@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SpaServices.Webpack;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using DotNetify;
 using DotNetify.Security;
@@ -14,6 +16,15 @@ namespace dotnetify_react_template
 {
    public class Startup
    {
+
+
+      private IConfiguration Configuration { get; }
+      public Startup(IConfiguration configuration)
+      {
+         Configuration = configuration;
+      }
+
+
       public void ConfigureServices(IServiceCollection services)
       {
          // Add OpenID Connect server to produce JWT access tokens.
@@ -25,9 +36,14 @@ namespace dotnetify_react_template
 
          services.AddTransient<ILiveDataService, MockLiveDataService>();
          services.AddSingleton<IEmployeeService, EmployeeService>();
+         services.AddMvc();
       }
-      public void Configure(IApplicationBuilder app)
+
+      public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
       {
+         loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+         loggerFactory.AddDebug();
+
          app.UseAuthentication();
          app.UseWebSockets();
          app.UseSignalR(routes => routes.MapDotNetifyHub());
@@ -54,6 +70,15 @@ namespace dotnetify_react_template
          });
 
          app.UseFileServer();
+
+         app.UseMvc(routes =>
+         {
+            routes.MapRoute(
+               name: "api",
+               // template: "api/{controller=Values}/{action=values}/{id?}"
+               template: "api/{controller=Home}/{action=values}/{target=Index}/{id?}"
+            );
+         });
 
          app.Run(async (context) =>
          {

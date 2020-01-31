@@ -1,6 +1,6 @@
 class Auth {
     url = "/token";
-
+    userid = 747;
     signIn(username, password) {
         return fetch(this.url, {
             method: 'post',
@@ -10,9 +10,11 @@ class Auth {
         })
         .then(response => {
             if (!response.ok) throw new Error(response.status);
+            console.log('Auth signin response: ', response);
             return response.json();
         })
         .then(token => {
+            console.log('Auth signin token: ', token);
             window.localStorage.setItem("access_token", token.access_token);
         });
     }

@@ -24,6 +24,9 @@ namespace dotnetify_react_template
          public int Id { get; set; }
          public string FirstName { get; set; }
          public string LastName { get; set; }
+         public string PaginaTelevideo { get; set; }
+         public string IndirizzoFTP { get; set; }
+         public string IndirizzoEmail { get; set; }
       }
 
       public RoutingState RoutingState { get; set; }
@@ -56,6 +59,24 @@ namespace dotnetify_react_template
          get => Get<string>();
          set => Set(value);
       }
+      
+      public string PaginaTelevideo
+      {
+         get => Get<string>();
+         set => Set(value);
+      }
+
+      public string IndirizzoFTP
+      {
+         get => Get<string>();
+         set => Set(value);
+      }
+
+      public string IndirizzoEmail
+      {
+         get => Get<string>();
+         set => Set(value);
+      }
 
       public Action<int> Cancel => id => LoadEmployee(id);
 
@@ -66,6 +87,9 @@ namespace dotnetify_react_template
          {
             record.FirstName = changes.FirstName;
             record.LastName = changes.LastName;
+            record.PaginaTelevideo = changes.PaginaTelevideo;
+            record.IndirizzoFTP = changes.IndirizzoFTP;
+            record.IndirizzoEmail = changes.IndirizzoEmail;
             _employeeService.Update(record);
             Changed(nameof(Employees));
          }
@@ -89,6 +113,9 @@ namespace dotnetify_react_template
          {
             FirstName = record.FirstName;
             LastName = record.LastName;
+            PaginaTelevideo = record.PaginaTelevideo;
+            IndirizzoFTP = record.IndirizzoFTP;
+            IndirizzoEmail = record.IndirizzoEmail;
             Id = record.Id;
          }
       }

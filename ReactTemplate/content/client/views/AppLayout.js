@@ -11,17 +11,18 @@ import auth from '../auth';
 class AppLayout extends React.Component {
   constructor(props) {
     super(props);
-
     this.vm = dotnetify.react.connect('AppLayout', this, {
       headers: { Authorization: 'Bearer ' + auth.getAccessToken() },
       exceptionHandler: _ => auth.signOut()
     });
     this.vm.onRouteEnter = (path, template) => (template.Target = 'Content');
-
     this.state = {
       sidebarOpen: props.width === LARGE,
-      Menus: []
+      Menus: [],
+      deliverable: true
     };
+    // this.handleDeliverableToggle2 = this.handleDeliverableToggle2.bind(this);
+    console.log('AppLayout userid da backend: ', props.userid);
   }
 
   componentWillUnmount() {
@@ -34,8 +35,16 @@ class AppLayout extends React.Component {
     }
   }
 
+  setDeliverable(event) {
+    this.setState({
+        deliverable: false //event.target.value,
+    });
+  }
+
+  // handleDeliverableToggle2 = id => this.setState({ deliverable: id });
+  
   render() {
-    let { sidebarOpen, Menus, UserAvatar, UserName } = this.state;
+    let { sidebarOpen, Menus, UserAvatar, UserName, IdUser, deliverable } = this.state;
     let userAvatarUrl = UserAvatar ? UserAvatar : null;
 
     const paddingLeftSidebar = 236;
@@ -48,22 +57,40 @@ class AppLayout extends React.Component {
     };
 
     const handleSidebarToggle = () => this.setState({ sidebarOpen: !this.state.sidebarOpen });
+    const handleDeliverableToggle = () => {
+      // console.log('handleDeliverableToggle value: ', value);
+      this.setState({ deliverable: !this.state.deliverable });
+    }
+    // const handleDeliverableToggle1 = id => this.handleDeliverableToggle2({ deliverable: id });
 
-    return (
+    return ( true ? // this.state.deliverable == 1 ? 
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <div>
-          <Header styles={styles.header} onSidebarToggle={handleSidebarToggle} />
-          <Sidebar vm={this.vm} logoTitle="dotNetify" open={sidebarOpen} userAvatarUrl={userAvatarUrl} menus={Menus} username={UserName} />
+          <Header styles={styles.header} onSidebarToggle={handleSidebarToggle} onDeliverableToggle={handleDeliverableToggle} deliv={deliverable} />
+          <Sidebar vm={this.vm} logoTitle={"LIS_d_" + (+deliverable)} open={sidebarOpen} userAvatarUrl={userAvatarUrl} menus={Menus} username={UserName} userid={IdUser} />
           <div id="Content" style={styles.container} />
+          {/* cambia deliverable al click su QUALUNQUE COSA nel div : onClick={handleDeliverableToggle} */ }
+          {/* non funziona : userid={IdUser} */}
+        </div>
+      </MuiThemeProvider>
+      :
+      <MuiThemeProvider muiTheme={ThemeDefault}>
+        <div>
+          Deliverable 2
+          <Header styles={styles.header} onSidebarToggle={handleSidebarToggle} />
+          
+          <div id="Content" style={styles.container} /> {/* userid={IdUser} */}
         </div>
       </MuiThemeProvider>
     );
+    
   }
 }
 
 AppLayout.propTypes = {
   userAvatar: PropTypes.string,
   userName: PropTypes.string,
+  IdUser: PropTypes.number,
   menus: PropTypes.array,
   width: PropTypes.number
 };

@@ -22,9 +22,14 @@
     "dotnetify": "~3.2.0",
     "flexboxgrid": "~6.3.1",
     "material-ui": "~0.19.4",
-    "react": "~16.3.2",
+    "react": "^16.3.2",
     "react-chartjs-2": "~2.6.4",
-    "react-dom": "~16.3.2"
+    "react-date-picker": "^7.8.2",
+    "react-dom": "^16.3.3",
+    "react-textarea-autosize": "^7.1.2",
+    "react-time-picker": "^3.8.0",
+    "redux": "^4.0.4",
+    "video-react": "^0.14.1"
   },
   "devDependencies": {
     "aspnet-webpack": "~3.0.0",

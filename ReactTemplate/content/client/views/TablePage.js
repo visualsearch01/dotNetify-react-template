@@ -69,7 +69,7 @@ class TablePage extends React.Component {
 
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
-        <BasePage title="Table Page" navigation="Application / Table Page">
+        <BasePage title="Export Page" navigation="Application / Export Page">
           <div>
             <div>
               <FloatingActionButton onClick={handleAdd} style={styles.addButton} backgroundColor={pink500} mini={true}>

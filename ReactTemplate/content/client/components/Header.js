@@ -5,13 +5,31 @@ import Menu from 'material-ui/svg-icons/navigation/menu';
 import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
+import FlatButton from 'material-ui/FlatButton';
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+import { pink500, grey200, grey500 } from 'material-ui/styles/colors';
+/*
+<Typography variant="h6" className={classes.title}>
+      News1
+    </Typography>
+    <Typography variant="h6" className={classes.title}>
+      News2
+    </Typography>
+    <Typography variant="h6" className={classes.title}>
+      News3
+    </Typography>
+    <FlatButton style={styles.button} label={page} disabled={props.select == page} onClick={() => props.onSelect(page)} />
+    <FloatingActionButton onClick={handleAdd} style={styles.addButton} backgroundColor={pink500} mini={true}>
+  <ContentAdd />
+</FloatingActionButton>
+*/
+
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import { white } from 'material-ui/styles/colors';
 import auth from '../auth';
 
 const Header = props => {
-  const { styles, onSidebarToggle } = props;
-
+  const { styles, onSidebarToggle, onDeliverableToggle, deliv } = props;
   const style = {
     appBar: {
       position: 'fixed',
@@ -20,19 +38,44 @@ const Header = props => {
       maxHeight: 57
     },
     menuButton: { marginLeft: 10 },
-    iconsRightContainer: { marginLeft: 20 }
+    iconsRightContainer: { marginLeft: 20 },
+    paper: {
+      display: 'inline',
+      padding: '.5em 0'
+    },
+    button: { minWidth: '1em' },
+    /*
+    onSelect(id) {
+      console.log('Header onSelect: ', id);
+    }
+    */
   };
 
+  const onSelect_test = id => {
+    console.log('Header onSelect: ', id);
+  }
+
   const handleSignout = _ => auth.signOut();
+  const handleClick = value => {
+    onDeliverableToggle(value);
+  }
 
   return (
     <div>
       <AppBar
         style={{ ...styles, ...style.appBar }}
         iconElementLeft={
-          <IconButton style={style.menuButton} onClick={onSidebarToggle}>
-            <Menu color={white} />
-          </IconButton>
+          <div>
+            <IconButton style={style.menuButton} onClick={onSidebarToggle}>
+              <Menu color={white} />
+            </IconButton>
+            {/* <label>Test</label> */}
+            {/* <FlatButton style={styles.button} label={"Bottone di test"} disabled={false} onClick={() => onSelect_test(2)} /> */}
+            <FlatButton style={styles.button} label={"Deliverable 1"} disabled={deliv} primary={!deliv} value={1} onClick={onDeliverableToggle} />
+            <FlatButton style={styles.button} label={"Deliverable 2"} disabled={!deliv} primary={deliv} value={2} onClick={onDeliverableToggle} />
+            {/* <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={true}>Test2</FloatingActionButton> */}
+            {/* <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={false}>Test3</FloatingActionButton> */}
+          </div>
         }
         iconElementRight={
           <div style={style.iconsRightContainer}>
@@ -46,7 +89,9 @@ const Header = props => {
               targetOrigin={{ horizontal: 'right', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
             >
-              <MenuItem primaryText="Sign out" onClick={handleSignout} />
+              <MenuItem primaryText="Deliverable 1 (meteo)" onClick={handleSignout} />
+              <MenuItem primaryText="Deliverable 2 (didattica)" onClick={handleSignout} />
+              <MenuItem primaryText="Logout" onClick={handleSignout} />
             </IconMenu>
           </div>
         }
@@ -57,7 +102,8 @@ const Header = props => {
 
 Header.propTypes = {
   styles: PropTypes.object,
-  handleChangeRequestNavDrawer: PropTypes.func
+  handleChangeRequestNavDrawer: PropTypes.func,
+  onDeliverableToggle: PropTypes.func
 };
 
 export default Header;

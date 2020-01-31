@@ -23,7 +23,7 @@ namespace dotnetify_react_template
       // by defining a string property that starts with that list's prop name, followed by "_itemKey".
       public string Employees_itemKey => nameof(EmployeeInfo.Id);
 
-      public IEnumerable<EmployeeInfo> Employees => Paginate(
+      public IEnumerable<EmployeeInfo> Employees1 => Paginate(
           _employeeService
               .GetAll()
               .Select(i => new EmployeeInfo
@@ -32,7 +32,15 @@ namespace dotnetify_react_template
                  FirstName = i.FirstName,
                  LastName = i.LastName
               }));
-
+      public IEnumerable<EmployeeInfo> Employees => Paginate(
+          _employeeService
+              .GetAllReq()
+              .Select(i => new EmployeeInfo
+              {
+                 Id = i.IdRequest,
+                 FirstName = i.PathVideo,
+                 LastName = i.Notes
+              }));
       public Action<string> Add => fullName =>
       {
          var names = fullName.Split(new char[] { ' ' }, 2);

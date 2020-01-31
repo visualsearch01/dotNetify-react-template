@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 
 namespace dotnetify_react_template
@@ -26,6 +28,10 @@ namespace dotnetify_react_template
 
    public class MockLiveDataService : ILiveDataService
    {
+
+      FileSystemWatcher fsw = new FileSystemWatcher(@"C:\Users\Public", "*.*");
+      FileSystemWatcher fsw1 = new FileSystemWatcher(@"C:\Users\Public", "yesssss.txt");
+
       private readonly Random _random = new Random();
 
       private readonly Dictionary<int, string> _activities = new Dictionary<int, string> {
@@ -54,11 +60,32 @@ namespace dotnetify_react_template
 
       public MockLiveDataService(IEmployeeService employeeService)
       {
-         Download = Observable
+         fsw.EnableRaisingEvents = true;
+         fsw1.EnableRaisingEvents = true;
+         //***************************************************************************************//
+         //*** Use the FromEventPattern operator to setup a subscription to the Created event. ***//
+         //***************************************************************************************//
+
+         IObservable<EventPattern<FileSystemEventArgs>> fswCreated = Observable.FromEventPattern<FileSystemEventArgs>(fsw, "Created");
+         IObservable<EventPattern<FileSystemEventArgs>> fswChanged = Observable.FromEventPattern<FileSystemEventArgs>(fsw1, "Changed");
+         
+         Console.WriteLine("MockLiveDataService.cs - MockLiveDataService(IEmployeeService employeeService)...\n");
+         // Download = fswCreated
+         // Download = fswChanged // fswCreated
+            // .Select(pattern => $"{pattern.EventArgs.Name} - {(((FileSystemWatcher)pattern.Sender).Path)}");
+            // .Select(pattern => $"{pattern.EventArgs.ChangeType} - {(((FileSystemWatcher)pattern.Sender).Path)}");
+         // Download = fswCreated
+         Download = fswChanged // fswCreated
+            // .Select(pattern => $"{pattern.EventArgs.Name} - {(((FileSystemWatcher)pattern.Sender).Path)}");
+            .Select(pattern => $"{pattern.EventArgs.ChangeType} - {new FileInfo(@"C:\Users\Public\yesssss.txt").Length} - {(((FileSystemWatcher)pattern.Sender).Path)}");
+         
+         
+         /*
+         Observable
             .Interval(TimeSpan.FromMilliseconds(900))
             .StartWith(0)
             .Select(_ => $"{Math.Round(_random.Next(15, 30) + _random.NextDouble(), 1)} Mb/s");
-
+         */
          Upload = Observable
             .Interval(TimeSpan.FromMilliseconds(800))
             .StartWith(0)

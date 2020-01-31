@@ -10,7 +10,8 @@ import auth from '../auth';
 class LoginPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { user: 'guest', password: 'dotnetify' };
+    // this.state = { user: 'guest', password: 'dotnetify' };
+    this.state = { user: 'user1', password: 'pass1' };
   }
 
   render() {
@@ -51,9 +52,19 @@ class LoginPage extends React.Component {
       },
       error: { color: 'red' }
     };
-
+    const onFormSubmit = e => {
+      console.log('LoginPage.js - onFormSubmit - Dovrebbe funzionare sia su click sia su Invio - Event: ', e);
+      e.preventDefault();
+      console.log('LoginPage.js - onFormSubmit - user: ', user);
+      console.log('LoginPage.js - onFormSubmit - password: ', password);
+      const { user, password } = this.state;
+      // send to server with e.g. `window.fetch`
+      handleLogin();
+    };
     const handleLogin = _ => {
       this.setState({ error: null });
+      console.log('LoginPage.js - handleLogin - user: ', user);
+      console.log('LoginPage.js - handleLogin - password: ', password);
       auth.signIn(user, password).then(_ => onAuthenticated()).catch(error => {
         if (error.message == '400') this.setState({ error: 'Invalid password' });
         else this.setState({ error: error.message });
@@ -69,8 +80,9 @@ class LoginPage extends React.Component {
                 <span style={styles.logo} />
                 <span style={styles.text}>dotNetify</span>
               </div>
-              <form>
-                <TextField
+              { /*<form>*/ }
+              <form onSubmit={onFormSubmit}>
+               <TextField
                   hintText="User"
                   floatingLabelText="User"
                   fullWidth={true}
@@ -88,7 +100,7 @@ class LoginPage extends React.Component {
                 {error ? <div style={styles.error}>{error}</div> : null}
                 <div>
                   <span>
-                    <RaisedButton label="Login" onClick={handleLogin} primary={true} style={styles.loginBtn} />
+                    <RaisedButton type="submit" label="Login" onClick={handleLogin} primary={true} style={styles.loginBtn} />
                   </span>
                 </div>
               </form>
