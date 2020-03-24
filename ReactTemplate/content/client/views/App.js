@@ -15,22 +15,37 @@ class App extends React.Component {
   }
 */
 
+global.foo = 'foo';
+global.bar = 'bar';
+global.deliver = true;
+
 class App extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = { 
       authenticated: auth.hasAccessToken(),
       inputVal: '',
-      userid: 78 // auth._userid // 78
+      userid: auth.userid //78 // auth._userid // 78
     };
     console.log('App auth: ', auth);
   }
 
-  render() {
-    const handleAuthenticated = _ => this.setState({ authenticated: true });
+  componentWillUnmount() {
+    // this.vm.$destroy();
+    console.log('App.js - componentWillUnmount');
+  };
 
-    return !this.state.authenticated ? <LoginPage onAuthenticated={handleAuthenticated} /> : <AppLayout userid={this.state.userid} />;
+  componentDidMount() {
+    console.log('App.js - componentDidMount');
+  };
+
+  handleAuthenticated_1 = _ => this.setState({ authenticated: true });
+
+  render() {
+    // const handleAuthenticated = _ => this.setState({ authenticated: true });
+    return !this.state.authenticated ? 
+      <LoginPage onAuthenticated={this.handleAuthenticated_1} /> : 
+      <AppLayout userid={this.state.userid} />;
   }
 }
 

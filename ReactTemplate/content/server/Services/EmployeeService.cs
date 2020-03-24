@@ -1,25 +1,30 @@
 ﻿using dotnetify_react_template.server.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Reactive.Linq;
 using System.Reactive;
+using System.Text;
 
 namespace dotnetify_react_template
 {
    public interface IEmployeeService
    {
       IList<EmployeeModel> GetAll();
-      IList<LisRequest> GetAllReq();
+      IList<LisRequest> GetRequests();
+      IList<RequestInfo> GetRequestInfo();
       IList<LisSetting> GetAllSet();
       EmployeeModel GetById(int id);
+      string getCs();
       int Add(EmployeeModel record);
       void Update(EmployeeModel record);
       void Delete(int id);
+      // string _connectionString;
    }
 
    public class EmployeeModel
@@ -38,15 +43,22 @@ namespace dotnetify_react_template
    public class EmployeeService : IEmployeeService
    {
       private List<EmployeeModel> _employees;
-      private List<LisRequest> _requests;
-      private List<LisSetting> _settings;
+      // private List<LisRequest> _requests;
+      // private List<LisSetting> _settings;
       private int _newId;
       private string _product = "";
       private MySqlConnection _connection;
-      private string _cs = @"server=localhost;port=3306;database=lis2;user=root;password=root";
+      // private string _cs = @"server=localhost;port=3306;database=lis2;user=root;password=root";
+      // private string _connectionString;
+      private string _connectionString { get; set; }
 
-      public EmployeeService()
+      // La stringa di connessione MySQL viene passata a questo componente da Startup
+      // Il metodo seguente serve per passarla ad altri componenti che possono averne bisogno, anchese bisognerebbe centralizzare qui
+      public string getCs() { return this._connectionString; }
+
+      public EmployeeService(string connectionString) // IServiceCollection services, IConfiguration configuration)
       {
+         _connectionString = connectionString; // configuration.GetValue<string>("ConnectionStrings:lis");
          // throw new FileNotFoundException();
          /*
          IDisposable writer = new FileSystemObservable(@"D:\", "*.*", false)
@@ -68,14 +80,14 @@ namespace dotnetify_react_template
             pattern.EventArgs.Name, ((FileSystemWatcher)pattern.Sender).Path));
          */
          _employees = JsonConvert.DeserializeObject<List<EmployeeModel>>(this.GetEmbeddedResource("employees.json"));
-         _requests = new LisRequestDBContext(_cs).GetLisRequests();
-         _settings = new LisSettingDBContext(_cs).GetLisSettings();
+         // _requests = new LisRequestDBContext(_connectionString).GetLisRequests();
+         // _settings = new LisSettingDBContext(_connectionString).GetLisSettings();
          _newId = _employees.Count;
-         _connection = new MySqlConnection(_cs);
+         _connection = new MySqlConnection(_connectionString);
          _connection.Open();
          using (_connection)
          {
-            MySqlCommand _cmd = new MySqlCommand(@"SELECT name_setting, value_setting from lis_setting", _connection);
+            MySqlCommand _cmd = new MySqlCommand(@"SELECT name_setting, value_setting FROM lis_setting", _connection);
             using (MySqlDataReader _reader = _cmd.ExecuteReader())
             {
                while (_reader.Read())
@@ -92,12 +104,13 @@ namespace dotnetify_react_template
             }
          }
          // _employees.ForEach(emp => {emp.IndirizzoEmail = _product;} );
-         Console.WriteLine("EmployeeService - Press ENTER to exit...\n");
+         Console.WriteLine("EmployeeService - SELECT name_setting, value_setting FROM lis_setting OK...\n");
       }
 
       public IList<EmployeeModel> GetAll() => _employees; // .ForEach(emp => {emp.IndirizzoEmail = _product;} ); //  .ForEach(x => { if(x.RemoveMe) someList.Remove(x); }); 
-      public IList<LisRequest> GetAllReq() => _requests;
-      public IList<LisSetting> GetAllSet() => _settings;
+      public IList<LisRequest> GetRequests() => new LisRequestDBContext(_connectionString).GetLisRequests(); // _requests;
+      public IList<RequestInfo> GetRequestInfo() => new LisRequestDBContext(_connectionString).GetLisRequestInfo(); // _requests;
+      public IList<LisSetting> GetAllSet() => new LisSettingDBContext(_connectionString).GetLisSettings(); // _settings;
       public EmployeeModel GetById(int id) => _employees.FirstOrDefault(i => i.Id == id);
       // public EmployeeModel GetById(int id) => _employees.FirstOrDefault(i => i.Id == id);
       public int Add(EmployeeModel record)
@@ -114,7 +127,7 @@ namespace dotnetify_react_template
          var idx = _employees.FindIndex(i => i.Id == record.Id);
          if (idx >= 0)
             _employees[idx] = record;
-         new LisSettingDBContext(_cs).UpdateLisSettings(record.PaginaTelevideo, record.IndirizzoEmail, record.IndirizzoFTP);
+         new LisSettingDBContext(_connectionString).UpdateLisSettings(record.PaginaTelevideo, record.IndirizzoEmail, record.IndirizzoFTP);
       }
 
       public void Delete(int id) => _employees.Remove(_employees.FirstOrDefault(i => i.Id == id));

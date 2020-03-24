@@ -11,14 +11,13 @@ namespace dotnetify_react_template
    public class Form : BaseVM, IRoutable
    {
       private readonly IEmployeeService _employeeService;
-
+      public RoutingState RoutingState { get; set; }
       public class EmployeeInfo
       {
          public int Id { get; set; }
          public string Name { get; set; }
          public Route Route { get; set; }
       }
-
       public class SavedEmployeeInfo
       {
          public int Id { get; set; }
@@ -28,12 +27,9 @@ namespace dotnetify_react_template
          public string IndirizzoFTP { get; set; }
          public string IndirizzoEmail { get; set; }
       }
-
-      public RoutingState RoutingState { get; set; }
-
       public IEnumerable<EmployeeInfo> Employees =>
           _employeeService
-              .GetAll()
+              .GetAll()                        // Usa idrettamente la lista di employees e non la lista di settings - 
               .OrderBy(i => i.LastName)
               .Select(i => new EmployeeInfo
               {
@@ -41,45 +37,37 @@ namespace dotnetify_react_template
                  Name = i.FullName,
                  Route = this.Redirect(AppLayout.FormPagePath, i.Id.ToString())
               });
-
       public int Id
       {
          get => Get<int>();
          set => Set(value);
       }
-
       public string FirstName
       {
          get => Get<string>();
          set => Set(value);
       }
-
       public string LastName
       {
          get => Get<string>();
          set => Set(value);
       }
-      
       public string PaginaTelevideo
       {
          get => Get<string>();
          set => Set(value);
       }
-
       public string IndirizzoFTP
       {
          get => Get<string>();
          set => Set(value);
       }
-
       public string IndirizzoEmail
       {
          get => Get<string>();
          set => Set(value);
       }
-
       public Action<int> Cancel => id => LoadEmployee(id);
-
       public Action<SavedEmployeeInfo> Save => changes =>
       {
          var record = _employeeService.GetById(changes.Id);
@@ -94,18 +82,20 @@ namespace dotnetify_react_template
             Changed(nameof(Employees));
          }
       };
-
       public Form(IEmployeeService employeeService)
       {
          _employeeService = employeeService;
 
+         // La pagina Form carica direttamente i dati senza dover fare una chiamata API
+         // perche' durante l'OnRouted del costruttore carica direttamente i dati dell'Employee 1
          this.OnRouted((sender, e) =>
          {
+            Console.WriteLine("Form.cs - Costruttore - sender: " + sender);
+            Console.WriteLine("Form.cs - Costruttore - e: " + e);
             if (int.TryParse(e?.From?.Replace($"{AppLayout.FormPagePath}/", ""), out int id))
                LoadEmployee(id);
          });
       }
-
       private void LoadEmployee(int id)
       {
          var record = _employeeService.GetById(id);

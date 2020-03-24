@@ -59,10 +59,24 @@ namespace dotnetify_react_template.server.Models
                     conn.Open();
                     MySqlCommand command = new MySqlCommand();
                     command.Connection = conn;
-                    string SQL = "UPDATE lis_setting SET value_setting=@tel WHERE name_setting='Url'";
+                    string SQL = "UPDATE lis_setting SET value_setting = (case when name_setting = 'Url' then @tel when name_setting = 'email' then @em when name_setting = 'ftp' then @ftp end) WHERE name_setting in ('Url', 'email', 'ftp');";
+                    // string SQL = "UPDATE lis_setting SET value_setting=@tel WHERE name_setting='Url'";
                     command.CommandText = SQL;
                     command.Parameters.AddWithValue("@tel", tel);
+                    command.Parameters.AddWithValue("@em", em);
+                    command.Parameters.AddWithValue("@ftp", ftp);
                     command.ExecuteNonQuery();
+                    /*
+                    string SQL = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ( ?id_text_ita, ?id_user, ?version, ?text, ?notes);";
+                                command.CommandText = SQL;
+                                command.Parameters.AddWithValue("?id_text_ita", changes.IdTextIta);
+                                command.Parameters.AddWithValue("?id_user", changes.IdUserEdit);
+                                command.Parameters.AddWithValue("?version", (changes.VersionIta + 1));
+                                command.Parameters.AddWithValue("?text", changes.TextIta); // Gia' escapato .Replace("'", "''"));
+                                command.Parameters.AddWithValue("?notes", changes.NotesIta); // .Replace("'", "''"));
+                                command.ExecuteNonQuery();
+                                command.Parameters.Clear();
+                    */
                     conn.Close();
                 }
             }

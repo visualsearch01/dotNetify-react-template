@@ -1,6 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace dotnetify_react_template.server.Models
 {
@@ -22,22 +25,27 @@ namespace dotnetify_react_template.server.Models
 
     public class LisUserDBContext
     {
-        public string ConnectionString { get; set; }
-        public LisUserDBContext(string connectionString)
+        private string _connectionString { get; set; }
+        // private string _connectionString;
+        // public ValuesController(IConfiguration configuration, ILogger<ValuesController> logger)
+        public LisUserDBContext(string connectionString) // IConfiguration configuration, ILogger<LisUserDBContext> logger)
         {
-            this.ConnectionString = connectionString;
+            _connectionString = connectionString;
+            // this._connectionString = configuration.GetConnectionString("ConnectionStrings:lis");
+            // IConfiguration configuration,
+            Console.WriteLine("LisUser.cs - costruttore, stringa DB: " + _connectionString);
         }
-    
+
         private MySqlConnection GetConnection()
         {
-            return new MySqlConnection(ConnectionString);
+            return new MySqlConnection(this._connectionString);
         }
     
         public LisUser GetLisUser(string u, string p)
         {
             LisUser us = new LisUser();
             us.IdUser = 0;
-            using (MySqlConnection conn = GetConnection())
+            using (MySqlConnection conn = new MySqlConnection(this._connectionString)) // this._connectionString) //GetConnection())
             {
                 conn.Open();
                 MySqlCommand command = new MySqlCommand();

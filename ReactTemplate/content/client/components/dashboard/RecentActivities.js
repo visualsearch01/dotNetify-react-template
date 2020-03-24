@@ -9,10 +9,11 @@ import IconButton from 'material-ui/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
-import { grey400, cyan600, white } from 'material-ui/styles/colors';
+import { grey400, cyan600, white, red500, green500 } from 'material-ui/styles/colors';
+
 import { typography } from 'material-ui/styles';
 import Wallpaper from 'material-ui/svg-icons/device/wallpaper';
-
+import Chip from 'material-ui/Chip';
 import RaisedButton from 'material-ui/RaisedButton';
 // import Dashboard from '../../views/Dashboard';
 
@@ -100,8 +101,104 @@ const RecentActivities = props => {
   );
 };
 
+
+const chipStyles1 = {
+  chip: {
+    margin: 4,
+  },
+  wrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+};
+
+const ChipExampleSimple1 = props => {
+    return (
+      <div style={chipStyles1.wrapper}>
+      { props.chips.map((item, idx) => (
+          <Chip 
+            backgroundColor={item.Found ? green500 : red500}
+            key={idx}
+            style={chipStyles1.chip}>
+            {item.Word}
+          </Chip>
+        ))
+      }
+{ /*
+
+menu.Title}
+        <Chip
+          style={chipStyles.chip}
+        >
+          Test Chip
+        </Chip>
+        <Chip
+          onRequestDelete={handleRequestDelete}
+          onClick={handleTouchTap}
+          style={chipStyles.chip}
+        >
+          Deletable Text Chip
+        </Chip>
+        <Chip
+          onClick={handleTouchTap}
+          style={chipStyles.chip}
+        >
+          <Avatar src={require( "../../../../../../../../source/Workspaces/SmallTFS/Images/1301300283_button_ok.png")} />
+          Image Avatar Chip
+        </Chip>
+        <Chip
+          onRequestDelete={handleRequestDelete}
+          onClick={handleTouchTap}
+          style={chipStyles.chip}
+        >
+          <Avatar src={require( "../../../../../../../../source/Workspaces/SmallTFS/Images/1301300293_desktop.png")} />
+          Deletable Avatar Chip
+        </Chip>
+        <Chip
+          onClick={handleTouchTap}
+          style={chipStyles.chip}
+        >
+          <Avatar icon={<FontIcon className="material-icons">perm_identity</FontIcon>} />
+          FontIcon Avatar Chip
+        </Chip>
+        <Chip
+          onRequestDelete={handleRequestDelete}
+          onClick={handleTouchTap}
+          style={chipStyles.chip}
+        >
+          <Avatar color="#444" icon={<SvgIconFace />} />
+          SvgIcon Avatar Chip
+        </Chip>
+        <Chip onClick={handleTouchTap} style={chipStyles.chip}>
+          <Avatar size={32}>A</Avatar>
+          Parola non trovata
+        </Chip>
+        <Chip
+          backgroundColor={blue300}
+          onRequestDelete={handleRequestDelete}
+          onClick={handleTouchTap}
+          style={chipStyles.chip}
+        >
+          <Avatar size={32} color={blue300} backgroundColor={indigo900}>
+            MB
+          </Avatar>
+          Parola trovata
+        </Chip>
+*/ }
+      </div>
+    );
+}
+
 RecentActivities.propTypes = {
   data: PropTypes.array
 };
 
-export default RecentActivities;
+ChipExampleSimple1.propTypes = {
+  chips: PropTypes.array
+};
+
+export {
+// default
+  RecentActivities,
+  ChipExampleSimple1
+}

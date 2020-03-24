@@ -29,15 +29,17 @@ import { white } from 'material-ui/styles/colors';
 import auth from '../auth';
 
 const Header = props => {
-  const { styles, onSidebarToggle, onDeliverableToggle, deliv } = props;
+  const { styles, onSidebarToggle, onDeliverableToggle, deliv, time } = props;
+  console.log('Header - props.deliv: ', deliv);
   const style = {
     appBar: {
-      position: 'fixed',
+      position: 'fixed', // prevent scrolling 'relative', //'fixed',
       top: 0,
-      overflow: 'hidden',
-      maxHeight: 57
+      // overflow: 'hidden',
+      height: 57, // '5%', // 57, //'5%', // 57,
+      // maxHeight: '5%' // 57 // 56
     },
-    menuButton: { marginLeft: 10 },
+    menuButton: { marginLeft: 20 },
     iconsRightContainer: { marginLeft: 20 },
     paper: {
       display: 'inline',
@@ -69,16 +71,20 @@ const Header = props => {
             <IconButton style={style.menuButton} onClick={onSidebarToggle}>
               <Menu color={white} />
             </IconButton>
-            {/* <label>Test</label> */}
-            {/* <FlatButton style={styles.button} label={"Bottone di test"} disabled={false} onClick={() => onSelect_test(2)} /> */}
-            <FlatButton style={styles.button} label={"Deliverable 1"} disabled={deliv} primary={!deliv} value={1} onClick={onDeliverableToggle} />
-            <FlatButton style={styles.button} label={"Deliverable 2"} disabled={!deliv} primary={deliv} value={2} onClick={onDeliverableToggle} />
-            {/* <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={true}>Test2</FloatingActionButton> */}
-            {/* <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={false}>Test3</FloatingActionButton> */}
+            {/*
+            <label>Selezione deliverable</label>
+            <FlatButton style={styles.button} label={"Bottone di test"} disabled={false} onClick={() => onSelect_test(2)} />
+            <FlatButton style={styles.button} label={"1-Meteo"} disabled={deliv} primary={!deliv} value={1} onClick={onDeliverableToggle} />
+            <FlatButton style={styles.button} label={"2-Didattica"} disabled={!deliv} primary={deliv} value={2} onClick={onDeliverableToggle} />
+            <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={true}>Test2</FloatingActionButton>
+            <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={false}>Test3</FloatingActionButton>
+            new Date().toString() /*.toLocaleString()*/  /*.getUTCDate()*/   /* toISOString().split('T')[0]
+            */}
           </div>
         }
         iconElementRight={
           <div style={style.iconsRightContainer}>
+            <label>Data {/*time*/}</label>
             <IconMenu
               color={white}
               iconButtonElement={
@@ -89,8 +95,8 @@ const Header = props => {
               targetOrigin={{ horizontal: 'right', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
             >
-              <MenuItem primaryText="Deliverable 1 (meteo)" onClick={handleSignout} />
-              <MenuItem primaryText="Deliverable 2 (didattica)" onClick={handleSignout} />
+              {/* <MenuItem primaryText="Deliverable 1 (meteo)" onClick={handleSignout} /> */}
+              {/* <MenuItem primaryText="Deliverable 2 (didattica)" onClick={handleSignout} /> */}
               <MenuItem primaryText="Logout" onClick={handleSignout} />
             </IconMenu>
           </div>

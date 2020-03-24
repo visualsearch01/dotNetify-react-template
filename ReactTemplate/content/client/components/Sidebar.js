@@ -4,12 +4,16 @@ import { RouteLink } from 'dotnetify';
 import Avatar from 'material-ui/Avatar';
 import Drawer from 'material-ui/Drawer';
 import FontIcon from 'material-ui/FontIcon';
+import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import { spacing, typography } from 'material-ui/styles';
 import { white, blue600 } from 'material-ui/styles/colors';
-
+import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import Autocomplete from 'material-ui/Autocomplete';
+
+import Divider from 'material-ui/Divider';
+import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
 
 // Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
 const top100Films = [
@@ -115,25 +119,84 @@ const top100Films = [
   { title: 'Monty Python and the Holy Grail', year: 1975 },
 ];
 
-const Sidebar = props => {
-  let { vm, logoTitle, open, userAvatarUrl, menus } = props;
+const bstyle = {
+  margin: 12,
+};
 
+/*
+this.state = {
+        count: this.props.count
+      }
+    }
+  increment(){
+    console.log("this.props.count");
+    console.log(this.props.count);
+    let count = this.state.count
+    count.push("new element");
+    this.setState({ count: count})
+  }
+  render() {
+
+    return (
+      <View style={styles.container}>
+        <Text>{ this.state.count.length }</Text>
+        <Button
+          onPress={this.increment.bind(this)}
+          title={ "Increase" }
+        />
+      </View>
+*/
+
+const Sidebar = props => {
+  let { vm, logoTitle, open, userAvatarUrl, menus_del1, menus_del2, deliv } = props;
+  console.log('Sidebar - props.deliv: ', deliv);
+  console.log('Sidebar - props.menus_del1: ', menus_del1);
   const styles = {
     logo: {
       cursor: 'pointer',
       fontSize: 22,
+      // justifyContent: 'center',
+      // verticalAlign: 'middle',
+      // textAlign: 'center',
+      // textAlign: 'center',
       color: typography.textFullWhite,
       lineHeight: `${spacing.desktopKeylineIncrement}px`,
       fontWeight: typography.fontWeightLight,
       backgroundColor: blue600,
-      paddingLeft: 70,
-      height: 56
+      // paddingLeft: 70,
+      // float: 'left'
+      height: 57 //56
     },
     menuItem: {
       color: white,
-      fontSize: 14
+      fontSize: 12,
+      width: '90%'
+    },
+    menuSelectedItem: {
+      color: blue600,
+      fontSize: 16,
+      width: '90%'
+    },
+    autocomplete: {
+      root: {
+        display: 'inline-block',
+        position: 'relative',
+        width: '20px',
+        backgroundColor: 'white'
+      },
+      menu: {
+        width: '100%'
+      },
+      list: {
+        display: 'block',
+        width: '100%' // fullWidth ? '100%' : 256 // 225 //
+      },
+      innerDiv: {
+        overflow: 'hidden'
+      }
     },
     avatar: {
+      size: 50,
       div: {
         padding: '15px 0 20px 15px',
         backgroundImage: 'url(' + require('../images/material_bg.png') + ')',
@@ -146,7 +209,7 @@ const Sidebar = props => {
         boxShadow: '0px 0px 0px 8px rgba(0,0,0,0.2)'
       },
       span: {
-        paddingTop: 12,
+        paddingTop: 4,
         display: 'block',
         color: 'white',
         fontWeight: 300,
@@ -158,48 +221,105 @@ const Sidebar = props => {
 // style={{ width: 300 }}
 // style={styles.avatar.span}
 // options={top100Films}
+  /*
+  <div>
+        <Autocomplete
+          id="combo-box-demo"
+          dataSource={top100Films}
+          dataSourceConfig={ {text: 'title', value: 'year'}  }
+          getOptionLabel={option => option.title}
+          style={styles.menuItem}
+          renderInput={params => (
+            <TextField {...params} label="Combo box" variant="outlined" style={styles.menuItem} />
+          )}
+        />
+      </div>
+          getOptionLabel={option => option.title}
+
+  renderInput={params => (
+            <TextField {...params} label="Combo box" variant="outlined" style={styles.avatar.span} />
+          )}
+  autoWidth={true}
+  */
+
+  const handleClickButton = _ => {
+    menus_del1 = menus_del1.slice(1);
+    console.log('Sidebar - sliced menus_del1: ', menus_del1); // I props di un componente non sono aggiornabili dal component stesso
+  }
+
+  const ConsoleLog = ({ children }) => {
+    console.log(children);
+    return false;
+  };
 /*
-<div>
-      <Autocomplete
-        id="combo-box-demo"
-        dataSource={top100Films}
-        dataSourceConfig={ {text: 'title', value: 'year'}  }
-        getOptionLabel={option => option.title}
-        style={styles.menuItem}
-        renderInput={params => (
-          <TextField {...params} label="Combo box" variant="outlined" style={styles.menuItem} />
-        )}
-      />
-    </div>
+PROPS
+A React component should use props to store information that can be changed, but can only be changed by a different component.
+STATE
+A React component should use state to store information that the component itself can change.
+style={styles.autocomplete.menu}
 */
   return (
     <Drawer docked={true} open={open}>
-      <div style={styles.logo}>{logoTitle}</div>
+      <ConsoleLog>{ menus_del1 }</ConsoleLog>
+      <div style={styles.logo}>
+        {/*logoTitle*/}
+        <img heigth="57px" width="57px" src={require("../../../../../../../Desktop/Rai _Logo RGB.png")} />
+        Progetto LIS
+      </div>
       <div style={styles.avatar.div}>
-        <Avatar src={userAvatarUrl} size={50} style={styles.avatar.icon} />
-        <span style={styles.avatar.span}>{props.username} - {props.userid}</span>
+        <Avatar src={userAvatarUrl} size={styles.avatar.size} style={styles.avatar.icon} />
+        <span style={styles.avatar.span}>Nome utente: {props.username}</span>
+        <span style={styles.avatar.span}>ID utente: {props.userid}</span>
       </div>
       <div>
-        {menus.map((menu, index) => (
+        <Menu>
           <MenuItem
-            button 
-            selected={index === 0}
-            key={index}
+            primaryText="Meteo"
+            checked={false}
             style={styles.menuItem}
-            primaryText={menu.Title}
-            leftIcon={<FontIcon className="material-icons">{menu.Icon}</FontIcon>}
-            containerElement={<RouteLink vm={vm} route={menu.Route} />}
+            rightIcon={<ArrowDropRight />}
+            menuItems={
+              menus_del1.map((menu, index) => (
+                <MenuItem
+                  button
+                  selected={index === 0}
+                  key={index}
+                  primaryText={menu.Title}
+                  leftIcon={<FontIcon className="material-icons">{menu.Icon}</FontIcon>}
+                  containerElement={<RouteLink vm={vm} route={menu.Route} />}
+                />
+              ))
+            }
           />
-        ))}
+          <Divider />
+          <MenuItem
+            primaryText="Didattica"
+            checked={false}
+            style={styles.menuItem}
+            rightIcon={<ArrowDropRight />}
+            menuItems={
+              menus_del2.map((menu, index) => (
+                <MenuItem
+                  button 
+                  selected={index === 0}
+                  key={index}
+                  primaryText={menu.Title}
+                  leftIcon={<FontIcon className="material-icons">{menu.Icon}</FontIcon>}
+                  containerElement={<RouteLink vm={vm} route={menu.Route} />}
+                />
+              ))
+            }
+          />
+        </Menu>
       </div>
-      
     </Drawer>
   );
 };
 
 Sidebar.propTypes = {
   sidebarOpen: PropTypes.bool,
-  menus: PropTypes.array,
+  menus_del1: PropTypes.array,
+  menus_del2: PropTypes.array,
   username: PropTypes.string,
   userid: PropTypes.any,
   userAvatarUrl: PropTypes.string

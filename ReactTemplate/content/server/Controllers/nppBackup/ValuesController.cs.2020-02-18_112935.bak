@@ -1,17 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Threading.Tasks;
-
 // using System.Management.Automation.Runspaces;
 // using System.Web.Script.Serialization;
 // using System.Text.Json;
@@ -24,25 +22,31 @@ public ActionResult Get()
 }
 */
 namespace dotnetify_react_template.server.Controllers
-{  
-    public static class FileSaveExtension
-    {
-        public static async Task SaveAsAsync(this IFormFile formFile, string filePath)
-        {
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await formFile.CopyToAsync(stream);
-            }
-        }
+{
+  
+  
+  public static class FileSaveExtension
+ {
+     public static async Task SaveAsAsync(this IFormFile formFile, string filePath)
+     {
+         using (var stream = new FileStream(filePath, FileMode.Create))
+         {
+             await formFile.CopyToAsync(stream);
+         }
+     }
 
-        public static void SaveAs(this IFormFile formFile, string filePath)
-        {
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                formFile.CopyTo(stream);
-            }
-        }
-    }
+     public static void SaveAs(this IFormFile formFile, string filePath)
+     {
+         using (var stream = new FileStream(filePath, FileMode.Create))
+         {
+             formFile.CopyTo(stream);
+         }
+     }
+
+
+ }
+  
+  
     [Route("api/[controller]")]
     // [Route("api/[controller]/[target]")]
     [ApiController]
@@ -50,8 +54,7 @@ namespace dotnetify_react_template.server.Controllers
     {
         private readonly ILogger _logger;
         private string _connectionString;
-        private string _translatescript;
-        public class PostInfo
+        public class PubInfo
         {
             public string value { get; set; }
         }
@@ -59,16 +62,11 @@ namespace dotnetify_react_template.server.Controllers
         public ValuesController(IConfiguration configuration, ILogger<ValuesController> logger)
         {
             // _connectionString = configuration.GetConnectionString("ConnectionStrings:lis");
-            Console.WriteLine("ValuesController.cs - costruttore, configurazione: " + configuration.ToString());
-
             _connectionString = configuration.GetConnectionString("lis"); //  _configuration.GetValue<string>("ConnectionStrings:lis");
-            Console.WriteLine("ValuesController.cs - costruttore, stringa connessione DB MySQL: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
-
-            _translatescript = configuration.GetValue<string>("Scripts:lis");
-            Console.WriteLine("ValuesController.cs - costruttore, script Powershell di translate: " + _translatescript); //_configuration["ConnectionStrings:lis"]);
-
             _logger = logger;
 
+            Console.WriteLine("ValuesController.cs - costruttore, configurazione: " + configuration.ToString());
+            Console.WriteLine("Startup.cs - costruttore, stringa DB: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
         }
 
         private MySqlConnection connection;
@@ -116,11 +114,52 @@ namespace dotnetify_react_template.server.Controllers
             // return Ok(ff); // new string[] { "value1", "value2_" + product };
         }
 
+
+        [HttpGet("translate")]
+        public ActionResult Get_translate() // ActionResult Get_translate()
+        // public string Get()
+        // public ActionResult<IEnumerable<string>> Get()
+        {
+            string output = "Default";
+            try {
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.FileName = @"powershell.exe";
+                // startInfo.Arguments = @"& 'd:\test.ps1'";
+                // PowerShell.exe -ExecutionPolicy Bypass -File .runme.ps1
+                // startInfo.Arguments = @"-Command ""echo 'd:\test.ps1'""";
+                // startInfo.Arguments = @"-ExecutionPolicy Bypass -File d:\test.ps1";
+                startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command ""d:\test.ps1 -Param1 Hello -Param2 World""";
+                startInfo.RedirectStandardOutput = true;
+                startInfo.RedirectStandardError = true;
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+                
+                Process process = new Process();
+                process.StartInfo = startInfo;
+                process.Start();
+
+                output = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
+                Console.WriteLine("ValuesController.cs - process powershell output: " + output);
+            }
+            catch(InvalidOperationException ex){
+                Console.WriteLine(ex.Message);
+            }
+            catch(Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
+            // connection.Close();
+            // return output;
+            return Ok("{\"translation\": \"" + output + "\"}");
+            // return Ok("{\"expiresAt\": \"2015-11-03T10:15:57.000Z\", \"status\": \"SUCCESS\", \"relayState\": \"/myapp/some/deep/link/i/want/to/return/to\", \"sessionToken\": \"00Fpzf4en68pCXTsMjcX8JPMctzN2Wiw4LDOBL_9pe\", \"_embedded\": { \"user\": { \"id\": \"00ub0oNGTSWTBKOLGLNR\", \"passwordChanged\": \"2015-09-08T20:14:45.000Z\", \"profile\": { \"login\": \"dade.murphy@example.com\", \"firstName\": \"Dade\", \"lastName\": \"Murphy\", \"locale\": \"en_US\", \"timeZone\": \"America/Los_Angeles\" } } } } ");
+            // return Ok(ff); // new string[] { "value1", "value2_" + product };
+        }
+
         // GET api/values/5
         [HttpGet("meteo/{id}")]
         // public ActionResult<string> Get(int id)
         // public ActionResult<string> Get(string id)
-        public ActionResult Get_meteo_id(string id)
+        public ActionResult Get(string id)
         {
             string product = "[{'CENTRO E SARDEGNA':'Inizializzazione..'},{'NORD':'Inizializzazione..'}]";
             try {
@@ -160,93 +199,8 @@ namespace dotnetify_react_template.server.Controllers
                     N(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis),(SELECT MAX(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis)) AND d.date_day = '2020-01-13' ORDER BY f.id_edition, fc.id_forecast_type, it.version) AS hh GROUP BY text_ita) AS klo;
                     */
 
-                    /*
-                    Versione corretta ma non formattata
-                                        SELECT JSON_OBJECT( 'status', 'success', 'data_day', MIN(date_day), 'id_day', MIN(id_day), 'timeframe', JSON_OBJECT( 'id_timeframe', MAX(id_timeframe), 'editions', JSON_ARRAY( JSON_OBJECT ( 'date_day', MIN(date_day), 'id_edition', MIN(id_edition), 'time_edition', MIN(name_edition), 'id_timeframe', MIN(id_timeframe), 'forecast_data', (SELECT JSON_ARRAYAGG(obj)) ), JSON_OBJECT ( 'date_day', MAX(date_day), 'id_edition', MAX(id_edition), 'time_edition', MAX(name_edition), 'id_timeframe', MAX(id_timeframe), 'forecast_data', (SELECT JSON_ARRAYAGG(obj)) )))) AS list FROM (SELECT * FROM ( SELECT d.id_day, d.date_day, le.name_edition, le.id_edition, tf.id_timeframe, JSON_OBJECT('date_day',d.date_day,'id_forecast',f.id_forecast, 'edition', f.id_edition, 'offset_days',f.offset_day, 'id_forecast_type',fc.id_forecast_type, 'name_type',( CASE WHEN f.offset_day = 1 THEN ft.name_type ELSE CONCAT(ft.name_type,' +',f.offset_day) END), 'id_text_trans',tr.id_text_trans,'id_text_ita',it.id_text_ita,'id_text_lis',li.id_text_lis,'it_version',it.version,'text_ita', it.text_ita,'li_version',li.version,'text_lis',li.text_lis) AS obj FROM lis_day           d JOIN lis_timeframe     tf ON d.id_timeframe = tf.id_timeframe JOIN lis_forecast      f ON d.id_day = f.id_day JOIN lis_forecast_data fc ON f.id_forecast = fc.id_forecast JOIN lis_text_trans    tr ON tr.id_text_trans=fc.id_translation JOIN lis_text_ita it ON tr.id_text_ita = it.id_text_ita JOIN lis_text_lis li ON tr.id_text_lis = li.id_text_lis AND it.version = li.version JOIN lis_forecast_type ft ON ft.id_forecast_type = fc.id_forecast_type JOIN lis_edition le ON f.id_edition = le.id_edition WHERE it.id_text_ita = it.id_text_ita AND it.version IN ((SELECT MIN(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita),(SELECT MAX(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita)) AND li.id_text_lis = li.id_text_lis AND li.version IN ((SELECT MIN(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis),(SELECT MAX(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis)) AND d.date_day = '" + id + "' ORDER BY f.id_edition, it.version, fc.id_forecast_type ) AS sub GROUP BY id_day, date_day, name_edition, id_edition, id_timeframe, obj ) AS lot;", connection);
-                    */
-                    // Versione con anche path_video
                     MySqlCommand cmd = new MySqlCommand(@"
-                        SELECT Json_object('status', 'success', 'data_day', Min(date_day), 'id_day', 
-                        Min(id_day), 'timeframe', 
-                Json_object('id_timeframe', Max(id_timeframe), 
-                'editions', 
-                Json_array(Json_object 
-                ('date_day', Min(date_day), 'id_edition', Min(id_edition) 
-                , 
-                'time_edition' 
-                , Min(name_edition), 'id_timeframe', Min(id_timeframe), 'forecast_data', 
-                            (SELECT 
-                Json_arrayagg(obj))), Json_object ('date_day', Max(date_day), 
-                                        'id_edition', Max( 
-                id_edition), 
-                'time_edition', Max(name_edition), 
-                'id_timeframe', Max( 
-                id_timeframe), 'forecast_data', 
-                (SELECT Json_arrayagg(obj)))))) AS list 
-            FROM   (SELECT * 
-                    FROM   (SELECT d.id_day, 
-                                d.date_day, 
-                                le.name_edition, 
-                                le.id_edition, 
-                                tf.id_timeframe, 
-                Json_object('date_day', d.date_day, 'id_forecast', f.id_forecast, 
-                'edition', 
-                f.id_edition, 'offset_days', f.offset_day, 
-                'id_forecast_type', fc.id_forecast_type, 
-                'name_type', ( CASE 
-                WHEN f.offset_day = 1 THEN ft.name_type 
-                ELSE Concat(ft.name_type, ' +', f.offset_day) 
-                end ), 
-            'id_text_trans', tr.id_text_trans, 'id_text_ita', it.id_text_ita, 'id_text_lis', li.id_text_lis, 'it_version', it.version, 'text_ita',
-            it.text_ita, 'li_version', li.version, 'text_lis', li.text_lis, 'path_video', lr.path_video) AS obj 
-            FROM   lis_day d 
-            JOIN lis_timeframe tf 
-            ON d.id_timeframe = tf.id_timeframe 
-            JOIN lis_forecast f 
-            ON d.id_day = f.id_day 
-            JOIN lis_forecast_data fc 
-            ON f.id_forecast = fc.id_forecast 
-            JOIN lis_text_trans tr 
-            ON tr.id_text_trans = fc.id_translation 
-            LEFT JOIN lis_request lr 
-            ON tr.id_text_trans = lr.id_translation 
-            JOIN lis_text_ita it 
-            ON tr.id_text_ita = it.id_text_ita 
-            JOIN lis_text_lis li 
-            ON tr.id_text_lis = li.id_text_lis 
-                AND it.version = li.version 
-            JOIN lis_forecast_type ft 
-            ON ft.id_forecast_type = fc.id_forecast_type 
-            JOIN lis_edition le 
-            ON f.id_edition = le.id_edition 
-            WHERE  it.id_text_ita = it.id_text_ita 
-            AND it.version IN ( (SELECT Min(version) 
-                                FROM   lis_text_ita 
-                                WHERE  id_text_ita = it.id_text_ita), 
-                                (SELECT Max(version) 
-                                FROM   lis_text_ita 
-                                WHERE 
-                                    id_text_ita = it.id_text_ita) ) 
-            AND li.id_text_lis = li.id_text_lis 
-            AND li.version IN ( (SELECT Min(version) 
-                                FROM   lis_text_lis 
-                                WHERE  id_text_lis = li.id_text_lis), 
-                                (SELECT Max(version) 
-                                FROM   lis_text_lis 
-                                WHERE 
-                                    id_text_lis = li.id_text_lis) ) 
-            AND d.date_day = '" + id + @"' 
-            ORDER  BY f.id_edition, 
-            it.version, 
-            fc.id_forecast_type) AS sub 
-            GROUP  BY id_day, 
-                    date_day, 
-                    name_edition, 
-                    id_edition, 
-                    id_timeframe, 
-                    obj) AS lot;
-                    ", 
-                    connection);
+                    SELECT JSON_OBJECT( 'status', 'success', 'data_day', MIN(date_day), 'id_day', MIN(id_day), 'timeframe', JSON_OBJECT( 'id_timeframe', MAX(id_timeframe), 'editions', JSON_ARRAY( JSON_OBJECT ( 'date_day', MIN(date_day), 'id_edition', MIN(id_edition), 'time_edition', MIN(name_edition), 'id_timeframe', MIN(id_timeframe), 'forecast_data', (SELECT JSON_ARRAYAGG(obj)) ), JSON_OBJECT ( 'date_day', MAX(date_day), 'id_edition', MAX(id_edition), 'time_edition', MAX(name_edition), 'id_timeframe', MAX(id_timeframe), 'forecast_data', (SELECT JSON_ARRAYAGG(obj)) )))) AS list FROM (SELECT * FROM ( SELECT d.id_day, d.date_day, le.name_edition, le.id_edition, tf.id_timeframe, JSON_OBJECT('date_day',d.date_day,'id_forecast',f.id_forecast, 'edition', f.id_edition, 'offset_days',f.offset_day, 'id_forecast_type',fc.id_forecast_type, 'name_type',( CASE WHEN f.offset_day = 1 THEN ft.name_type ELSE CONCAT(ft.name_type,' +',f.offset_day) END), 'id_text_trans',tr.id_text_trans,'id_text_ita',it.id_text_ita,'id_text_lis',li.id_text_lis,'it_version',it.version,'text_ita', it.text_ita,'li_version',li.version,'text_lis',li.text_lis) AS obj FROM lis_day           d JOIN lis_timeframe     tf ON d.id_timeframe = tf.id_timeframe JOIN lis_forecast      f ON d.id_day = f.id_day JOIN lis_forecast_data fc ON f.id_forecast = fc.id_forecast JOIN lis_text_trans    tr ON tr.id_text_trans=fc.id_translation JOIN lis_text_ita it ON tr.id_text_ita = it.id_text_ita JOIN lis_text_lis li ON tr.id_text_lis = li.id_text_lis AND it.version = li.version JOIN lis_forecast_type ft ON ft.id_forecast_type = fc.id_forecast_type JOIN lis_edition le ON f.id_edition = le.id_edition WHERE it.id_text_ita = it.id_text_ita AND it.version IN ((SELECT MIN(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita),(SELECT MAX(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita)) AND li.id_text_lis = li.id_text_lis AND li.version IN ((SELECT MIN(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis),(SELECT MAX(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis)) AND d.date_day = '" + id + "' ORDER BY f.id_edition, it.version, fc.id_forecast_type ) AS sub GROUP BY id_day, date_day, name_edition, id_edition, id_timeframe, obj ) AS lot;", connection);
 
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -319,48 +273,6 @@ namespace dotnetify_react_template.server.Controllers
 
             // return "value";
         }
-
-        
-        [HttpGet("translate1")]
-        public ActionResult Get_translate() // ActionResult Get_translate()
-        // public string Get()
-        // public ActionResult<IEnumerable<string>> Get()
-        {
-            string output = "Default";
-            try {
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = @"powershell.exe";
-                // startInfo.Arguments = @"& 'd:\test.ps1'";
-                // PowerShell.exe -ExecutionPolicy Bypass -File .runme.ps1
-                // startInfo.Arguments = @"-Command ""echo 'd:\test.ps1'""";
-                // startInfo.Arguments = @"-ExecutionPolicy Bypass -File d:\test.ps1";
-                startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _translatescript + @" -Param1 Hello -Param2 World""";
-                startInfo.RedirectStandardOutput = true;
-                startInfo.RedirectStandardError = true;
-                startInfo.UseShellExecute = false;
-                startInfo.CreateNoWindow = true;
-                
-                Process process = new Process();
-                process.StartInfo = startInfo;
-                process.Start();
-
-                output = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                Console.WriteLine("ValuesController.cs - process powershell output: " + output);
-            }
-            catch(InvalidOperationException ex){
-                Console.WriteLine(ex.Message);
-            }
-            catch(Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
-
-            // connection.Close();
-            // return output;
-            return Ok("{\"translation\": \"" + output + "\"}");
-            // return Ok("{\"expiresAt\": \"2015-11-03T10:15:57.000Z\", \"status\": \"SUCCESS\", \"relayState\": \"/myapp/some/deep/link/i/want/to/return/to\", \"sessionToken\": \"00Fpzf4en68pCXTsMjcX8JPMctzN2Wiw4LDOBL_9pe\", \"_embedded\": { \"user\": { \"id\": \"00ub0oNGTSWTBKOLGLNR\", \"passwordChanged\": \"2015-09-08T20:14:45.000Z\", \"profile\": { \"login\": \"dade.murphy@example.com\", \"firstName\": \"Dade\", \"lastName\": \"Murphy\", \"locale\": \"en_US\", \"timeZone\": \"America/Los_Angeles\" } } } } ");
-            // return Ok(ff); // new string[] { "value1", "value2_" + product };
-        }
-
 
         // POST api/values
         // [HttpPost]
@@ -460,26 +372,24 @@ namespace dotnetify_react_template.server.Controllers
             }
         }
 
-        [HttpPost("testpost_0/{id}")]
+        [HttpPost("test/{id}")]
         // public ApiResponse PushMessage(int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
-        public ActionResult<string> TestPost(int id, [FromBody] string json)
+        public ActionResult<string> TestPost(int id, [FromBody] string value)
         {
             _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            _logger.LogInformation("ValuesController POST test - json: " + json);
-            dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
+            _logger.LogInformation("ValuesController POST test - value: " + value);
+            dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             var idf = results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
             // return "Prova";
-            return Ok(new string[] { "id_passato_querystring_" + id, "value_passato_json_post_" + idf });
-            // $ curl -X POST -d '"{\"value\":\"test_setting_name\"}"' --header "Content-Type: application/json" http://localhost:5000/api/values/testpost_0/699
-            // 100   109    0    74  100    35    197     93 --:--:-- --:--:-- --:--:--   290["id_passato_querystring_699","value_passato_json_post_test_setting_name"]
+            return Ok(new string[] { "value1", "value2_" + idf });
         }
 
-        [HttpPost("testpost_1/{id}")]
+        [HttpPost("test_1/{id}")]
         // public ApiResponse PushMessage(int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
-        public ActionResult<string> TestPost_1(int id, [FromBody] string json)
+        public ActionResult<string> TestPost_1(int id, [FromBody] string value)
         {
             _logger.LogInformation("ValuesController POST test - post_id: " + id);
             // _logger.LogInformation("ValuesController POST test - value: " + value);
@@ -487,45 +397,37 @@ namespace dotnetify_react_template.server.Controllers
             // var idf = results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
             // return "Prova";
-            return Ok(new string[] { "value_json_string_" + json, "id_querystring_" + id });
-            // $ curl -X POST -d '"{\"value\":\"test_setting_name\"}"' --header "Content-Type: application/json" http://localhost:5000/api/values/testpost_1/699
-            // 100   111    0    76  100    35   5066   2333 --:--:-- --:--:-- --:--:--  7400["value_json_string_{\"value\":\"test_setting_name\"}","id_querystring_699"]
-
+            return Ok(new string[] { "value1", "value2_" + id });
         }
 
-        [HttpPost("testpost_2")]
+
+        [HttpPost("test_2")]
         // public ApiResponse PushMessage(int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
-        public ActionResult<string> TestPost_2([FromBody] string json)
+        public ActionResult<string> TestPost_2([FromBody] string value)
         {
             // _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            _logger.LogInformation("ValuesController POST test - value: " + json);
-            dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
+            _logger.LogInformation("ValuesController POST test - value: " + value);
+            dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             var idf = results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
             // return "Prova";
-            return Ok(new string[] { "value_json_" + idf, "value_totale_" + json });
-            // $ curl -X POST -d '"{\"value\":\"test_setting_name\"}"' --header "Content-Type: application/json" http://localhost:5000/api/values/testpost_2
-            // 100   116    0    81  100    35  81000  35000 --:--:-- --:--:-- --:--:--  113k["value_json_test_setting_name","value_totale_{\"value\":\"test_setting_name\"}"]
-
+            return Ok(new string[] { "value1" + idf, "value2_" + value });
         }
 
-        [HttpPost("testpost_3")]
+        [HttpPost("test_3")]
         // public ApiResponse PushMessage(int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
-        public ActionResult<string> TestPost_3([FromBody] PostInfo json)
+        public ActionResult<string> TestPost_3([FromBody] PubInfo value)
         {
+
             // _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            _logger.LogInformation("ValuesController POST test - value: " + json);
+            _logger.LogInformation("ValuesController POST test - value: " + value);
             // dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
-            var idf = json.value; // ["value"]; // results.value;
+            var idf = value.value; // ["value"]; // results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
             // return "Prova";
-            return Ok(new string[] { "value_idf_" + idf, "value_tot_" + json});
-            // $ curl -X POST -d '"{\"value\":\"test_setting_name\"}"' --header "Content-Type: application/json" http://localhost:5000/api/values/testpost_3
-            // 100    68    0    33  100    35    302    321 --:--:-- --:--:-- --:--:--   623{"":["The input was not valid."]}
-            // $ curl -X POST -d '{"value":"test_setting_name"}' --header "Content-Type: application/json" http://localhost:5000/api/values/testpost_3
-            // 100   141    0   112  100    29   109k  29000 --:--:-- --:--:-- --:--:--  137k["value_idf_test_setting_name","value_tot_dotnetify_react_template.server.Controllers.ValuesController+PostInfo"]
+            return Ok(new string[] { "value1", "value2_" + idf});
         }
         // POST api/values/text
         // [HttpPost("{id}")]
@@ -567,92 +469,6 @@ namespace dotnetify_react_template.server.Controllers
                 return "{\"expiresAt\": \"Non Okei\"}";
             }
             // return content;
-        }
-
-        [HttpPost("request")]
-        // public string JsonStringBody([FromBody] string value)
-        public string InsertRequest([FromBody] string value)
-        {
-            _logger.LogInformation("ValuesController POST - value: " + value);
-            dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
-            // var idf = results.value;
-            try {
-                connection = new MySqlConnection(this._connectionString);
-                connection.Open();
-                using (connection) {
-                    MySqlCommand command = new MySqlCommand();
-                    command.Connection = connection;
-
-                    // INSERT INTO `lis_request` ( `id_translation`, `path_video`, `notes`) VALUES ( 1, '/path/to/video/1.mp4', 'Note della request relativa alla translation 1. Il fatto che una translation abbia una request significa che ne e\' stata avviato il rendering con relativo salvataggio degli artefatti su ftp' );
-
-                    string SQL = "INSERT INTO lis_request ( id_translation, path_video, notes) VALUES (?id, ?path, ?notes)";
-                    command.CommandText = SQL;
-                    command.Parameters.AddWithValue("?id", results.id);
-                    command.Parameters.AddWithValue("?path", results.path);
-                    // command.Parameters.AddWithValue("?url_menu", "/path/to/menuvalue");
-                    command.Parameters.AddWithValue("?notes", results.notes);
-                    command.ExecuteNonQuery();
-
-                    // SQL = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES ((select MAX(id_text_lis)+1 from (select * from lis_text_lis) AS T2),2, ?version, 'texttt_lis', '<xml>test</xml>', 'note_lis_HttpPost')";
-                    // command.CommandText = SQL;
-                    // command.Parameters.AddWithValue("?version", idf); // Gia' specificato sopra - anche se poi magari le versioni potranno essere diverse tra ita e lis
-                    // command.Parameters.AddWithValue("?name_menu", "menu_name");
-                    // command.Parameters.AddWithValue("?url_menu", "/path/to/menuvalue");
-                    // command.Parameters.AddWithValue("?notes", "menu_notes_!");
-                    // command.ExecuteNonQuery();
-                }
-                connection.Close();
-                return "{\"insertRequest\": \"Ok\"}";
-            } catch (MySqlException ex) {
-                // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"request\")]. Error: " + ex.Message);
-                return "{\"insertRequest\": \"Non Okei\"}";
-            }
-            // return content;
-        }
-
-        [HttpPost("translate")]
-        // public void Post([FromBody] string value)
-        public ActionResult Post_translate([FromBody] string json) //  [FromBody] string b)
-        {
-            _logger.LogInformation("ValuesController POST translate - value: " + json);
-            dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
-            var translateText = results.value;
-            // _logger.LogInformation("ValuesController POST publish - value: ");
-            // _logger.LogInformation(idf);
-            Console.WriteLine("ValuesController.cs - process powershell output: " + translateText);
-            try {
-
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = @"powershell.exe";
-                // startInfo.Arguments = @"& 'd:\test.ps1'";
-                // PowerShell.exe -ExecutionPolicy Bypass -File .runme.ps1
-                // startInfo.Arguments = @"-Command ""echo 'd:\test.ps1'""";
-                // startInfo.Arguments = @"-ExecutionPolicy Bypass -File d:\test.ps1";
-                startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _translatescript + @" -Param1 '" + translateText + @"' -Param2 'manual'""";
-                startInfo.RedirectStandardOutput = true;
-                startInfo.RedirectStandardError = true;
-                startInfo.UseShellExecute = false;
-                startInfo.CreateNoWindow = true;
-                
-                Process process = new Process();
-                process.StartInfo = startInfo;
-                process.Start();
-
-                string output = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                Console.WriteLine("ValuesController.cs - process powershell output: " + output);
-                
-                // connection.Close();
-                // return output;
-
-                return Ok("{\"translation\": \"" + output + "\"}");
-                // return Ok("{\"expiresAt\": \"2015-11-03T10:15:57.000Z\", \"status\": \"SUCCESS\", \"relayState\": \"/myapp/some/deep/link/i/want/to/return/to\", \"sessionToken\": \"00Fpzf4en68pCXTsMjcX8JPMctzN2Wiw4LDOBL_9pe\", \"_embedded\": { \"user\": { \"id\": \"00ub0oNGTSWTBKOLGLNR\", \"passwordChanged\": \"2015-09-08T20:14:45.000Z\", \"profile\": { \"login\": \"dade.murphy@example.com\", \"firstName\": \"Dade\", \"lastName\": \"Murphy\", \"locale\": \"en_US\", \"timeZone\": \"America/Los_Angeles\" } } } } ");
-                // return Ok(ff); // new string[] { "value1", "value2_" + product };
-            } catch (Exception ex) {
-                // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"publish\")]. Error: " + ex.Message);
-                return Ok("{\"output_publish\": \"KO\"}");
-            }
         }
 
 
@@ -770,20 +586,19 @@ namespace dotnetify_react_template.server.Controllers
         {
         }
         
-        [HttpPost("upload_1")]
+        [HttpPost("upload")]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
-            // if (file == null || file.Length == 0) 
-            // return Content("file not selected");
+          if (file == null || file.Length == 0) 
+            return Content("file not selected");
             var path = Path.Combine(
-              Directory.GetCurrentDirectory(), "wwwroot", "list.txt");
+              Directory.GetCurrentDirectory(), "wwwroot", "file.test);"
               // file.GetFilename());
-            // byte[] byteArray = Encoding.UTF8.GetBytes(uploads);
-            /*
-            byte[] byteArray = Encoding.UTF8.GetBytes(uploads);
-            MemoryStream stream = new MemoryStream(byteArray);
-            await file.CopyToAsync(stream);
-            */
+              /*
+              byte[] byteArray = Encoding.UTF8.GetBytes(uploads);
+              MemoryStream stream = new MemoryStream(byteArray);
+              await file.CopyToAsync(stream);
+              */
               
               
             using (var stream = new FileStream(path, FileMode.Create))
@@ -792,70 +607,26 @@ namespace dotnetify_react_template.server.Controllers
             }
             return RedirectToAction("Files");
         }
-
-        [HttpPost("upload")]
-        public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files)
-        {
-            long uploadFileSize = files.Sum(f => f.Length);
-            Console.WriteLine("ValuesController - upload uploadFileSize:" + uploadFileSize);
-            string uploadFilePath = "";
-            foreach (var formFile in files)
-            {
-                if (formFile.Length > 0)
-                {
-                    _logger.LogInformation("ValuesController - upload: " + formFile);
-                    Console.WriteLine("ValuesController - upload: " + formFile);
-                    uploadFilePath = Path.Combine(
-                        Directory.GetCurrentDirectory(),
-                        "wwwroot", "dist/rules/glossario.csv");
-                    
-                    // Path.GetTempFileName();
-                    using (var stream = System.IO.File.Create(uploadFilePath))
-                    {
-                        await formFile.CopyToAsync(stream);
-                    }
-                } else {
-                    _logger.LogInformation("ValuesController - upload: no files");
-                    Console.WriteLine("ValuesController - upload KO:");
-                    return Ok(new { count = 0, uploadFileSize = 0, uploadFilePath = "no files" });
-                }
-            }
-            // Process uploaded files
-            // Don't rely on or trust the FileName property without validation.
-            return Ok(new { count = files.Count, uploadFileSize, uploadFilePath });
-        }
         
         [HttpGet("download")]
-        public async Task<IActionResult> Download(string downloadFileName)
+        public async Task<IActionResult> Download(string filename)
         {
-            // filename = "index.html";
-            downloadFileName = "dist/rules/glossario.csv";
-            if (downloadFileName == null)
-              return Content("downloadFileName not present");
-            var downloadFilePath = Path.Combine(
+            if (filename == null)
+              return Content("filename not present");
+            var path = Path.Combine(
                Directory.GetCurrentDirectory(),
-               "wwwroot", downloadFileName);
+               "wwwroot", filename);
                
             // formFile.SaveAsAsync("Your-File-Path"); // [ Async call ]
             // formFile.SaveAs("Your-File-Path");
             
             var memory = new MemoryStream();
-            using (var stream = new FileStream(downloadFilePath, FileMode.Open))
+            using (var stream = new FileStream(path, FileMode.Open))
             {
               await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
-        }
-        
-        private string GetMimeType (string fileName)
-        {
-            string mimeType = "application/unknown";
-            string ext = System.IO.Path.GetExtension(fileName).ToLower();
-            Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext);
-            if (regKey != null && regKey.GetValue("Content Type") != null)
-            mimeType = regKey.GetValue("Content Type").ToString();
-            return mimeType;
-        }
+            return File(memory, GetContentType(path), Path.GetFileName(path));
+        } 
     }
 }

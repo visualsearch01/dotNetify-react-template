@@ -10,12 +10,14 @@ import DiskIcon from 'material-ui/svg-icons/hardware/sim-card';
 import NetworkIcon from 'material-ui/svg-icons/device/network-wifi';
 import { cyan600, pink600, purple600, white } from 'material-ui/styles/colors';
 import GlobalStyles from '../../styles/styles';
-import { Player, ControlBar } from 'video-react';
+import { Player, ControlBar, PlaybackRateMenuButton, VolumeMenuButton } from 'video-react';
 
 import Subheader from 'material-ui/Subheader';
 import { typography } from 'material-ui/styles';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextareaAutosize from 'react-textarea-autosize';
+
+import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
 
 const Utilization = props => {
   const styles = {
@@ -64,7 +66,6 @@ const Utilization = props => {
       <Subheader style={styles.subheader}>Selezione edizione/orario</Subheader>
       <span style={GlobalStyles.title}>Test</span>
       <div className="row">
-        
         <div className="col-xs-12 col-sm-4 col-md-4 col-lg-4">
           <div style={styles.legend}>
             <List>
@@ -74,35 +75,23 @@ const Utilization = props => {
                 </ListItem>
               ))}
             </List>
-
             <RaisedButton label="09:30" onClick={props.onClicked} />
             <RaisedButton label="18:30" onClick={props.onClicked} />
-
           </div>
         </div>
-
         <div className="col-xs-12 col-sm-8 col-md-8 col-lg-8">
-          {/*<div style={styles.pieChartDiv}>*/}
-            {/*<Doughnut data={data} options={options} /> */}
-            <Player
-              playsInline
-              fluid={false}
-              poster="https://parer.ibc.regione.emilia-romagna.it/notizie/a-bologna-la-presentazione-del-volume-201carchivio-concetti-e-parole201d-di-federico-valacchi/@@images/8e7b8c07-7e1f-4d18-8c31-d511790f352b.jpeg"
-              src="http://flashedu.rai.it/ieduportale/italiano/3_bologna_parole.mp4">
-                <ControlBar disableCompletely={true} />
-            </Player>
-          {/*</div>*/}
+          <div style={styles.pieChartDiv}>
+            <Doughnut data={data} options={options} />
+          </div>
         </div>
-
       </div>
-      
     </Paper>
   );
 };
 
 
-
-const NewUtilization_new = props => {
+// Il componente video preview e' functional - non ha bisogno di avere uno stato
+const VideoPreview = props => {
   const styles = {
     subheader: {
       fontSize: 24,
@@ -115,7 +104,7 @@ const NewUtilization_new = props => {
       padding: 10
     },
     legend: {
-      paddingTop: 60,
+      paddingTop: 0, // 60,
       border: '1px solid'
     },
     legendText: {
@@ -127,8 +116,8 @@ const NewUtilization_new = props => {
     }
   };
 
-  const labelStyles = [ { color: cyan600, icon: <MemoryIcon /> }, { color: pink600, icon: <DiskIcon /> }, { color: purple600, icon: <NetworkIcon /> } ];
-
+  // const labelStyles = [ { color: cyan600, icon: <MemoryIcon /> }, { color: pink600, icon: <DiskIcon /> }, { color: purple600, icon: <NetworkIcon /> } ];
+/*
   const datanew = {
     // labels: props.label,
     // label: props.label,
@@ -140,8 +129,7 @@ const NewUtilization_new = props => {
       }
     ]
   };
-
-
+*/
   const options = {
     legend: { display: false },
     layout: { padding: { left: 0, right: 10, top: 20, bottom: 10 } },
@@ -152,58 +140,60 @@ const NewUtilization_new = props => {
     console.log(id);
   };
 
+  // {/* Questo require dovrebbe essere quello che fa creare a webpack la cartella videos e ci mette dentro questo file*/}
+
   return (
     <Paper style={styles.paper}>
-      <Subheader style={styles.subheader}>{props.label}</Subheader>
-      {/* <span style={GlobalStyles.title}>Test</span> */}
-      <div className="row">
-        <div className="col-xs-12 col-sm-4 col-md-4 col-lg-4">
-          <div style={styles.legend}>
-            {props.text_orig}
-{/*
-            <RaisedButton label="09:30" onClick={props.onClicked} />
-            <RaisedButton label="18:30" onClick={props.onClicked} />
-*/}
-          </div>
-        </div>
-        <div className="col-xs-12 col-sm-8 col-md-8 col-lg-8">
-          {/*<div style={styles.pieChartDiv}>*/}
-            {/*<Doughnut data={data} options={options} /> */}
-          {/*</div>*/}
-          {/*<div style={styles.pieChartDiv}>*/}
-          <div style={styles.legend}>
-            {/*props.label  cols="145" rows="40" maxRows={15}   */}
-            <TextareaAutosize cols={80} rows={10} maxRows={15} value={props.text_edit} onChange={props.onChanged} />
-          </div>
-        </div>
+      <div>
+        <Player preload={"none"} poster={props.Poster} >
+          <source src={props.Src}/>
+          <ControlBar disableCompletely={true} />
+        </Player>
+      </div>
+      <div>
+        <RaisedButton label="Pubblica" onClick={props.onPublish} />
       </div>
     </Paper>
   );
 };
 
-
-
+const CardExampleExpandable = props => (
+  <Card>
+    <CardHeader
+      title={props.title}
+      subtitle={props.subtitle}
+      actAsExpander={true}
+      showExpandableButton={true}
+    />
+    <CardText expandable={true}>
+      {props.text}
+    </CardText>
+  </Card>
+);
 
 Utilization.propTypes = {
   data: PropTypes.array
 };
 // export const Utilization;
 
-NewUtilization_new.propTypes = {
-  datanew: PropTypes.array
+VideoPreview.propTypes = {
+  // datanew: PropTypes.array
+  Poster: PropTypes.string,
+  Src: PropTypes.string,
+  onPublish: PropTypes.func //.required
 };
 /*
 export default () => {
-    return [Utilization, NewUtilization_new];
+    return [Utilization, VideoPreview];
 }
 */
-
 export {
 // export default 
 Utilization, //;
 
 // export const 
-NewUtilization_new //;
+VideoPreview, //;
+CardExampleExpandable
 }
 
 // And after, you can import your exports :

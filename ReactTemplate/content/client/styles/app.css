@@ -2,7 +2,11 @@ html {
   font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-
+/*
+* {
+  border: 1px solid #FF0000;
+}
+*/
 body,
 h1,
 h2,
@@ -10,7 +14,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-size: 15px;
+  font-size: 10px; /*15px;*/
   margin: 0;
   line-height: 24px;
 }
@@ -18,6 +22,8 @@ h6 {
 body {
   margin: 0;
   background-color: #efefef;
+  bottom: 0;
+  /*border: 1px solid #e00000;*/
 }
 
 body,
@@ -25,6 +31,7 @@ html,
 #app,
 #app > div {
   height: 100%;
+  /*border: 1px solid #e0044689;*/
 }
 
 a {
@@ -38,4 +45,11 @@ a:hover {
 
 .m-b-15 {
   margin-bottom: 15px;
+}
+
+input[type=file]::-webkit-file-upload-button {
+  /*border: 1px solid grey;*/
+  background: #FFFAAA;
+  margin-top: 30;
+  float: 'left';
 }
