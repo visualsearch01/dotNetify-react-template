@@ -130,7 +130,7 @@ class Dashboard extends React.Component {
       edition_id:         1, // ID dell'edizione di default da visualizzare (ID 1, cioe' 9:00)
       forecast_id:        1, // ID del tipo di forecast di default (NORD)
       offset_day:         1, // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
-      
+      offsets:            [],
       testi:              null, // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
       
       ita_id:             0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
@@ -302,7 +302,7 @@ class Dashboard extends React.Component {
     date1.getFullYear() + " " + ("0" + date1.getHours()).slice(-2) + ":" + ("0" + date1.getMinutes()).slice(-2);
 
     var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-    var url = "http://localhost:5000/api/values/meteo/" + datestring1;
+    // var url = "/api/values/meteo/" + datestring1;
     /*
     console.log('handleChangePicker_dashboard - url: ', url);
     console.log('handleChangePicker_dashboard - datestring: ', datestring);
@@ -316,7 +316,7 @@ class Dashboard extends React.Component {
     console.log('handleChangePicker_dashboard - date.toISOString().split(\'T\')[0]: ', date1.toISOString().split('T')[0]);
     console.log('handleChangePicker_dashboard - date.getUTCDate(): ', date1.getUTCDate());
     */
-    fetch(url, { signal: this.mySignal }) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
+    fetch("/api/values/meteo/" + datestring1, { signal: this.mySignal }) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
       .then((response) => {
         return response.json();
       })
@@ -385,15 +385,26 @@ class Dashboard extends React.Component {
           // this.state.ff = 
           this.setState({
             showActions:      true,
-            testi:            data }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            testi:            data,
+            offset_day:       data.timeframe.editions[0].offsets.min,
+            offsets:           Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i)=>i + data.timeframe.editions[0].offsets.min)
+          }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
           //this.setState({ ita: data[1].NORD}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
           //this.setState({ lis: data[0]['CENTRO E SARDEGNA']}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
           // this.setState({ edition_id: 1 });
           // this.setState({ forecast_id: 1 }); // Azzera il selettore nella toolbar a NORD
           let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
           // console.log('handleUpdateTextAreas - forecast_data: ', forecast_data);
+
+          // /api/values/download
+
           // console.log('handleUpdateTextAreas - forecast_data filter: ', forecast_data.filter(function(data){return data.edition == 1}));
-          let nord_orig = getVersion(forecast_data, this.state.edition_id, this.state.forecast_id, this.state.offset_day, 1);
+          let nord_orig = getVersion(
+            forecast_data, 
+            this.state.edition_id, 
+            this.state.forecast_id, 
+            this.state.offset_day,
+            1);
           // forecast_data
               // .filter(function(data){return data.edition == 3})
               // .filter(data => {return data.edition == this.state.edition_id})
@@ -436,7 +447,7 @@ class Dashboard extends React.Component {
             lis_edit_version: nord_edit.it_version, // });
             lis_notes:        'Campo non ancora estratto'
           }, this.handleCloseDialog);
-          // console.log('handleChangePicker_dashboard - this.state: ', this.state);
+          console.log('handleChangePicker_dashboard - this.state: ', this.state);
         }
       })
       .catch(error => {
@@ -815,9 +826,9 @@ onCircProgressCompleted = _ => {
 
   handleTranslate_get = _ => {
     // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-    var url = "http://localhost:5000/api/values/translate/";
+    // var url = "/api/values/translate/";
     // this.setState({ showProgress: true });
-    fetch(url) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
+    fetch("/api/values/translate") //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
       .then((response) => {
         return response.json();
       })
@@ -849,7 +860,7 @@ onCircProgressCompleted = _ => {
 
   handleTranslate = _ => {
     fetch(
-      "http://localhost:5000/api/values/translate",
+      "/api/values/translate",
       {
         method: 'POST',
         body: "'"+JSON.stringify({value: btoa(this.state.ita_edit)})+"'",
@@ -873,9 +884,9 @@ onCircProgressCompleted = _ => {
    */
   handlePreview = _ => {
     console.log('handlePreview');
-    var url = "http://localhost:5000/api/values/request";
+    // var url = "/api/values/request";
 
-    fetch("http://localhost:5000/api/values/request", // 1/6",
+    fetch("/api/values/request", // 1/6",
     {
       method: 'POST',
       body: "'"+JSON.stringify({
@@ -937,7 +948,7 @@ onCircProgressCompleted = _ => {
     data.append( "value", "sdsdfsfds"); //JSON.stringify( payload1 ) );
     this.setState({ lis_edit: 'Attendere, pubblicazione..' }); //, this.handleOpenDialogPublish)
     
-    fetch("http://localhost:5000/api/values/testpost_2", // 1/6",
+    fetch("/api/values/testpost_2", // 1/6",
     {
       method: 'POST',
       body: "'"+JSON.stringify({value: 'bacon'})+"'",
@@ -946,7 +957,7 @@ onCircProgressCompleted = _ => {
     .then(res => res.json())
     .then(p => {
       console.log('testpost_2: ' , p);
-      fetch("http://localhost:5000/api/values/testpost_3", // 1/6",
+      fetch("/api/values/testpost_3", // 1/6",
       {
         method: 'POST',
         body: JSON.stringify({value: 'bacon'}),
@@ -957,7 +968,7 @@ onCircProgressCompleted = _ => {
         console.log('testpost_3: ' , p);
         this.setState({ lis_edit: 'Pubblicato!!!' }, this.handleCloseDialog);
         this.setState({ snackbarMessage: 'Video pubblicato su ftp://test@test.com' }, this.handleOpenSnackbar)
-        fetch("http://localhost:5000/api/values/testpost_1/88", // 1/6",
+        fetch("/api/values/testpost_1/88", // 1/6",
         {
           method: 'POST',
           body: "'"+JSON.stringify({value: 'bacon'})+"'",
@@ -967,7 +978,7 @@ onCircProgressCompleted = _ => {
         .then(p => {
           console.log('testpost_1: ' , p);
           fetch(
-            "http://localhost:5000/api/values/translate",
+            "/api/values/translate",
             {
               method: 'POST',
               body: "'"+JSON.stringify({value: 'UkVTSURVRSBQSU9HR0UgTkVMTEUgUFJJTUUgT1JFIERFTCBNQVRUSU5PIFNVTExFIEFSRUUgQVBQRU5OSU5JQ0hFIEVNSUxJQU5FIEUgTFVOR08gTEUgWk9ORSBDT1NUSUVSRSBBRFJJQVRJQ0hFLCBNQSBJTiBTVUNDRVNTSVZPIFJBUElETyBNSUdMSU9SQU1FTlRPIENPTiBDSUVMTyBURVJTTy5CRUwgVEVNUE8gU1VMIFJFU1RBTlRFIFNFVFRFTlRSSU9ORSwgQSBQQVJURSBVTiBQTycgREkgTlVCSSBDT01QQVRURSBBVFRFU0UgTkVMTEEgUFJJTUEgUEFSVEUgREVMTEEgTUFUVElOQVRBIFNVTExFIEFSRUUgQUxQSU5FIENPTiBERUJPTEkgTkVWSUNBVEUgQSBBU1NPQ0lBVEUgQSBQQVJUSVJFIERBSSAxMjAwIEEgTUVUUkkuQUwgUFJJTU8gTUFUVElOTyBFIERPUE8gSUwgVFJBTU9OVE8gRk9STUFaSU9ORSBESSBGT1NDSElFIERFTlNFIEUgQkFOQ0hJIERJIE5FQkJJQSBFIFNVTExBIFBJQU5VUkEgRSBQQURBTkE='})+"'",
@@ -994,7 +1005,7 @@ onCircProgressCompleted = _ => {
       });
     });
     /*
-    fetch("http://localhost:5000/api/values/testpost_1/88", // 1/6",
+    fetch("/api/values/testpost_1/88", // 1/6",
     {
       method: 'POST',
       // body: '"ggegrergerg"',
@@ -1059,6 +1070,7 @@ onCircProgressCompleted = _ => {
       },
       buttonStyle: { 
         marginLeft: 2,
+        padding: '10px', //,
         float: 'left'
       },
       buttonLabel: {
@@ -1093,9 +1105,9 @@ onCircProgressCompleted = _ => {
 
     const handleTranslate1 = _ => {
       // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-      var url = "http://localhost:5000/api/values/translate/";
+      // var url = "/api/values/translate/";
       // this.setState({ showProgress: true });
-      fetch(url) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
+      fetch("/api/values/translate") //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
         .then((response) => {
           return response.json();
         })
@@ -1200,7 +1212,7 @@ onCircProgressCompleted = _ => {
                   backgroundColor: 'rgb(0, 188, 212)',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center',
+                  alignItems: 'left',
                   justifyContent: 'center',
                   height: '48px',
                   
@@ -1212,17 +1224,17 @@ onCircProgressCompleted = _ => {
                   // }
                 }}>
               <ToolbarGroup firstChild={true}>
-                <ToolbarTitle text="Selezione data" style={{padding: 10}} />
+                <ToolbarTitle text="Data" style={{paddingLeft: 10, padding: 10}} />
                 <DatePicker value={this.state.pickDate} onChange={this.handleOpenDialogChangePicker} />
                 <ToolbarSeparator />
-                <ToolbarTitle text="Selezione edizione" style={{padding: 10}} />
+                <ToolbarTitle text="Edizione" style={{padding: 10}} />
                 <DropDownMenu value={this.state.edition_id} onChange={this.handleChangeEditionId}>
                   <MenuItem value={1} primaryText="09:30" />
                   {/* <MenuItem value={2} primaryText="17:30" disabled={true}/> */}
                   <MenuItem value={3} primaryText="18:30" />
                 </DropDownMenu>
                 <ToolbarSeparator />
-                <ToolbarTitle text="Selezione area" style={{padding: 10}} />
+                <ToolbarTitle text="Area" style={{padding: 10}} />
                 <DropDownMenu value={this.state.forecast_id} onChange={this.handleChangeForecastId}>
                   <MenuItem value={1} primaryText="NORD" />
                   <MenuItem value={2} primaryText="CENTRO E SARDEGNA" />
@@ -1233,11 +1245,15 @@ onCircProgressCompleted = _ => {
                   <MenuItem value={7} primaryText="TUTTA ITALIA" />
                 </DropDownMenu>
                 <ToolbarSeparator />
+                <ToolbarTitle text="Giorno" style={{padding: 10}} />
                 <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay} disabled={this.state.forecast_id != 7}>
-                  <MenuItem value={1} primaryText="+1" disabled={this.state.forecast_id == 7}/>
-                  <MenuItem value={2} primaryText="+2" />
-                  <MenuItem value={3} primaryText="+3" />
-                  {/*<MenuItem value={4} primaryText="+4" />*/}
+                  {this.state.offsets.map(item => <MenuItem key={item} value={item} primaryText={'+' + item} />)}
+                  {/*
+                    <MenuItem value={1} primaryText="+1" disabled={this.state.forecast_id == 7}/>
+                    <MenuItem value={2} primaryText="+2" />
+                    <MenuItem value={3} primaryText="+3" />
+                    <MenuItem value={4} primaryText="+4" />
+                  */}
                 </DropDownMenu>
                 {/*<ToolbarSeparator />*/}
               </ToolbarGroup>
@@ -1263,10 +1279,12 @@ onCircProgressCompleted = _ => {
             */}
             <div className="row">
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+                {/*
                 <div style={dashboardStyles.buttons}>
                   <div style={globalStyles.navigation}>Testo ITA originale{this.state.ita_edit_version ? ' (versione 1)' : '' }:</div>
                 </div>
-                {/*<label>{this.state.ita_orig}</label>*/}
+                <label>{this.state.ita_orig}</label>
+                */}
                 <div style={dashboardStyles.buttons}>
                   <CardExampleExpandable title={"Testo ITA originale" + (this.state.lis_edit_version ? " (versione 1)" : "") } subtitle="Cliccare per espandere" text={this.state.ita_orig} />
                 </div>
@@ -1278,17 +1296,19 @@ onCircProgressCompleted = _ => {
                 </div>
   {showActions ?
                 <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Annulla"    onClick={this.handleCancel}       style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
+                  <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
                   <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={justTranslated} />
                 </div>
   : null}
               </div>
 
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+                {/*
                 <div style={dashboardStyles.buttons}>
                   <div style={globalStyles.navigation}>Testo LIS originale{this.state.lis_edit_version ? ' (versione 1)' : '' }:</div>
                 </div>
-                {/*<label>{this.state.lis_orig}</label>*/}
+                <label>{this.state.lis_orig}</label>
+                */}
                 <div style={dashboardStyles.buttons}>
                   <CardExampleExpandable title={"Testo LIS originale" + (this.state.lis_edit_version ? " (versione 1)" : "") } subtitle="Cliccare per espandere" text={this.state.lis_orig} />
                 </div>
@@ -1300,7 +1320,7 @@ onCircProgressCompleted = _ => {
                 </div>
   {showActions ?
                 <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Salva"      onClick={handleSave}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
+                  <RaisedButton label="Salva"           onClick={handleSave}                     style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
                   <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed} />
                   {/*
                   <br />

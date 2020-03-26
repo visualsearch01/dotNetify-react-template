@@ -78,7 +78,7 @@ class LoginPage extends React.Component {
             <Paper style={styles.paper}>
               <div>
                 <span style={styles.logo} />
-                <span style={styles.text}>dotNetify</span>
+                <span style={styles.text}>Progetto LIS</span>
               </div>
               { /*<form>*/ }
               <form onSubmit={onFormSubmit}>

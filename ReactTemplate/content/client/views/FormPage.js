@@ -147,8 +147,8 @@ class FormPage extends React.Component {
 
   // handleDownload = _ => {}
   handleDownload = () => {
-    var url = "http://localhost:5000/api/values/download/";
-    fetch(url, { signal: this.mySignal })
+    // var url = "/api/values/download/";
+    fetch("/api/values/download", { signal: this.mySignal })
       .then(response => {
         const filename =  'glossario.csv'; //response.headers.get('Content-Disposition').split('filename=')[1];
         response.blob().then(blob => {
@@ -194,9 +194,9 @@ class FormPage extends React.Component {
     data.append('files', this.state.file);
     data.append('name', this.state.file.name);
 
-    var url = "http://localhost:5000/api/values/upload/";
+    var url = "/api/values/upload/";
     
-    fetch(url, {
+    fetch("/api/values/upload", {
       signal: this.mySignal,
       method: 'POST',
       body: data

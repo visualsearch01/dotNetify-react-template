@@ -682,8 +682,8 @@ class TablePage_1 extends React.Component {
   }
 
   handleRender = () => {
-    var url = "http://localhost:5000/api/values/download/";
-    fetch(url, { signal: this.mySignal })
+    var url = "/api/values/download/";
+    fetch("/api/values/download", { signal: this.mySignal })
       .then(response => {
         const filename =  'glossario.csv'; //response.headers.get('Content-Disposition').split('filename=')[1];
         response.blob().then(blob => {
