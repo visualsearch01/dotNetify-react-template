@@ -135,10 +135,8 @@ class InfoBox extends React.Component {
 
 // export default 
 class CircularProgressExampleDeterminate extends React.Component {
-
   constructor(props) {
     super(props);
-
     this.state = {
       completed: 0,
       tess: 'Attendere, caricamento video'
@@ -177,7 +175,7 @@ class CircularProgressExampleDeterminate extends React.Component {
   }
 
   // Rendere il progress piu' veloce
-  // - aumentare il valore fisso di diff
+  // - aumentare il valore fisso per cui vine emoltiplicato Math.Random
   // - stringere l'intervallo di aggiornamento al fondo (es. da 1000 a 200)
   progress(completed) {
     if (completed > 100) {
@@ -186,7 +184,7 @@ class CircularProgressExampleDeterminate extends React.Component {
       this.props.onCompleted();
     } else {
       this.setState({completed});
-      const diff = Math.random() * 40;
+      const diff = Math.random() * 5; // 40;
       this.timer = setTimeout(() => {
         this.progress(completed + diff)
         this.setState({tess: this.state.tess += "."});
@@ -199,6 +197,7 @@ class CircularProgressExampleDeterminate extends React.Component {
     // const { tess, onCompleted, completed } = this.props;
     return (
       <div>
+      {this.props.progress}
         {/*
         <CircularProgress
           mode="determinate"
@@ -280,8 +279,6 @@ class ChipExampleSimple extends React.Component {
           </div>
         )) */}
 
-
-
         <Chip
           style={chipStyles.chip}
         >
@@ -352,7 +349,7 @@ function wrapState(ComposedComponent) {
     static propTypes = {
       children: PropTypes.node.isRequired,
       defaultValue: PropTypes.number.isRequired,
-      // onChangeIndex: PropTypes.func
+      // onChangeSign: PropTypes.func
     };
 
     componentWillMount() {
@@ -365,7 +362,7 @@ function wrapState(ComposedComponent) {
       this.setState({
         selectedIndex: index,
       },
-        // this.props.onChangeIndex(index)
+        // this.props.onChangeSign(index)
       );
     };
 
@@ -374,7 +371,7 @@ function wrapState(ComposedComponent) {
     }
 
     render() {
-      // const { onChangeIndex } = this.props;
+      // const { onChangeSign } = this.props;
       return (
         <ComposedComponent
           value={this.state.selectedIndex}
@@ -395,28 +392,40 @@ const Child = (props) => {
     <div style={{backgroundColor: props.eyeColor}} />
   )
 }
-onChangeIndex
+onChangeSign
 onClick={(e) => handleListSelect1(item)}
+
+// leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
+// leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
+
+item.Signs.map((item, idx2) => (
+          <ListItem
+            key={idx2}
+            value={item}
+            primaryText={item}
+            onClick={(e) => props.onChangeSign(item)}
+          />
+          ))}
+open={props.filtered}
 */
-// leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-// leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
 const ListExampleSelectable = props => {
   return (
     <SelectableList defaultValue={3}>
-      <Subheader>Segni presenti a dizionario</Subheader>
+      {/*<Subheader>Segni presenti a dizionario</Subheader>*/}
       {props.children.map((item, idx1) => (
       <ListItem
         key={idx1}
         value={item.Iniziale}
         primaryText={item.Iniziale}
-        primaryTogglesNestedList={true}        
+        primaryTogglesNestedList={true}
+        open={props.children.length == 36 ? null : true}
         nestedItems={
-          item.Signs.map((item, idx2) => (
+          item.Signs_object.map((item, idx2) => (
           <ListItem
             key={idx2}
             value={item}
-            primaryText={item}
-            onClick={(e) => props.onChangeIndex(item)}
+            primaryText={item.name}
+            onClick={(e) => props.onChangeSign(item)}
           />
           ))}
       />
@@ -516,6 +525,7 @@ InfoBox.propTypes = {
 
 
 CircularProgressExampleDeterminate.propTypes = {
+  progress: PropTypes.number,
   onCompleted: PropTypes.func //.required
 };
 // export default InfoBox;

@@ -155,16 +155,14 @@ const Sidebar = props => {
     logo: {
       cursor: 'pointer',
       fontSize: 22,
-      // justifyContent: 'center',
-      // verticalAlign: 'middle',
-      // textAlign: 'center',
-      // textAlign: 'center',
+      display: 'flex',
       color: typography.textFullWhite,
       lineHeight: `${spacing.desktopKeylineIncrement}px`,
       fontWeight: typography.fontWeightLight,
       backgroundColor: blue600,
-      // paddingLeft: 70,
-      // float: 'left'
+      // padding: 10,
+      // textAlign: 'rigth',
+      float: 'rigth',
       height: 57 //56
     },
     menuItem: {
@@ -248,7 +246,7 @@ const Sidebar = props => {
   }
 
   const ConsoleLog = ({ children }) => {
-    console.log(children);
+    console.log('Sidebar ConsoleLog - children: ', children);
     return false;
   };
 /*
@@ -273,6 +271,7 @@ style={styles.autocomplete.menu}
       </div>
       <div>
         <Menu>
+{ (Array.isArray(menus_del1) && menus_del1.length) ?
           <MenuItem
             primaryText="Meteo"
             checked={false}
@@ -291,7 +290,10 @@ style={styles.autocomplete.menu}
               ))
             }
           />
+          :
+          null }
           <Divider />
+{ (Array.isArray(menus_del2) && menus_del2.length) ?
           <MenuItem
             primaryText="Didattica"
             checked={false}
@@ -310,6 +312,8 @@ style={styles.autocomplete.menu}
               ))
             }
           />
+          :
+          null }
         </Menu>
       </div>
     </Drawer>

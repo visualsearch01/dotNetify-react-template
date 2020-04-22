@@ -23,9 +23,11 @@ module.exports = {
       { test: /\.css$/, use: [ MiniCssExtractPlugin.loader, 'css-loader?minimize' ] },
       { test: /\.svg$/, use: 'svg-url-loader?noquotes=true' },
       { test: /\.(png|jpg|jpeg|gif)$/, use: 'url-loader?limit=25000' },
-      { test: /\.mp4$/, use: 'url-loader?name=videos/[name].[ext]' },
       { test: /\.cvs$/, use: 'url-loader?name=rules/[name].[ext]' }
-/*
+      /*
+      Sezione gestione file video (mp4)
+      non serve - la gestione di file statici fuori da wwwroot si fa con 
+      { test: /\.mp4$/, use: 'url-loader?name=videos/[name].[ext]' },
       {
         test: /\.(txt|csv|mmdb)$/,
         use: [
@@ -38,7 +40,7 @@ module.exports = {
           },
         ],
       }
-*/
+    */
     ]
   },
   plugins: [ new MiniCssExtractPlugin() ]

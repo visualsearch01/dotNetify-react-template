@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace dotnetify_react_template
    [Authorize]
    public class AppLayout : BaseVM, IRoutable
    {
-      private enum Route
+      private enum _levels // Route
       {
          Home,
          Dashboard,
@@ -26,7 +25,9 @@ namespace dotnetify_react_template
          TablePage_1
       };
 
-      private Timer _timer;
+      private Timer _timer => null;
+      private readonly string _connectionString;
+
       public string Greetings => "Hello World!";
       public DateTime ServerTime1 => DateTime.Now;
       public string ServerTime => ServerTime1.ToString("MM/dd/yyyy HH:mm:ss");
@@ -40,24 +41,37 @@ namespace dotnetify_react_template
 
       // public object Menus_del1 => new List<object>();
       // public object Menus_del2 => new List<object>();
+      /*
+      public static string[] Foo = new string[16];
 
-      public object Menus_del1 => new List<object>()
+      private Route[] Routes1 => new Route[
+         this.GetRoute(nameof(_levels.Dashboard)),
+         this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1"),
+         this.GetRoute(nameof(_levels.TablePage)),
+         this.GetRoute(nameof(_levels.TablePage_1))
+      ];
+      */
+      public object Menus_del1_bak => new List<object>()
       {
-         new { Title = "Meteo",        Icon = "assessment", Route = this.GetRoute(nameof(Route.Dashboard)) },
-         new { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(Route.FormPage), $"{FormPagePath}/1") },
-         new { Title = "Lista video",  Icon = "grid_on",    Route = this.GetRoute(nameof(Route.TablePage)) }
+         new { Title = "Meteo",        Icon = "assessment", Route = this.GetRoute(nameof(_levels.Dashboard)) },
+         new { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1") },
+         new { Title = "Lista video",  Icon = "grid_on",    Route = this.GetRoute(nameof(_levels.TablePage)) }
       };
-      public object Menus_del2 => new List<object>()
+      public object Menus_del2_bak => new List<object>()
       {
-         new { Title = "Dizionario/composizione",   Icon = "grid_on",    Route = this.GetRoute(nameof(Route.TablePage_1)) }
+         new { Title = "Dizionario",   Icon = "assessment", Route = this.GetRoute(nameof(_levels.TablePage_1)) },
+         new { Title = "Traduzione",   Icon = "grid_on",    Route = this.GetRoute(nameof(_levels.TablePage_1)) }
       };
-
-
-      public AppLayout(IPrincipalAccessor principalAccessor)
+      public object Menus_del1;
+      public object Menus_del2;
+      // public List genericListType => typeof(List<object>);
+      public AppLayout(IConfiguration configuration, IPrincipalAccessor principalAccessor)
       {
-         // Console.WriteLine("Route dashboard: " + this.GetRoute(nameof(Route.FormPage), $"{FormPagePath}/1"));
+         // Console.WriteLine("Route dashboard: " + this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1"));
          // string _connectionString = cs; //onfiguration["ConnectionStrings:lis"]; // configuration.GetValue<string>("ConnectionStrings:lis");
          // configuration.GetValue<string>("Scripts:lis");
+         _connectionString = configuration.GetConnectionString("lis"); //  _configuration.GetValue<string>("ConnectionStrings:lis");
+         Console.WriteLine("AppLayout.cs - costruttore, stringa connessione DB MySQL: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
 
          var userIdentity = principalAccessor.Principal.Identity as ClaimsIdentity;
          foreach (Claim claim in userIdentity.Claims)  
@@ -84,30 +98,90 @@ namespace dotnetify_react_template
          UserAvatar = userIdentity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.Uri)?.Value;
          // userIdentity.Uri.Value;
          UserIsAdmin = string.Equals(UserName, "rai");
-/*
+         /*
          Menus_del1 = new List<object>()
          {
-            new { Title = "Meteo",        Icon = "assessment", Route = this.GetRoute(nameof(Route.Dashboard)) },
-            // new { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(Route.FormPage), $"{FormPagePath}/1") },
-            new { Title = "Lista video",  Icon = "grid_on",    Route = this.GetRoute(nameof(Route.TablePage)) }
+            new { Title = "Meteo",        Icon = "assessment", Route = this.GetRoute(nameof(_levels.Dashboard)) },
+            // new { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1") },
+            new { Title = "Lista video",  Icon = "grid_on",    Route = this.GetRoute(nameof(_levels.TablePage)) }
          };
-*/
-         // AddProperty<object>(Menus_del1, { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(Route.FormPage), $"{FormPagePath}/1") });  
-         // Menus_del1[2] = new { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(Route.FormPage), $"{FormPagePath}/1") };  
-/*        
+         */
+         // AddProperty<object>(Menus_del1, { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1") });  
+         // Menus_del1[2] = new { Title = "Impostazioni", Icon = "web",        Route = this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1") };  
+         /*
          Menus_del2 = new List<object>()
          {
-            new { Title = "Dizionario/composizione",   Icon = "grid_on",    Route = this.GetRoute(nameof(Route.TablePage_1)) }
+            new { Title = "Dizionario/composizione",   Icon = "grid_on",    Route = this.GetRoute(nameof(_levels.TablePage_1)) }
          };
-*/
-         this.RegisterRoutes("/", new List<RouteTemplate>
+         */
+
+         var genericListType = typeof(List<>);
+         var specificListType = genericListType.MakeGenericType(typeof(List<object>));
+         Menus_del1 = Activator.CreateInstance(specificListType);
+         Menus_del2 = Activator.CreateInstance(specificListType);
+         /*
+         Menus_del2 = new List<object>()
          {
-            new RouteTemplate(nameof(Route.Home)) { UrlPattern = "", ViewUrl = nameof(Route.Dashboard) },
-            new RouteTemplate(nameof(Route.Dashboard)),
-            new RouteTemplate(nameof(Route.FormPage)) { UrlPattern = $"{FormPagePath}(/:id)" },
-            new RouteTemplate(nameof(Route.TablePage)),
-            new RouteTemplate(nameof(Route.TablePage_1))
-         });
+            new { Title = "Dizionario",   Icon = "assessment", Route = new RouteTemplate(nameof(_levels.TablePage_1)) { UrlPattern = "TablePage_1", ViewUrl = nameof(_levels.TablePage_1) }   }, // new RouteTemplate("TablePage_1")}, // { UrlPattern = "page1" }), // ,this.GetRoute(nameof(_levels.TablePage_1)) },
+            new { Title = "Traduzione",   Icon = "grid_on",    Route = new RouteTemplate(nameof(_levels.TablePage_1)) { UrlPattern = "TablePage_1", ViewUrl = nameof(_levels.TablePage_1) }   }  //  new RouteTemplate("TablePage_1")}  // { UrlPattern = "page1" }), // ,this.GetRoute(nameof(_levels.TablePage_1)) }, // this.GetRoute(nameof(_levels.TablePage_1)) }
+            // new { Title = "Dizionaribbbo",   Icon = "assessment", Route = this.GetRoute(nameof(this._levels.TablePage_1)) },
+            // new { Title = "Traduzionbbbbe",   Icon = "grid_on",    Route = this.GetRoute(nameof(this._levels.TablePage_1)) }
+         };
+         public class Route
+         {
+            /// <summary>
+            /// Identifies the route template.
+            /// </summary>
+            public string TemplateId { get; set; }
+
+            /// <summary>
+            /// Route path relative to the root path.
+            /// </summary>
+            public string Path { get; set; }
+
+            /// <summary>
+            /// Optional; only set it if you want to redirect to a different root.
+            /// </summary>
+            public string RedirectRoot { get; set; }
+         */
+
+         if (UserId == 3 || UserIsAdmin) {
+            Menus_del1 = new List<object>()
+            {
+               new { Title = "Meteo",        Icon = "assessment", Route = new {TemplateId = "Dashboard", Path = "Dashboard", primaryText = "Meteo"} },               // this.GetRoute(nameof(_levels.Dashboard)) },
+               new { Title = "Impostazioni", Icon = "web",        Route = new {TemplateId = "FormPage",  Path = $"{FormPagePath}/1", primaryText = "Impostazioni"} },// Route = this.GetRoute(nameof(_levels.FormPage), $"{FormPagePath}/1") },
+               new { Title = "Le mie liste", Icon = "grid_on",    Route = new {TemplateId = "TablePage", Path = "TablePage", primaryText = "Le mie liste"} }        // this.GetRoute(nameof(_levels.TablePage)) }
+            };
+            this.RegisterRoutes("/", new List<RouteTemplate>
+            {
+               new RouteTemplate(nameof(_levels.Home)) { UrlPattern = "", ViewUrl = nameof(_levels.Dashboard) },
+               new RouteTemplate(nameof(_levels.Dashboard)),
+               new RouteTemplate(nameof(_levels.FormPage)) { UrlPattern = $"{FormPagePath}(/:id)" },
+               new RouteTemplate(nameof(_levels.TablePage)),
+               new RouteTemplate(nameof(_levels.TablePage_1))
+            });
+         }
+
+         if (UserId == 4 || UserIsAdmin) {
+            Menus_del2 = new List<object>()
+            {
+               new { Title = "Dizionario",   Icon = "assessment", Route = new {TemplateId = "TablePage_1", Path = "TablePage_1", primaryText = "Dizionario"} },
+               new { Title = "Traduzione",   Icon = "web",        Route = new {TemplateId = "TablePage_1", Path = "TablePage_1", primaryText = "Traduzione"} }, // this.GetRoute(nameof(_levels.TablePage_1)) }
+               // new { Title = "Dizionaribbbo",   Icon = "assessment", Route = this.GetRoute(nameof(this._levels.TablePage_1)) },
+               new { Title = "I miei video", Icon = "grid_on",    Route = new {TemplateId = "TablePage", Path = "TablePage", primaryText = "I miei video"} }
+            };
+            this.RegisterRoutes("/", new List<RouteTemplate>
+            {
+               new RouteTemplate(nameof(_levels.Home)) { UrlPattern = "", ViewUrl = nameof(_levels.TablePage_1) },
+               new RouteTemplate(nameof(_levels.Dashboard)),
+               new RouteTemplate(nameof(_levels.FormPage)) { UrlPattern = $"{FormPagePath}(/:id)" },
+               new RouteTemplate(nameof(_levels.TablePage)),
+               new RouteTemplate(nameof(_levels.TablePage_1))
+            });
+         }
+         Changed(nameof(Menus_del1));
+         Changed(nameof(Menus_del2));
+         // PushUpdates();
          /*
          _timer = null; // timer per far arrivare alla gui l'ora corrente aggiornata al secondo - copiato da HelloWorld
          _timer = new Timer(state =>
@@ -117,6 +191,13 @@ namespace dotnetify_react_template
          }, null, 0, 1000); // every 1000 ms.
          */
       }
+      /*
+      public object Menus_del2 => new List<object>()
+      {
+         new { Title = "Dizionaribbbo",   Icon = "assessment", Route = this.GetRoute(nameof(_levels.TablePage_1)) },
+         new { Title = "Traduzionbbbbe",   Icon = "grid_on",    Route = this.GetRoute(nameof(_levels.TablePage_1)) }
+      };
+      */
       public override void Dispose() => _timer.Dispose();
    }
 }

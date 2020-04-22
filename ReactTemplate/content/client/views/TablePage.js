@@ -13,349 +13,12 @@ import ThemeDefault from '../styles/theme-default';
 import globalStyles from '../styles/styles';
 import { ChipExampleSimple, ListExampleSelectable } from '../components/dashboard/InfoBox';
 import { ChipExampleSimple1 } from '../components/dashboard/RecentActivities';
+import { VideoPreview } from '../components/dashboard/Utilization';
 import BasePage from '../components/BasePage';
 import Pagination from '../components/table/Pagination';
 import InlineEdit from '../components/table/InlineEdit';
 import TextareaAutosize from 'react-textarea-autosize';
 import RaisedButton from 'material-ui/RaisedButton';
-
-const glossario = [
-'600',
-'800',
-'1000',
-'3100',
-'abruzzese',
-'abruzzo',
-'addensamenti',
-'adriatiche',
-'adriatico',
-'agitati',
-'agitato',
-'al di sopra',
-'alta toscana',
-'altrove',
-'annuvolamenti',
-'appenniniche',
-'appenninico',
-'appennino',
-'appennino toscano',
-'arco alpino',
-'area alpina',
-'aree alpine',
-'aree alpine del piemonte',
-'aree appenniniche',
-'aree costiere',
-'aree interne',
-'aree montuose',
-'aree prealpine',
-'attenuazione dei fenomeni',
-'attenuazione della nuvolosità',
-'attenuazione della nuvolosità e dei fenomeni',
-'attenuazione delle precipitazioni',
-'aumento',
-'aumento della nuvolosità',
-'aumento delle velature',
-'bacini',
-'bacino',
-'bel tempo',
-'calabria',
-'campania',
-'canale di sardegna',
-'centrale',
-'centroccidentale',
-'centromeridionale',
-'centromeridionali',
-'centro-nord',
-'centrorientale',
-'centrosettentrionale',
-'centro-sud',
-'cielo',
-'cielo molto nuvoloso',
-'cielo nuvoloso',
-'cielo sereno',
-'coperto',
-'copertura medio alta',
-'costa',
-'coste',
-'costiere adriatiche',
-'dai quadranti settentrionali al nord',
-'debole fenomeno',
-'deboli',
-'deboli nevicate',
-'deboli piogge',
-'deboli piogge o rovesci',
-'deboli precipitazioni ',
-'decisi rinforzi',
-'dell\'abruzzo',
-'diradamento della nuvolosità compatta',
-'dopo il tramonto',
-'due isole maggiori',
-'emiliano-romagnole',
-'emilia-romagna',
-'emiliane',
-'estensione della nuvolosità',
-'estese velature',
-'fenomeni',
-'fenomeni con ampie schiarite',
-'fenomeni convettivi diffusi',
-'fenomeni nevosi',
-'forti',
-'foschie',
-'friuli-venezia giulia',
-'gran parte del settore',
-'in estensione serale',
-'in attenuazione',
-'in aumento',
-'in calo',
-'in diminuzione',
-'in lieve aumento',
-'in lieve diminuzione',
-'in rialzo',
-'in special modo',
-'in successiva estensione serale',
-'intensificazione dei fenomeni',
-'ionio',
-'isola',
-'isolati addensamenti compatti',
-'isole maggiori',
-'l\'adriatico',
-'lazio',
-'levante ligure',
-'liguria',
-'locali deboli nevicate',
-'locali nevicate',
-'locali rinforzi',
-'locali temporali',
-'lombardi',
-'lombardia',
-'maltempo',
-'marche',
-'mare di sardegna',
-'mare e canale di sardegna',
-'mari',
-'massime',
-'massime in calo',
-'mattino',
-'meridionale',
-'meridionali',
-'metri',
-'miglioramento',
-'minime',
-'moderati',
-'molise',
-'molte nubi',
-'molto agitati',
-'molto agitato',
-'molto mossi',
-'molto mosso',
-'molto nuvoloso',
-'mossi',
-'nebbia',
-'nevicate',
-'nevose',
-'nevoso',
-'nord',
-'nord-ovest',
-'nubi',
-'nuvolosità',
-'nuvolosità compatta',
-'occidentale',
-'occidentali',
-'orientali',
-'ovest',
-'ovunque',
-'padana',
-'parziale diradamento della nuvolosità',
-'parzialmente nuvoloso',
-'pianura',
-'piemonte',
-'piogge',
-'piogge o rovesci',
-'piogge o rovesci diffusi',
-'piogge o rovesci sparsi',
-'pioggia o rovescio',
-'piovaschi',
-'poco nuvoloso',
-'pomeridiane',
-'pomeriggio',
-'precipitazioni a carattere nevoso',
-'precipitazioni diffuse',
-'precipitazioni sparse di debole intensità',
-'prima parte della giornata',
-'primo mattino',
-'puglia',
-'quadranti meridionali',
-'quadranti nord-orientali',
-'quadranti settentrionali',
-'qualche isolato debole fenomeno',
-'qualche isolato fenomeno',
-'quote superiori',
-'regioni',
-'regioni adriatiche',
-'regioni alpine e prealpine',
-'regioni centrali',
-'regioni centro-meridionali',
-'regioni ioniche',
-'regioni meridionali',
-'regioni tirreniche',
-'restanti',
-'restanti mari',
-'resto_______________________________________1',
-'resto del paese',
-'resto del settore',
-'resto del territorio',
-'resto delle regioni',
-'resto delle regioni tirreniche',
-'rilievi',
-'rilievi alpini',
-'rilievi appenninici',
-'rimanenti',
-'rimanenti bacini',
-'rinforzi',
-'rovesci',
-'rovesci o temporali',
-'rovesci o temporali anche di forte intensità',
-'rovesci o temporali da sparsi a diffusi',
-'rovescio o temporale',
-'sardegna',
-'scarsa nuvolosità',
-'scarsa nuvolosita in rapida intensificazione',
-'schiarite',
-'seconda parte della mattinata',
-'serali',
-'serata',
-'sereno',
-'settentrionale',
-'settentrionali',
-'sicilia',
-'sicilia tirrenica',
-'soleggiamento',
-'soleggiamento',
-'spesse velature',
-'stazionarie',
-'stretto di sicilia',
-'sud',
-'sulla parte alta',
-'tarda mattinata',
-'tarda sera',
-'temperature minime ',
-'temporale',
-'tirreniche',
-'tirreno',
-'toscana',
-'toscano',
-'tramonto',
-'triveneto',
-'tutto il paese',
-'tutto il settore',
-'umbria',
-'velato',
-'velature',
-'venti',
-'vento moderato',
-'vento poco',
-'versante tirrenico'
-];
-
-let glossario_objects = [];
-
-glossario.forEach((item, i) => {
-  // y.push(Object.assign({}, {"name": item, "id": i}, item));
-  glossario_objects.push(Object.assign({}, {"name": item, "id": i}));
-}); 
-
-// Iniziale: 'A', Signs: ['A
-
-let data = glossario_objects.reduce((r, e) => {
-  // get first letter of name of current element
-// if(e.name.includes("gga")) {
-  let Iniziale = e.name[0].toUpperCase();
-  // if there is no property in accumulator with this letter create it
-  if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name]}; //[e]}
-  // if there is push current element to children array for that letter
-  else r[Iniziale].Signs.push(e.name);
-// }
-  // return accumulator
-  return r;
-}, {})
-
-// since data at this point is an object, to get array of values
-// we use Object.values method
-let result = Object.values(data);
-console.log('Result: ', result);
-
-const glossario_iniziali = [
-  {Iniziale: '1', Signs: [
-    '1000', 
-    '1500'
-  ]}, 
-  {Iniziale: '6', Signs: [
-    '600', 
-  ]}, 
-  {Iniziale: '8', Signs: [
-    '800', 
-  ]}, 
-  {Iniziale: 'A', Signs: [
-    'abruzzese',
-    'abruzzo',
-    'addensamenti',
-    'adriatiche',
-    'adriatico',
-    'agitati',
-    'agitato',
-    'al di sopra',
-    'alta toscana',
-    'altrove',
-    'annuvolamenti',
-    'appenniniche',
-    'appenninico',
-    'appennino',
-    'appennino toscano',
-    'arco alpino',
-    'area alpina',
-    'aree alpine',
-    'aree alpine del piemonte',
-    'aree appenniniche',
-    'aree costiere',
-    'aree interne',
-    'aree montuose',
-    'aree prealpine',
-    'attenuazione dei fenomeni',
-    'attenuazione della nuvolosità',
-    'attenuazione della nuvolosità e dei fenomeni',
-    'attenuazione delle precipitazioni',
-    'aumento',
-    'aumento della nuvolosità',
-    'aumento delle velature',
-  ]}, 
-  {Iniziale: 'B', Signs: [
-    'bacini',
-    'bacino',
-    'bel tempo',
-  ]}, 
-  {Iniziale: 'C', Signs: [
-    'calabria',
-    'campania',
-    'canale di sardegna',
-    'centrale',
-    'centroccidentale',
-    'centromeridionale',
-    'centromeridionali',
-    'centro-nord',
-    'centrorientale',
-    'centrosettentrionale',
-    'centro-sud',
-    'cielo',
-    'cielo molto nuvoloso',
-    'cielo nuvoloso',
-    'cielo sereno',
-    'coperto',
-    'copertura medio alta',
-    'costa',
-    'coste',
-    'costiere adriatiche',
-  ]}
-];
 
 class TablePage extends React.Component {
   constructor(props) {
@@ -364,9 +27,8 @@ class TablePage extends React.Component {
     this.vm = dotnetify.react.connect('Table', this);
     this.dispatch = state => this.vm.$dispatch(state);
 
-    console.log('Table - dotnetify: ', dotnetify);
+    console.log('TablePage - dotnetify: ', dotnetify);
     console.log('TablePage - props: ', props);
-    console.log('TablePage - props.data_id: ', props.data_id);
 
     this.state = {
       addName: '',
@@ -386,17 +48,17 @@ class TablePage extends React.Component {
     this._isMounted = false;
     this.abortController.abort();
     // this.vm.$destroy();
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
-    console.log('Form - componentDidMount');
+    console.log('TablePage - componentDidMount');
     window.addEventListener('beforeunload', this.handleLeavePage);    
   };
 
   handleLeavePage(e) {
     this.vm.$destroy();
-  }
+  };
 
   /*
   componentWillUnmount() {
@@ -406,7 +68,7 @@ class TablePage extends React.Component {
 
   render() {
     let { addName, Employees, Requests, Pages, SelectedPage, ShowNotification } = this.state;
-    const { data_id } = this.props;
+    // const { data_id } = this.props;
     // console.log('TablePage - data_id: ', data_id);
     const styles = {
       addButton: { margin: '1em' },
@@ -419,7 +81,7 @@ class TablePage extends React.Component {
       },
       pagination: { marginTop: '1em' }
     };
-
+    /*
     const handleAdd = _ => {
       if (addName) {
         this.dispatch({ Add: addName });
@@ -432,6 +94,7 @@ class TablePage extends React.Component {
       this.setState({ Employees: newState });
       this.dispatch({ Update: employee });
     };
+    */
 
     const handleSelectPage = page => {
       const newState = { SelectedPage: page };
@@ -508,154 +171,202 @@ class TablePage extends React.Component {
   }
 }
 
-
-
-
 class TablePage_1 extends React.Component {
   constructor(props) {
     super(props);
-    console.log('TablePage_1 - props: ', props);
     // console.log('TablePage_1 - props.data_id: ', props.data_id);
     dotnetify.debug = true;
     this.vm = dotnetify.react.connect('Table_1', this);
     this.dispatch = state => this.vm.$dispatch(state);
-    console.log('Table_1 - dotnetify: ', dotnetify);
-    // [
-    // { title: 'The Shawshank Redemption', year: 1994 },
+    console.log('TablePage_1 - dotnetify: ', dotnetify);
+    console.log('TablePage_1 - props: ', props);
 
     this.state = {
-      addName:            '',
-      Employees:          [],
-      Pages:              [],
-      children1:          ['tetete', 'yhtyjtjyuj'],
-      children:           result, // glossario_iniziali, // [{Iniziale: 'A', Signs: ['Atto', 'Attgeruzz']}, {Iniziale: 'B', Signs: ['BafAtto', 'Buytktuzz']}, {Iniziale: 'C', Signs: ['Cutto', 'Cuzz']}],
-      children_filtered:  [],
-      chips:              [], // {Word: 'Redemption', Found: true}, {Word: 'Godfather', Found: false}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}],
-      ShowNotification:   false,
-      position:           0,
-      allWordsFound:      false,
-      ita_edit:           '',
-      lis_edit:           '',
-      tab_mode_table1:    'dizionario', // Tab di default
-      videoUrl:           'http://www.silviaronchey.it/materiali/video/mp4/Intervista%20Vernant.mp4'
+      // addName:            '',
+      // Employees:          [],
+      // Pages:              [],
+      // ShowNotification:   false,
+      sign_tot:           [],    // Array con la lista dei segni come arriva dall'endpoint api - serve per poter fare di nuovo il reduce in caso di filter
+      sign_names:         [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
+      sign_iniz:          [],    // Array completo dei segni, raggruppati per iniziale e ordinati lettere/numeri
+      sign_filtered:      [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
+      sign_selected:      null,  // Oggetto che rappresenta l'eventuale segno cliccato nella lista
+      chips:              [],    // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
+      // position:           0,
+      allWordsFound:      false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
+      ita_edit:           '',    // campo di inserimento libero testo ITA - serve solo per appoggiare un testo, non e' prevista traduzione automatica
+      lis_edit:           '',    // campo di inserimento segni LIS - durante l'inserimento viene tenuta traccia della posizione del cursore e ogni parola separata da spazio viene cercata nei segni
+      file:               '',
+      error:              '',
+      msg:                '',
+      selectionStart:     0,
+      selectionEnd:       0,
+      tab_mode_table1:    'dizionario', // switch del tab di selezione modo - Tab di default dizionario
+      videoPoster:        '', // '/video_gen/mp4/sentence_04_03_2020_11_01_54.jpg',
+      videoUrl:           '', // '/video_gen/mp4/amico.mp4' // 'http://www.silviaronchey.it/materiali/video/mp4/Intervista%20Vernant.mp4'
     };
-    this.handelKeyDown = this.handelKeyDown.bind(this);
-    this.handleChangeIndex = this.handleChangeIndex.bind(this);
-  }
+    this.handleChangeSign = this.handleChangeSign.bind(this);
+    this.handleChips = this.handleChips.bind(this);
+  };
 
   _isMounted = false;
   abortController = new AbortController();
   mySignal = this.abortController.signal;
 
+  inputRef = ref => (this.inputRef = ref)
+
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.handleLeavePage);
-    document.removeEventListener("keydown", this.handelKeyDown, false);
+    // document.removeEventListener("keydown", this.handleSpaceKeyDown, false); // Rimane agganciato a tutti i campi, non solo lis_edit
     this._isMounted = false;
     this.abortController.abort();
     // this.vm.$destroy();
-  }
+  };
 
   componentDidMount() {
+    console.log('TablePage_1 - componentDidMount');
+    console.log('TablePage_1 - this.props.location: ', this.props.location);
     this._isMounted = true;
-    console.log('Form - componentDidMount');
     window.addEventListener('beforeunload', this.handleLeavePage);
-    document.addEventListener("keydown", this.handelKeyDown, false);
+    // document.addEventListener("keydown", this.handleSpaceKeyDown, false);
+    this.handleGetSigns();
     this.setState({
-      children_filtered: this.state.children
+      sign_filtered: this.state.sign_iniz
     });
   };
 
   handleLeavePage(e) {
     this.vm.$destroy();
-  }
+  };
 
-  updateVideoManually() {
-    const position = this.state.position + 1;
+  handleGetSigns = _ => {
+    fetch("/api/values/sign",
+      { signal: this.mySignal }
+      ).then((response) => {
+        return response.json();
+      })
+      .then(data => {
+        let sign_names = [];
+        let sign_group = data.reduce((r, e) => {
+          // get first letter of name of current element
+          // if(e.name.includes("gga")) {
+          sign_names.push(e.name);
+          let Iniziale = e.name[0].toUpperCase();
+          // if there is no property in accumulator with this letter create it
+          if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name], Signs_object: [e]}; //[e]}
+          // if there is push current element to children array for that letter
+          else {r[Iniziale].Signs.push(e.name); r[Iniziale].Signs_object.push(e);}
+          // }
+          // return accumulator
+          return r;
+        }, {});
+        let sign_iniz = Object.values(sign_group).sort(function(a, b) {
+          // var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+          // var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+          if (Number.isInteger(+a.Iniziale)) {
+            return 1;
+          }
+          if (Number.isInteger(+b.Iniziale)) {
+            return -1;
+          }
+        });
+        console.log('TablePage_1 - handleGetSigns data: ',       data); // 0: {id: 60, name: "a"}
+        console.log('TablePage_1 - handleGetSigns sign_group: ', sign_group);
+        console.log('TablePage_1 - handleGetSigns sign_names: ', sign_names);
+        console.log('TablePage_1 - handleGetSigns sign_iniz: ',  sign_iniz);
+
+        this.setState({
+          sign_tot:       data,
+          sign_names:     sign_names,
+          sign_iniz:      sign_iniz,
+          sign_filtered:  sign_iniz
+        });
+
+        // this.setState({ dirty: true });
+        // this.setState({ justTranslated: true });
+        // this.setState({ lis_edit:         data.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+      })
+      .catch(error => {
+        console.log('TablePage_1 - handleGetSigns - Error: ', error);
+      });
+  };
+
+  updateVideo(sign_name) {
+    // const position = this.state.position + 1;
+    console.log('TablePage_1 - updateVideo(sign_name): ', sign_name);
     this.setState({
-      position: position,
-      videoUrl: 'http://www.silviaronchey.it/materiali/video/mp4/Racconti%20di%20Corrado%20Augias.mp4'
-
-
+      // position: position,
+      videoPoster: '/video_gen/mp4/'+sign_name+'.gif',
+      videoUrl: '/video_gen/mp4/'+sign_name+'.mp4' // http://www.silviaronchey.it/materiali/video/mp4/Racconti%20di%20Corrado%20Augias.mp4'
       // items[Math.floor(Math.random()*items.length)]
       // Math.floor(Math.random()*2)
     });
-  }
+  };
 
-/*
-  function getVersion(timeFrameJsonArray, edition_id, id_forecast_type, offset_days, version) {
-    let res = children
-        .filter(data => {return data.Signsincludes(value)})
-        .filter(data => {return data.id_forecast_type == id_forecast_type})
-        .filter(data => {return data.offset_days == offset_days})
-        .sort(function(a, b) {
-          // var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-          // var nameB = b.name.toUpperCase(); // ignore upper and lowercase
-          if (a.it_version < b.it_version) {
-            return -1;
-          }
-          if (a.it_version > b.it_version) {
-            return 1;
-          }
-          if (a.it_version > b.it_version) {
-            if (a.text_ita.length < b.text_ita.length) {
-              return -1;
-            }
-            if (a.text_ita.length > b.text_ita.length) {
-              return 1;
-            }
-          }
-          // return 0;
-        });
+  handleChangeSign = (sign) => {
+    console.log('TablePage_1 - handleChangeSign - sign: ', sign);
+    console.log('TablePage_1 - handleChangeSign - this.state.tab_mode_table1: ', this.state.tab_mode_table1);
+    if (this.state.tab_mode_table1 == 'dizionario') {
+      this.setState({
+        sign_selected: sign
+        },
+        this.updateVideo(sign.name)
+      )
+    }
+    if (this.state.tab_mode_table1 == 'traduzione') {
+      console.log('TablePage_1 - ', this.state.lis_edit.substring(0, this.state.selectionStart));
+      console.log('TablePage_1 - ', this.state.lis_edit.substring(this.state.selectionStart + sign.name.length, this.state.lis_edit.length));
+      let newText = (this.state.lis_edit.substring(0, this.state.selectionStart) + ' ' + sign.name + ' ' + this.state.lis_edit.substring(this.state.selectionStart, this.state.lis_edit.length)).replace(/\s\s+/g, ' ').trim(); // + sign.name.length
+      this.setState({
+        sign_selected: sign,
+        lis_edit: newText
+        },
+        this.handleChips({keyCode: 32, target: {value: newText}})
+      );
+    }
+  };
 
-    console.log('getVersion - version: ', version);
-    console.log('getVersion - res: ', res);
+  handleFilter = (value) => {
+    this.setState({ sign_filtered: this.state.sign_iniz.reduce((r, e) => {
+        // get first letter of name of current element
+        if(e.includes(value)) {
+          let Iniziale = e[0];
+          // if there is no property in accumulator with this letter create it
+          if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e]}; //[e]}
+          // if there is push current element to children array for that letter
+          else r[Iniziale].Signs.push(e);
+        }
+        // return accumulator
+        return r;
+      }, {})
+    });
+    console.log('TablePage_1 - handleFilter - value: ', value);
+  };
 
-    if(version === 1)
-  */
-  handleChangeIndex = value => {
-    console.log('onChangeIndex - value: ', value);
+  handleChangeLisText = (value) => {
+    console.log('TablePage_1 - handleChangeLisText - value: ', value);
     this.setState({
-      ita_edit: 'Segno selezionato: ' + value
-      }, this.updateVideoManually());
-  }
-
-  handleFilter = value => {
-  this.setState({ children_filtered: this.state.children.reduce((r, e) => {
-      // get first letter of name of current element
-      if(e.includes(value)) {
-        let Iniziale = e[0];
-        // if there is no property in accumulator with this letter create it
-        if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e]}; //[e]}
-        // if there is push current element to children array for that letter
-        else r[Iniziale].Signs.push(e);
-      }
-      // return accumulator
-      return r;
-    }, {})
-  });
-  console.log('onChangeIndex - value: ', value);
-}
-  onChangeText = value => {
-    console.log('onChangeText - value: ', value);
-    this.setState({
-      // children_filtered: this.state.children.filter(data => {return data.Signs.includes(value)})
+      // sign_filtered: this.state.children.filter(data => {return data.Signs.includes(value)})
       // allWordsFound: true,
       lis_edit: event.target.value
     },
       () => {                 
-            this.handelKeyDown(event);                 
-        });
-    // }, this.handelKeyDown);
+        // this.handleSpaceKeyDown(event);                 
+    });
+    // }, this.handleSpaceKeyDown);
     // console.log('onChangeDate1 - date1: ', date1);
     // console.log('onChangeDate1 - date1.toISOString(): ', date1.toISOString());
       // this.handleFetch(date1);
       // onChange={this.handleFetch} value={this.state.pickDate} 
-  }
+  };
 
-  handelKeyDown(event){
-    if(event.keyCode === 32) { // 27) { // Space
+  handleChips = (event) => {
+    console.log('TablePage_1 - handleChips event: ', event)
+    // console.log('TablePage_1 - handleChips input: ', input)
+    // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+    if ([8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
       // Do whatever when esc is pressed
-      console.log('Space pressed! ')
+      console.log('TablePage_1 - handleChips keyCode 12 - Space pressed! ')
       let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
       let ar = [];
       // let tt = ['Test', 'Prova'];
@@ -665,21 +376,26 @@ class TablePage_1 extends React.Component {
         // console.log(Object.assign({}, {"key3": "value3"}, item));
         // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
         // if (!tt.includes(item)) this.setState({ allWordsFound: false });
-        ar[i] = {Word: item, Found: glossario.includes(item)};
+        ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
       });
       // Object.assign
 
       // Object.keys(obj).some(function(k) {
       // return obj[k] === "test1";
       // });
-      console.log('Check ar: ', ar.some(function(k) {return k.Found === false}));
+      console.log('TablePage_1 - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
       this.setState({
         allWordsFound: ar.some(function(k) {return k.Found === false}),
         chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
       });
     }
     // this.setState({ lis_edit: event.target.value });
-  }
+  };
+  /*
+  handleSpaceKeyDown1(event, yo){
+    console.log('TablePage_1 - handleSpaceKeyDown1 event: ', event)
+    console.log('TablePage_1 - handleSpaceKeyDown1 yo.props.inputRef.selectionStart: ', yo.props.inputRef.selectionStart)
+  };
 
   handleRender = () => {
     var url = "/api/values/download/";
@@ -694,31 +410,233 @@ class TablePage_1 extends React.Component {
           a.click();
       });
    });
-  }
-
+  };
+  */
   handleUpdateTab = (value) => {
-    console.log('handleUpdateTab - value: ', value);
+    console.log('TablePage_1 - handleUpdateTab - value: ', value);
     // this.setState({ value_area: value });
-
-
     this.setState({
       tab_mode_table1: value,
-      ita_edit: '',
-      lis_edit: '',
-      videoUrl: "dist/videos/output.mp4"
+      // ita_edit: '',
+      // lis_edit: '',
+      videoUrl: '' // "dist/videos/output.mp4"
       }, this.handleUpdateDiz); //.id});
     // this.handleUpdateTextAreas(7);
-  }
+  };
 
   handleUpdateDiz = () => {
     // setOpen(true);
     // this.setState({showSnackbar: true});
   };
 
+  handleDownloadTxtFile = () => {
+    const element = document.createElement("a");
+    
+    const file = new Blob([document.getElementById('targetField').value], {type: 'text/plain'});
+    // const file = new Blob([this.state.lis_edit], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = "myFile.txt";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+  };
+
+  handleTxtFileChange = (event) => {
+    this.setState({
+      file: event.target.files[0]
+    });
+  };
+
+  // handleTxtFileUpload = _ => {}  
+  handleTxtFileUpload = (event) => {
+    event.preventDefault();
+    this.setState({error: '', msg: ''});
+ 
+    if(!this.state.file) {
+      this.setState({error: 'Please upload a file.'})
+      return;
+    }
+ 
+    if(this.state.file.size >= 2000000) {
+      this.setState({error: 'File size exceeds limit of 2MB.'})
+      return;
+    }
+
+
+    const reader = new FileReader()
+    new Promise((resolve, reject) => {
+      reader.onload = event => resolve(event.target.result)
+      reader.onerror = error => reject(error)
+      reader.readAsText(this.state.file)
+    }).then(content => {
+      // target.value = content
+      // console.log('TablePage_1 - cont: ', content);
+      this.setState({ lis_edit: content });
+    }).catch(error => console.log('TablePage_1 - handleTxtFileUpload error: ', error))
+
+    /*
+    const reader = new FileReader()
+    reader.onload = event => console.log(this.state.file); // desired file content
+    reader.onerror = error => reject(error);
+    let cont = reader.readAsText(this.state.file) // you could also read images and other binaries
+    console.log('TablePage_1 - cont: ', cont);
+    */
+  };
+
+  handleArrowKeysDown = (e) => {
+    /*
+    The event. which property normalizes event. keyCode and event.
+    ...
+    #Keycode values.
+    Key	Code
+    left arrow	37
+    up arrow	38
+    right arrow	39
+    down arrow	40
+    */
+    // const { cursor, result } = this.state
+
+    /*
+    onKeyDown={(event) => {
+      if (typeof(this.input)==='object'&&this.input!==null) {
+        const selectionStart = this.input.props.inputRef.selectionStart;
+        console.log('onKeyDown - selectionStart: ', selectionStart);
+        if (typeof(selectionStart)==='number') {
+          this.setState({
+            selectionStart: selectionStart,
+            selectionEnd:   selectionStart
+          })
+          return
+        }
+      }
+      if(event.keyCode === 32) { // 27) { // Space
+        // Do whatever when esc is pressed
+        console.log('TablePage_1 - event.keyCode === 32 - Space pressed! ')
+        let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+        let ar = [];
+        // let tt = ['Test', 'Prova'];
+
+        list.forEach((item, i) => {
+          // if (i === idx) {
+          // console.log(Object.assign({}, {"key3": "value3"}, item));
+          // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
+          // if (!tt.includes(item)) this.setState({ allWordsFound: false });
+          ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
+        });
+        // Object.assign
+
+        // Object.keys(obj).some(function(k) {
+        // return obj[k] === "test1";
+        // });
+        console.log('TablePage_1 - handleSpaceKeyDown - Check array: ', ar.some(function(k) {return k.Found === false}));
+        this.setState({
+          allWordsFound: ar.some(function(k) {return k.Found === false}),
+          chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+        });
+      }
+    }}
+    */
+
+    let cursor = 1;
+    // arrow up/down button should select next/previous list element
+    if (e.keyCode === 37) {
+      console.log('TablePage_1 - left - e.keyCode: ', e.keyCode);
+      this.setState({
+        selectionStart: this.state.selectionStart - 1,
+        selectionStart: this.state.selectionEnd - 1
+      });
+    } else if (e.keyCode === 38) {
+      console.log('TablePage_1 - render - e.keyCode: ', e.keyCode);
+      // this.setState( prevState => ({
+      //   cursor: prevState.cursor + 1
+      // }))
+    } else if (e.keyCode === 39) {
+      console.log('TablePage_1 - render - e.keyCode: ', e.keyCode);
+      this.setState({
+        selectionStart: this.state.selectionStart + 1,
+        selectionStart: this.state.selectionEnd + 1
+      });
+    } else if (e.keyCode === 40) {
+      console.log('TablePage_1 - render - e.keyCode: ', e.keyCode);
+      // this.setState( prevState => ({
+      //   cursor: prevState.cursor + 1
+      // }))
+    }
+  };
+
+  handleSave = _ => {
+    console.log('TablePage_1 handleSave - creazione text_trad');
+    fetch(
+      "/api/values/text_trad",
+      {
+        signal: this.mySignal,
+        method: 'POST',
+        body: "'"+JSON.stringify({
+          IdUserEdit: 4,
+          TextIta: this.state.ita_edit, //"Provaaaa_manda_a_dashboard",
+          NotesIta: "Provaaa_note_ita_tablepage_1",
+          TextLis: this.state.lis_edit, //"Provaaaa_manda_a_dashboard",
+          NotesLis: "Provaaa_note_lis_tablepage_1"
+        })+"'",
+        headers: {'Content-Type': 'application/json'}
+      })
+    .then(res => res.json())
+    .then(p => {
+      console.log('TablePage_1 handleSave - Risultato text_trad POST: ', p);
+      console.log('TablePage_1 handleSave - creazione request');
+      fetch("/api/values/request",
+      {
+        signal: this.mySignal,
+        method: 'POST',
+        body: "'"+JSON.stringify({
+          id: p.id_text_trans,
+          path: '/path/to/video_idtrans'+p.id_text_trans,
+          notes: 'note_request_idtrans'+p.id_text_trans
+        })+"'",
+        headers: {'Content-Type': 'application/json'}
+      })
+      .then(res => res.json())
+      .then(p => {
+        console.log('TablePage_1 handleSave - Risultato request POST: ', p);
+        console.log('TablePage_1 handleSave - creazione preview');
+        fetch(
+          "/api/values/preview",
+          {
+            signal: this.mySignal,
+            method: 'POST',
+            // 'mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere'
+            body: "'"+JSON.stringify({value: btoa(this.state.lis_edit)})+"'",
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(res => res.json())
+        .then(p => {
+          console.log('TablePage_1 handleSave - Risultato preview POST: ', p);
+          this.setState({
+            ita_edit: p.output_preview+'.jpg',
+            videoUrl: p.output_preview+'.mp4'
+            // path_postergen: p.output_preview+'.jpg',
+            // path_videogen: p.output_preview+'.mp4',
+            // showVideoPreview: true,
+            // justPreviewed:    true,
+            // snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
+          }); // , this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+        })
+        .catch(error => {
+          console.log('TablePage_1 handleSave - preview Error: ', error);
+        });
+      })
+      .catch(error => {
+        console.log('TablePage_1 handleSave - request Error: ', error);
+      });
+    })
+    .catch(error => {
+      console.log('TablePage_1 handleSave - text_trad Error: ', error);
+    });
+  };
+
   render() {
-    let { addName, Employees, Pages, SelectedPage, ShowNotification } = this.state;
-    const { data_id } = this.props;
-    console.log('TablePage_1 - data_id: ', data_id);
+    // let { addName, Employees, Pages, SelectedPage, ShowNotification } = this.state;
+    // const { data_id } = this.props;
+    // console.log('TablePage_1 - render - data_id: ', data_id);
     const Table_1Styles = {
       buttons: {
         marginTop: 5, //30
@@ -735,19 +653,20 @@ class TablePage_1 extends React.Component {
       },
       pagination: { marginTop: '1em' }
     };
-
+    /*
     const handleAdd = _ => {
       if (addName) {
         this.dispatch({ Add: addName });
         this.setState({ addName: '' });
       }
     };
-
+    
     const handleUpdate = employee => {
       let newState = Employees.map(item => (item.Id === employee.Id ? Object.assign(item, employee) : item));
       this.setState({ Employees: newState });
       this.dispatch({ Update: employee });
     };
+    */
 
     const handleSelectPage = page => {
       const newState = { SelectedPage: page };
@@ -757,13 +676,13 @@ class TablePage_1 extends React.Component {
 
     const hideNotification = _ => this.setState({ ShowNotification: false });
 
-    const handleEditIta1 = event => {
+    const handleEditIta = event => {
       console.log('handleEditIta - event: ', event);
       // this.setState({ dirty: true });
-      // this.setState({ ita_edit: event.target.value });
+      this.setState({ ita_edit: event.target.value });
     };
 
-    const handleEditLis1 = (event) => {
+    const handleEditLis = (event) => {
       console.log('handleEditLis - event: ', event);
       if(event.key === 'Space'){
         console.log('Space pressed! ')
@@ -771,24 +690,13 @@ class TablePage_1 extends React.Component {
       this.setState({ 
         chips: [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
       });
-      // this.setState({ lis_edit: event.target.value });
-      /*
-        onChange={event => this.setState({
-                      children_filtered: this.state.children.filter(data => {return data.Signs.includes(event.target.value)})
-                    })
-        this.state.children.reduce((r, e) => {
-          // get first letter of name of current element
-          if(e.includes(value)) {
-          let Iniziale = e[0];
-          // if there is no property in accumulator with this letter create it
-          if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e]}; //[e]}
-          // if there is push current element to children array for that letter
-          else r[Iniziale].Signs.push(e);
-          // }
-          // return accumulator
-          return r;
-        }, {})
-      */
+    };
+
+    const updateSel = (sel) => {
+      this.setState({
+        selectionStart: sel,
+        selectionEnd:   sel
+      });
     };
 
     return (
@@ -800,71 +708,284 @@ class TablePage_1 extends React.Component {
               <Tab label="Traduzione" value="traduzione" disabled={this.state.tab_mode_table1 === 'traduzione'}></Tab>
               {/* <Tab label="I miei video" value="video" disabled={this.state.tab_mode_table1 === 'video'}></Tab> */}
             </Tabs>
+
             <div className="row">
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
                 <TextField
                   hintText="Digitare per filtrare"
-                  onChange={event => this.setState({
-                    children_filtered: Object.values(glossario_objects.reduce((r, e) => {
-                      // get first letter of name of current element
-                      if (e.name.includes(event.target.value)) {
-                        let Iniziale = e.name[0].toUpperCase();
-                        // if there is no property in accumulator with this letter create it
-                        if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name]}; //[e]}
-                        // if there is push current element to children array for that letter
-                        else r[Iniziale].Signs.push(e.name);
-                      }
-                        // return accumulator
-                      return r;
-                      }, {}))
+                  onChange={event => 
+                  this.setState({
+                      sign_filtered: 
+                        event.target.value != '' ?
+                        Object.values(this.state.sign_tot.reduce((r, e) => {
+                          // get first letter of name of current element
+                          /*
+                          if (this.state.sign_names.includes(event.target.value)) {
+                            let Iniziale = event.target.value[0].toUpperCase();
+                            // if there is no property in accumulator with this letter create it
+                            if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [event.target.value], Signs_object: [{id: 1, name: event.target.value}]}; //[e]}
+                            // if there is push current element to children array for that letter
+                            // else r[Iniziale].Signs.push(e.Signs);
+                            else {r[Iniziale].Signs.push(e.name); r[Iniziale].Signs_object.push(e);}
+                          }
+                          */
+                          if(e.name.includes(event.target.value)) {
+                            let Iniziale = e.name[0].toUpperCase();
+                            // if there is no property in accumulator with this letter create it
+                            if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name], Signs_object: [e]}; //[e]}
+                            // if there is push current element to children array for that letter
+                            else {r[Iniziale].Signs.push(e.name); r[Iniziale].Signs_object.push(e);}
+                          }
+                          
+                          return r;
+                        }, {})).sort(function(a, b) {
+                          // var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+                          // var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+                          if (Number.isInteger(+a.Iniziale)) {
+                            return 1;
+                          }
+                          if (Number.isInteger(+b.Iniziale)) {
+                            return -1;
+                          }
+                        })
+                        :
+                        this.state.sign_iniz
                   })
                   }
                 />
                 <br />
                 <div style={{overflowY: "scroll", height: "400px"}}>
-                  <ListExampleSelectable children={this.state.children_filtered} onChangeIndex={this.handleChangeIndex} />
+                  <ListExampleSelectable children={this.state.sign_filtered} onChangeSign={this.handleChangeSign} filtered={this.state.sign_iniz == this.state.sign_filtered ? null : true}/>
                 </div>  
               </div>
-{this.state.tab_mode_table1 === 'dizionario' ? 
+{
+  this.state.tab_mode_table1 === 'dizionario' ? 
+              
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+              {/* DIZIONARIO */}
+                {/*
                 <div style={Table_1Styles.buttons}>
-                  <div style={globalStyles.navigation}>Descrizione segno</div>
+                  <div style={globalStyles.navigation}>Descrizione segno:</div>
                 </div>
+                */}
                 <div style={Table_1Styles.buttons}>
-                  <TextareaAutosize cols={40} rows={20} maxRows={25} value={this.state.ita_edit} onChange={handleEditIta1} />
+                  { /* <TextareaAutosize cols={40} rows={20} maxRows={25} value={this.state.ita_edit} onChange={handleEditIta} /> */ }
+{
+  this.state.sign_selected ?
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>
+                          ID:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.id}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Nome lemma:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.name}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Nome file player:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.name_player}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Nome editor:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.name_editor}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Contesto:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.contesto}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Progetto:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.progetto}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Contributo:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.contributo}</b>
+                        </td>
+                      </tr>                      
+                      <tr>
+                        <td>
+                          Interprete:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.inteprete}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Animatore:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.animatore}</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          Validatore:
+                        </td>
+                        <td>
+                          <b>{this.state.sign_selected.validatore}</b>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+  :
+  null
+}
                 </div>
               </div>
 :
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+              {/* TRADUZIONE */}
                 <div style={Table_1Styles.buttons}>
                   <div style={globalStyles.navigation}>Testo ITA:</div>
                 </div>
                 <div style={Table_1Styles.buttons}>
-                  <TextareaAutosize cols={40} rows={20} maxRows={25} value={this.state.ita_edit} onChange={handleEditIta1} />
+                  <TextareaAutosize
+                    cols={40}
+                    rows={20}
+                    maxRows={25}
+                    onChange={handleEditIta}
+                  />
                 </div>
                 <div style={Table_1Styles.buttons}>
                   <div style={globalStyles.navigation}>Segni LIS:</div>
                 </div>
                 <div style={Table_1Styles.buttons}>
-                  <TextareaAutosize cols={40} rows={20} maxRows={25} value={this.state.lis_edit} onChange={this.onChangeText} />
+                  {/*
+                  onChange={this.handleChangeLisText}
+                  {this.handleArrowKeysDown}
+                  value={this.state.ita_edit}
+                  value={this.state.lis_edit}
+                  ref={el=>this.input=el}
+                  */}
+                  <TextareaAutosize
+                    cols={40}
+                    rows={20}
+                    maxRows={25}
+                    inputRef={this.inputRef}
+                    ref={el=>this.input=el}
+                    className="form-control"
+                    id="targetField"
+                    value={this.state.lis_edit}
+                    onChange={(event) => {
+                      if (typeof(this.input)==='object'&&this.input!==null) {
+                        const selectionStart = this.input.props.inputRef.selectionStart;
+                        console.log('TextareaAutosize onKeyDown - selectionStart: ', selectionStart);
+                        const selectionEnd = this.input.props.inputRef.selectionEnd;
+                        console.log('TextareaAutosize onKeyDown - selectionEnd: ', selectionEnd);
+                        this.setState({
+                          lis_edit:       event.target.value,
+                          selectionStart: selectionStart,
+                          selectionEnd:   selectionEnd
+                        }, this.handleChips(event))
+                      }
+                    }}
+
+                    onKeyDown={(event) => {
+                      if (typeof(this.input)==='object'&&this.input!==null) {
+                        const selectionStart = this.input.props.inputRef.selectionStart;
+                        console.log('TextareaAutosize onKeyDown - selectionStart: ', selectionStart);
+                        // document.getElementById('pos').innerHTML = selectionStart;
+                        document.getElementById('pos').value = selectionStart;
+                        const selectionEnd = this.input.props.inputRef.selectionEnd;
+                        console.log('TextareaAutosize onKeyDown - selectionEnd: ', selectionEnd);
+                        this.setState({
+                          lis_edit:       event.target.value,
+                          selectionStart: selectionStart,
+                          selectionEnd:   selectionEnd
+                        }, this.handleChips(event))
+                      }
+                    }}
+                                        
+                    onClick={(event) => {
+                      if (typeof(this.input)==='object'&&this.input!==null) {
+                        const selectionStart = this.input.props.inputRef.selectionStart;
+                        console.log('TextareaAutosize onClick - selectionStart: ', selectionStart);
+                        const selectionEnd = this.input.props.inputRef.selectionEnd;
+                        console.log('TextareaAutosize onClick - selectionEnd: ', selectionEnd);
+                        this.setState({
+                          lis_edit:       event.target.value,
+                          selectionStart: selectionStart,
+                          selectionEnd:   selectionEnd
+                        }, this.handleChips(event))
+                      }
+                    }}
+                  />
+                  <div className="mr-auto">Cursor at position: {this.state.selectionStart} (<input type='text' id="pos" />)</div>
                 </div>
                 <div style={Table_1Styles.buttons}>
                   <ChipExampleSimple1 chips={this.state.chips}/>
                 </div>
                 { /* <ChipExampleSimple /> */ }
-                <RaisedButton label="Render" onClick={this.handleRender} disabled={this.state.allWordsFound} style={Table_1Styles.saveButton} primary={true} />
+                <div style={Table_1Styles.buttons}>
+                  { /* <input id="targetField" /> */ }
+                  { /* <button onClick={this.handleDownloadTxtFile}>Download txt</button> */ }
+                  <RaisedButton label="Scarica txt" onClick={this.handleDownloadTxtFile} style={Table_1Styles.saveButton} primary={true} />
+                  <input type="file" onChange={this.handleTxtFileChange}></input>
+                  <RaisedButton label="Carica txt"  onClick={this.handleTxtFileUpload} disabled={false} style={Table_1Styles.saveButton} primary={true} />
+                </div>
+
+                <div style={Table_1Styles.buttons}>
+                  <RaisedButton label="Anteprima"   onClick={this.handleSave} disabled={this.state.allWordsFound} style={Table_1Styles.saveButton} primary={true} />
+                </div>
+
+{
+this.state.tab_mode_table1 === 'traduzione' && this.state.videoUrl != '' ? 
+                <video controls autoPlay={true} width="320" height="240" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
+:
+  null
+}
               </div>
 }              
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+                { /*
                 <div style={Table_1Styles.buttons}>
+                  width="320" height="240"
                   <video 
                     width="320"
                     height="240"
                     key={this.state.videoUrl}>
                     <source src={this.state.videoUrl} />
                   </video>
+                  poster={this.state.path_postergen} 
+                  <VideoPreview poster={this.state.videoPoster} source={this.state.videoUrl} />
                 </div>
-                <button onClick={() => this.updateVideoManually()}>Next</button>
+                style={{display: (this.state.videoUrl != null ? 'inline': 'none')}}
+                <button onClick={() => this.updateVideo()}>Next</button> */}
+{
+this.state.tab_mode_table1 === 'dizionario' && this.state.videoUrl != '' ? 
+                <video controls autoPlay={true} width="320" height="240" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
+:
+  null
+}
               </div>
             </div>
           </div>
@@ -877,8 +998,8 @@ class TablePage_1 extends React.Component {
 // export default TablePage;
 
 export {
-// export default 
-TablePage, //;
-// export const 
-TablePage_1 //;
+  // export default 
+  TablePage, //;
+  // export const 
+  TablePage_1 //;
 }

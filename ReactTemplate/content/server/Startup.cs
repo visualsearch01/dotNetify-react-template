@@ -14,12 +14,11 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-
 using MySql.Data.EntityFrameworkCore;
 using MySql.Data.EntityFrameworkCore.Extensions;
-
 using System;
 using System.IO;
 using System.Text;
@@ -42,17 +41,14 @@ namespace dotnetify_react_template
             .AddEnvironmentVariables();
          _configuration = builder.Build();
       }
-
       // public IConfigurationRoot Configuration { get; }
-      
       /*
-      
       public Startup(IConfiguration configuration)
       {
          _configuration = configuration;
          Console.WriteLine("Startup.cs - costruttore, configurazione: " + _configuration.ToString());
       }
-*/
+      */
       public void ConfigureServices(IServiceCollection services)
       {
          // Add OpenID Connect server to produce JWT access tokens.
@@ -64,7 +60,7 @@ namespace dotnetify_react_template
          // services.AddDbContext<HouserContext>(o => o.UseMySql(connectionString));
          // services.AddDbContext<ApplicationDbContext>(options =>
          // options.UseMySQL(Configuration.GetConnectionString("ConnectionStrings:lis")));
-         services.AddAuthenticationServer(_connectionString);
+         services.AddAuthenticationServer(_connectionString, _configuration);
          services.AddMemoryCache();
          services.AddSignalR();
          services.AddDotNetify();
@@ -75,20 +71,18 @@ namespace dotnetify_react_template
             // var connectionString = _configuration["ConnectionStrings:lis"];
             return new EmployeeService(_connectionString);
          });
-/*
-public void ConfigureServices(IServiceCollection services)
-{
-    // Choose Scope, Singleton or Transient method
-    services.AddSingleton<IRootService, RootService>();
-    services.AddSingleton<INestedService, NestedService>(serviceProvider=>
-    {
-         var connectionString = Configuration["Data:ConnectionString"];
-         return new NestedService(connectionString);
-    });
-}
-*/
-
-
+         /*
+         public void ConfigureServices(IServiceCollection services)
+         {
+            // Choose Scope, Singleton or Transient method
+            services.AddSingleton<IRootService, RootService>();
+            services.AddSingleton<INestedService, NestedService>(serviceProvider=>
+            {
+                  var connectionString = Configuration["Data:ConnectionString"];
+                  return new NestedService(connectionString);
+            });
+         }
+         */
 
          services.AddMvc();
          /*
@@ -167,6 +161,7 @@ public void ConfigureServices(IServiceCollection services)
          
          if (env.IsDevelopment())
          {
+             Console.WriteLine("Startup.cs - Configure, env: DEVELOPMENT - env.EnvironmentName: " + env.EnvironmentName);
              app.UseDeveloperExceptionPage();
              app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
              {
@@ -175,16 +170,32 @@ public void ConfigureServices(IServiceCollection services)
          }
          else
          {
+            Console.WriteLine("Startup.cs - Configure, env: PRODUCTION - env.EnvironmentName: " + env.EnvironmentName);
              //app.UseExceptionHandler("/Home/Error");
              app.UseDeveloperExceptionPage();
          }
-/*
+         /*
          app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
          {
             HotModuleReplacement = true
          });
-*/
+         */
          app.UseFileServer();
+         app.UseStaticFiles();
+         // _configuration.GetValue<string>("Paths:video_rel"), _configuration.GetValue<string>("Paths:video_dir")
+         var videoPath = Path.Combine(Directory.GetCurrentDirectory(), _configuration.GetValue<string>("Paths:video_rel"), _configuration.GetValue<string>("Paths:video_dir"));
+         Console.WriteLine("Startup.cs - Configure, video relative path: " + videoPath);
+         Console.WriteLine("Startup.cs - Configure, video absolute path: " + Path.GetFullPath((new Uri(videoPath)).LocalPath)); // Si potrebbe usare direttamente il path assoluto senza doverne montare due relativi..
+
+         // FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\", @"Videos")),
+         // RequestPath = new PathString("/video_gen/mp4")
+
+         app.UseStaticFiles(new StaticFileOptions()
+         {
+            FileProvider = new PhysicalFileProvider(videoPath),
+            RequestPath = new PathString( _configuration.GetValue<string>("Urls:video_url")) // "/video_gen/mp4")
+         });
+
          app.UseMvc(routes =>
          {
             routes.MapRoute(

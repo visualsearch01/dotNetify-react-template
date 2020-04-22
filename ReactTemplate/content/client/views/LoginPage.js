@@ -11,7 +11,7 @@ class LoginPage extends React.Component {
   constructor(props) {
     super(props);
     // this.state = { user: 'guest', password: 'dotnetify' };
-    this.state = { user: 'user1', password: 'pass1' };
+    this.state = { user: 'rai', password: 'rai' };
   }
 
   render() {

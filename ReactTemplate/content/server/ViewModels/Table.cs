@@ -1,4 +1,5 @@
 using DotNetify;
+using DotNetify.Routing;
 using DotNetify.Security;
 using MySql.Data.MySqlClient;
 using System;
@@ -13,7 +14,7 @@ namespace dotnetify_react_template
       private readonly IEmployeeService _employeeService;
       private readonly int _recordsPerPage = 8;
       private string _connectionString; // { get; set; }
-      private MySqlConnection connection;
+      // private MySqlConnection connection;
 
       public class EmployeeInfo
       {
@@ -187,12 +188,18 @@ namespace dotnetify_react_template
    }
 
    [Authorize]
-   public class Table_1 : BaseVM
+   public class Table_1 : BaseVM, IRoutable
    {
       private readonly IEmployeeService _employeeService;
+      public RoutingState RoutingState { get; set; }
       public Table_1(IEmployeeService employeeService)
       {
          _employeeService = employeeService;
+         this.OnRouted((sender, e) =>
+         {
+            Console.WriteLine("TablePage_1 - sender: " + sender);
+            Console.WriteLine("TablePage_1 - e: " + e);
+         });
       }
    }
 }

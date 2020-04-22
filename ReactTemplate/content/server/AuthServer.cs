@@ -26,7 +26,7 @@ namespace dotnetify_react_template
       // LisUser _us;
       // public string _connectionString;
       // Source: https://github.com/aspnet-contrib/AspNet.Security.OpenIdConnect.Server
-      public static void AddAuthenticationServer(this IServiceCollection services, string cs)//  IConfiguration configuration)
+      public static void AddAuthenticationServer(this IServiceCollection services, string cs, IConfiguration configuration)//  IConfiguration configuration)
       {
          // string _connectionString = cs; //onfiguration["ConnectionStrings:lis"]; // configuration.GetValue<string>("ConnectionStrings:lis");
          Console.WriteLine("AuthServer.cs - costruttore, stringa DB: " + cs);

@@ -11,7 +11,6 @@ import auth from '../auth';
 import FontIcon from 'material-ui/FontIcon';
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
-
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -20,16 +19,38 @@ const recentsIcon = <FontIcon className="material-icons">restore</FontIcon>;
 const favoritesIcon = <FontIcon className="material-icons">favorite</FontIcon>;
 const nearbyIcon = <IconLocationOn />;
 
+
+const Content = props => {
+  console.log('Content deliverable_id: ', props.deliv_id);
+  return (
+    <div id="Content" style={props.styles} />
+  );
+};
+
+Content.propTypes = {
+  styles: PropTypes.object,
+  deliv_id: PropTypes.number
+};
+
 class AppLayout extends React.Component {
   constructor(props) {
     super(props);
-    dotnetify.debug = true;    
+    var arg = { User: { Name: "AppLayout" } }; // Visibile in: vm.$vmArg.User.Name
+    dotnetify.debug = true;
     this.vm = dotnetify.react.connect('AppLayout', this, {
       headers: {
-        Authorization: 'Bearer ' + auth.getAccessToken() },
-        exceptionHandler: _ => auth.signOut()
+        Authorization: 'Bearer ' + auth.getAccessToken()
+      },
+      exceptionHandler: ex => {
+        // alert(ex.message);
+        console.log('appLayout exceptionHandler: ', ex);
+        auth.signOut();
+      },
+      vmArg: arg
     });
+    
     this.vm.onRouteEnter = (path, template) => (template.Target = 'Content');
+
     this.state = {
       Greetings: "",
       ServerTime: "",
@@ -45,6 +66,16 @@ class AppLayout extends React.Component {
     // this.handleDeliverableToggle2 = this.handleDeliverableToggle2.bind(this);
     console.log('AppLayout userid da backend: ', props.userid);
   }
+
+  abortController = new AbortController();
+  mySignal = this.abortController.signal;
+
+  componentWillUnmount() {
+    this.abortController.abort();
+    this.vm.$destroy();
+    // Component is attempting to connect to an already active 'Dashboard'.
+    // If it's from a dismounted component, you must add vm.$destroy to componentWillUnmount().
+  };
   /*
   componentDidMount() {
     console.log('AppLayout.js - componentDidMount');
@@ -54,28 +85,28 @@ class AppLayout extends React.Component {
     this.vm.$destroy();
     console.log('AppLayout.js - componentWillUnmount');
   }
-  */
+  
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.handleLeavePage);
     // this.vm.$destroy();
   }
-
+  */
   componentDidMount() {
-    console.log('Form - componentDidMount');
-    window.addEventListener('beforeunload', this.handleLeavePage);
+    console.log('ApplLayout - componentDidMount');
+    // window.addEventListener('beforeunload', this.handleLeavePage);
   };
 
   handleLeavePage(e) {
     this.vm.$destroy();
-  }
+  };
 
   componentWillReceiveProps(nextProps) {
     console.log('AppLayout.js - componentWillReceiveProps');
     if (this.props.width !== nextProps.width) {
       this.setState({ leftSidebarOpen: nextProps.width === LARGE });
     }
-  }
+  };
   /*
   shouldComponentUpdate() {
     console.log('AppLayout.js - shouldComponentUpdate');
@@ -88,12 +119,12 @@ class AppLayout extends React.Component {
     this.setState({
         deliverable: false //event.target.value,
     });
-  }
+  };
 
   BottomNavigationSelect = (index) => {
     console.log('BottomNavigationSelect - index: ', index);
     this.setState({BottomNavigationSelectedIndex: index});
-  }
+  };
 
   handleDeliverableToggle2 = id => this.setState({ deliverable: id });
   handleSidebarToggle1 = () => this.setState({ leftSidebarOpen: !this.state.leftSidebarOpen });
@@ -104,7 +135,7 @@ class AppLayout extends React.Component {
     this.setState({ deliverable: !this.state.deliverable });
     deliver = !deliver;
     console.log('AppLayout.js - deliver: ', deliver);
-  }
+  };
 
   handleRightSidebarToggle = () => this.setState({rightSidebarOpen: !this.state.rightSidebarOpen});
 
@@ -204,13 +235,27 @@ class AppLayout extends React.Component {
     const handleDeliverableToggle0 = () => {
       // console.log('handleDeliverableToggle value: ', value);
       // this.setState({ deliverable: !this.state.deliverable });
-    }
+    };
 
     return ( true ? // this.state.deliverable == 1 ? 
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <div>
           <Header styles={styles.header} onSidebarToggle={this.handleSidebarToggle1} onDeliverableToggle={this.handleDeliverableToggle1} deliv={deliverable} time={this.state.ServerTime} />
+          <Sidebar
+            vm={this.vm}
+            logoTitle={"LIS_d_" + (+deliverable)}
+            open={leftSidebarOpen}
+            userAvatarUrl={userAvatarUrl}
+            menus_del1={Menus_del1}
+            menus_del2={Menus_del2}
+            username={UserName}
+            userid={UserId}
+            deliv={deliverable}
+          />
+          <Content deliv_id={(+deliverable)} styles={styles.container} />
+
           { /*
+          <div id="Content" data_id={(+deliverable)} style={styles.container} />
           <div>
             <RaisedButton
               label="Toggle right Drawer"
@@ -219,8 +264,6 @@ class AppLayout extends React.Component {
             />
           </div>
           */}
-          <Sidebar vm={this.vm} logoTitle={"LIS_d_" + (+deliverable)} open={leftSidebarOpen} userAvatarUrl={userAvatarUrl} menus_del1={Menus_del1} menus_del2={Menus_del2} username={UserName} userid={UserId} deliv={deliverable} />
-          <div id="Content" data_id={(+deliverable)} style={styles.container} />
           {/* cambia deliverable al click su QUALUNQUE COSA nel div : onClick={handleDeliverableToggle} */ }
           {/* non funziona : userid={UserId}
           
@@ -262,13 +305,12 @@ class AppLayout extends React.Component {
         <React.Fragment>
           Deliverable 2
           <Header styles={styles.header} onSidebarToggle={handleSidebarToggle} />
-          
           <div id="Content" style={styles.container} /> {/* userid={UserId} */}
         </React.Fragment>
       </MuiThemeProvider>
     );
   }
-}
+};
 
 AppLayout.propTypes = {
   userAvatar: PropTypes.string,

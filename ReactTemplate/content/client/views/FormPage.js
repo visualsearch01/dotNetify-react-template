@@ -193,8 +193,6 @@ class FormPage extends React.Component {
     let data = new FormData();
     data.append('files', this.state.file);
     data.append('name', this.state.file.name);
-
-    var url = "/api/values/upload/";
     
     fetch("/api/values/upload", {
       signal: this.mySignal,

@@ -11,7 +11,8 @@ import { InfoBox, CircularProgressExampleDeterminate, ChipExampleSimple, ListExa
 import Traffic from '../components/dashboard/Traffic';
 import ServerUsage from '../components/dashboard/ServerUsage';
 import { Utilization , VideoPreview, CardExampleExpandable } from '../components/dashboard/Utilization';
-import RecentActivities from '../components/dashboard/RecentActivities';
+// import RecentActivities from '../components/dashboard/RecentActivities';
+import { ChipExampleSimple1 , RecentActivities} from '../components/dashboard/RecentActivities';
 import BasePage from '../components/BasePage';
 import globalStyles from '../styles/styles';
 import ThemeDefault from '../styles/theme-default';
@@ -32,7 +33,7 @@ import NavigationExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-mo
 // import MenuItem from 'material-ui/MenuItem';
 import DropDownMenu from 'material-ui/DropDownMenu';
 // import RaisedButton from 'material-ui/RaisedButton';
-import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle } from 'material-ui/Toolbar';
 import TextField from 'material-ui/TextField'
 // import {Tabs, Tab} from 'material-ui/Tabs';
 import FlatButton from 'material-ui/FlatButton';
@@ -50,7 +51,12 @@ import FolderIcon from 'material-ui/svg-icons/file/folder-open';
 // import IconButton from 'material-ui/IconButton';
 import NotificationsIcon from 'material-ui/svg-icons/social/notifications';
 
-function getVersion(timeFrameJsonArray, edition_id, id_forecast_type, offset_days, version) {
+function getTextByVersion(timeFrameJsonArray, edition_id, id_forecast_type, offset_days, version) {
+  console.log('getTextByVersion - edition_id: ', edition_id);
+  console.log('getTextByVersion - id_forecast_type: ', id_forecast_type);
+  console.log('getTextByVersion - offset_days: ', offset_days);
+  console.log('getTextByVersion - version: ', version);
+
   let res = timeFrameJsonArray
     .filter(data => {return data.edition == edition_id})
     .filter(data => {return data.id_forecast_type == id_forecast_type})
@@ -64,24 +70,39 @@ function getVersion(timeFrameJsonArray, edition_id, id_forecast_type, offset_day
       if (a.it_version > b.it_version) {
         return 1;
       }
-      if (a.it_version > b.it_version) {
-        if (a.text_ita.length < b.text_ita.length) {
+      // Se le versioni dovessero essere uguali
+      // ordina partendo dal presupposto che il testo lis di una versione successiva e' sempre piu' lungo rispetto a una versione precedente (sicuramente da migliorare)
+      if (a.it_version == b.it_version) {
+        if (a.text_lis.length < b.text_lis.length) {
           return -1;
         }
-        if (a.text_ita.length > b.text_ita.length) {
+        if (a.text_lis.length > b.text_lis.length) {
           return 1;
         }
       }
       // return 0;
     });
-  console.log('getVersion - version: ', version);
-  console.log('getVersion - res: ', res);
-  if(version === 1)
-    return res.shift(); // Dovrebbe prendere il primo
-  else
-    return res.pop();
-  // .filter(function(data){return data.it_version == 1});
-}
+  console.log('getTextByVersion - res: ', res);
+
+  if (!(Array.isArray(res) && res.length)) {
+    console.log('getTextByVersion - res vuoto - popolato oggetto di default');
+    return {
+      text_ita:         'Nessun dato per la selezionato corrente',
+      text_lis:         'Nessun dato per la selezionato corrente',
+      id_text_trans:    0,
+      id_text_ita:      0,
+      it_version:       0,
+      id_text_lis:      0,
+      it_version:       0
+    };
+  } else {
+    if(version === 1)
+      return res.shift(); // Dovrebbe prendere il primo
+    else
+      return res.pop();
+    // .filter(function(data){return data.it_version == 1});
+  }
+};
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -92,7 +113,7 @@ class Dashboard extends React.Component {
     this.vm = dotnetify.react.connect('Dashboard', this, {
       exceptionHandler: ex => {
         // alert(ex.message);
-        console.log('Dashboard exceptionHandler: ', ex);
+        console.log('Dashboard - exceptionHandler: ', ex);
         auth.signOut();
       },
       vmArg: arg
@@ -100,13 +121,16 @@ class Dashboard extends React.Component {
     this.dispatch = state => this.vm.$dispatch(state);
     // this.abortController = new AbortController();
     // mySignal = abortController.signal;
+    console.log('Dashboard - dotnetify: ', dotnetify);
+    console.log('Dashboard - props: ', props);
+    
     this.state = {
       dirty:                    false, // flag di abilitazione bottone di salvataggio (se e' stata effettuata una modifica in un campo TextArea)
       // success1:              true, // Non usato
       // popOverOpen:              false, // Usato dal popover, ma il popover al momento non e' implementato - quindi niente
       showSnackbar:             false, // Mostra snackbar di salvataggio avvenuto
       snackbarMessage:          "Nuova versione di testo salvata!!",
-      snackbarHide:             3000,
+      snackbarAutoHideDuration: 2000,
       showProgress:             false, // Mostra circular progress, inizialmente pensato per dare evidenza di caricamento - sostituito dalla dialog
       showDialog:               false, // Mostra la dialog
       showVideoPreview:         false, // Mostra anteprima video
@@ -115,40 +139,51 @@ class Dashboard extends React.Component {
       justTranslated:           false, // Subito dopo una traduzione, disabilita il bottone relativo per evitare ritraduzione dello stesso testo
       justSaved:                false, // Subito dopo un salvataggio, abilita la preview video
       justPreviewed:            false, // Subito dopo una preview, abilita il publish che e' l'ultima fase
-      dialogTitle:        "Attendere, caricamento...",
-      dialogContent:      "Attendere, caricamento...",
-      Traffic:            [],
-      ServerUsage:        [],
-      ServerUsageLabel:   [],
-      Utilization:        [],
-      UtilizationLabel:   [],
-      UtilizationLabel1:  'Testo ITA originale',
-      UtilizationLabel2:  'Testo LIS originale',
-      RecentActivities:   [],
+      dialogTitle:              "Attendere, caricamento...",
+      dialogContent:            "Attendere, caricamento...",
+      Traffic:                  [],
+      ServerUsage:              [],
+      ServerUsageLabel:         [],
+      Utilization:              [],
+      UtilizationLabel:         [],
+      UtilizationLabel1:        "Testo ITA originale",
+      UtilizationLabel2:        "Testo LIS originale",
+      RecentActivities:         [],
       
-      pickDate:           new Date(), // .toISOString().split('T')[0], // Data iniziale (oggi) - Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
-      edition_id:         1, // ID dell'edizione di default da visualizzare (ID 1, cioe' 9:00)
-      forecast_id:        1, // ID del tipo di forecast di default (NORD)
-      offset_day:         1, // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
-      offsets:            [],
-      testi:              null, // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
+      sign_tot:                 [],    // Array con la lista dei segni come arriva dall'endpoint api - serve per poter fare di nuovo il reduce in caso di filter
+      sign_names:               [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
+      sign_iniz:                [],    // Array completo dei segni, raggruppati per iniziale e ordinati lettere/numeri
+      // sign_filtered:            [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
+      // sign_selected:            null,  // Oggetto che rappresenta l'eventuale segno cliccato nella lista
+      chips:                    [],    // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
+      allWordsFound:      false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
       
-      ita_id:             0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
-      ita_orig:           'Attendere..', //Testo di default
-      ita_edit:           'Attendere..',
-      ita_edit_version:   0,
-      ita_notes:          'Attendere..',
+      pickDate:                 new Date(), // .toISOString().split('T')[0], // Data iniziale (oggi) - Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
+      edition_id:               1, // ID dell'edizione di default da visualizzare (ID 1, cioe' 9:00)
+      forecast_id:              1, // ID del tipo di forecast di default (NORD)
+      offset_day:               1, // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
+      offsets:                  [],// Possibili valori di offset nella lista di valori per la data selezionata
+      testi:                    null, // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
+      
+      ita_id:                   0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
+      ita_orig:                 'Attendere..', //Testo di default
+      ita_edit:                 'Attendere..',
+      ita_edit_version:         0,
+      ita_notes:                'Attendere..',
 
-      lis_id:             0,
-      lis_orig:           'Attendere..',
-      lis_edit:           'Attendere..',
-      lis_edit_version:   0,
-      lis_notes:          'Attendere..',
+      lis_id:                   0,
+      lis_orig:                 'Attendere..',
+      lis_edit:                 'Attendere..',
+      lis_edit_version:         0,
+      lis_notes:                'Attendere..',
 
-      id_text_trans:      0,
+      id_text_trans:            0,
 
-      path_video:         null,
-/*
+      path_video:               null, // Eventuale path video di un testo gia' renderizzato
+
+      path_postergen:           null, // Path poster generato in anteprima
+      path_videogen:            null, // Path video generato in anteprima
+      /*
       centro_ita_orig:    '',
       centro_ita_edit:    '',
       centro_lis_orig:    '',
@@ -158,7 +193,7 @@ class Dashboard extends React.Component {
       sud_ita_edit:       '',
       sud_lis_orig:       '',
       sud_lis_edit:       '',
-*/
+      */
       // value:             1, 
       tab_mode_dash:      'dizionario', // Tab di default (UPDATE - i tab usati qui in dashboard servivano per gestire la prima versione "appoggiata" di deliverable 2 - ora tutto spostato in TablePage_1)
       // tab_mode_dash1:         3, 
@@ -186,14 +221,15 @@ class Dashboard extends React.Component {
     this.onVideoChildClicked = this.onVideoChildClicked.bind(this);
     this.onCircProgressCompleted = this.onCircProgressCompleted.bind(this);
     // this.onClickp = this.onClickp.bind(this);
-    this.handleChangePicker_child = this.handleChangePicker_child.bind(this);
+    // this.handleChangePicker_child = this.handleChangePicker_child.bind(this);
     this.handleUpdateTextAreas = this.handleUpdateTextAreas.bind(this);
     this.handleChangeEditionId = this.handleChangeEditionId.bind(this);
-    this.handleEditIta = this.handleEditIta.bind(this);
-    this.handleEditLis = this.handleEditLis.bind(this);
-    this.setNum1 = this.setNum1.bind(this);
-    this.setNum2 = this.setNum2.bind(this);
+    // this.handleEditIta = this.handleEditIta.bind(this);
+    // this.handleEditLis = this.handleEditLis.bind(this);
+    // this.setNum1 = this.setNum1.bind(this);
+    // this.setNum2 = this.setNum2.bind(this);
     // console.log('Dashboard.js costruttore - props: ', props); // .userid qui non funziona
+    this.handleChips = this.handleChips.bind(this);
   }
   abortController = new AbortController();
   mySignal = this.abortController.signal;
@@ -210,64 +246,151 @@ class Dashboard extends React.Component {
     // this.handleChangePicker_dashboard(new Date());
     console.log('Dashboard - al mount del componente, caricamento dati meteo data corrente - area NORD di default');
     console.log('Dashboard - componentDidMount this.state.pickDate: ', this.state.pickDate);
+    this.handleGetSigns();
     this.handleChangePicker_dashboard(this.state.pickDate);
   };
-
-  // https://stackoverflow.com/questions/29280445/reactjs-setstate-with-a-dynamic-key-name
-  inputChangeHandler1 = (event) => {
-      var stateObject = function() {
-        returnObj = {};
-        returnObj[this.target.id] = this.target.value;
-          return returnObj;
-      }.bind(event)();
-      this.setState( stateObject );
-  }
-
-  inputChangeHandler2(event) {
-    this.setState({ [event.target.name]: event.target.value });
-  }
 
   handleChangeEditionId = (event, index, value) => {
     console.log('handleChangeEditionId - value: ', value);
     // this.setState({ value_ed: value});
     this.setState({ edition_id: value }, this.handleUpdateTextAreas);
     // this.handleUpdateTextAreas(value);
-  }
+  };
 
   handleChangeForecastId = (event, index, value) => {
     console.log('handleChangeForecastId - value: ', value);
     // this.setState({ value_area: value });
-    this.setState({ forecast_id: value,  offset_day: (value === 7 ? 2 : 1) }, this.handleUpdateTextAreas); //.id});
+    this.setState({ forecast_id: value,  offset_day: (value === 7 ? // 2 : 1
+      // this.state.offsets[0][0] : // 2 : 
+      // this.state.offsets[0][1]   // 1
+
+      this.state.offsets[1] :
+      this.state.offsets[0]
+    )}, this.handleUpdateTextAreas); //.id});
     // this.handleUpdateTextAreas(7);
-  }
+  };
 
   handleChangeOffsetDay = (event, index, value) => {
     console.log('handleChangeOffsetDay - value: ', value);
     // this.setState({ value_area: value });
     this.setState({ offset_day: value }, this.handleUpdateTextAreas); //.id});
     // this.handleUpdateTextAreas(7);
-  }
+  };
+  
+  handleGetSigns = _ => {
+    fetch("/api/values/sign",
+      { signal: this.mySignal }
+      ).then((response) => {
+        return response.json();
+      })
+      .then(data => {
+        let sign_names = [];
+        let sign_iniz = [];
+        let sign_group = data.reduce((r, e) => {
+          // get first letter of name of current element
+          // if(e.name.includes("gga")) {
+          sign_names.push(e.name);
+          sign_iniz[e.name] = e;
+          let Iniziale = e.name[0].toUpperCase();
+          // if there is no property in accumulator with this letter create it
+          if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name], Signs_object: [e]}; //[e]}
+          // if there is push current element to children array for that letter
+          else {r[Iniziale].Signs.push(e.name); r[Iniziale].Signs_object.push(e);}
+          // }
+          // return accumulator
+          return r;
+        }, {});
+        /*
+        let sign_iniz = Object.values(sign_group).sort(function(a, b) {
+          // var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+          // var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+          if (Number.isInteger(+a.Iniziale)) {
+            return 1;
+          }
+          if (Number.isInteger(+b.Iniziale)) {
+            return -1;
+          }
+        });
+        */
+        console.log('Dashboard - handleGetSigns data: ',       data); // 0: {id: 60, name: "a"}
+        console.log('Dashboard - handleGetSigns sign_group: ', sign_group);
+        console.log('Dashboard - handleGetSigns sign_names: ', sign_names);
+        console.log('Dashboard - handleGetSigns sign_iniz: ',  sign_iniz);
 
-  handleChangeTabArea = (value) => {
-    console.log('handleChangeTabArea - value: ', value);
-    // this.setState({ value_area: value });
-    this.setState({ forecast_id: value }, this.handleUpdateTextAreas); //.id});
-    // this.handleUpdateTextAreas(7);
-  }
+        this.setState({
+          // sign_tot:       data,
+          sign_names:     sign_names,
+          sign_iniz:      sign_iniz,
+          // sign_filtered:  sign_iniz
+        });
 
-  handleUpdateDel2 = (value) => {
-    console.log('handleUpdateDel2 - value: ', value);
-    // this.setState({ value_area: value });
-    this.setState({ tab_mode_dash: value }, this.handleUpdateDiz); //.id});
-    // this.handleUpdateTextAreas(7);
-  }
-
-  handleUpdateDiz = () => {
-    // setOpen(true);
-    this.setState({showSnackbar: true});
+        // this.setState({ dirty: true });
+        // this.setState({ justTranslated: true });
+        // this.setState({ lis_edit:         data.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+      })
+      .catch(error => {
+        console.log('Dashboard - handleGetSigns - Error: ', error);
+      });
   };
 
-  // Pilotato dal picker nel child (InfoBox)
+  handleChips = (event) => {
+    console.log('Dashboard - handleChips event.key: ', event.key);
+    console.log('Dashboard - handleChips event.keyCode: ', event.keyCode);
+    console.log('Dashboard - handleChips event.Code: ', event.code);
+    // console.log('Dashboard - handleChips input: ', input)
+    // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+
+    /*        
+    <script>
+    window.addEventListener("keydown", function(event) {
+    let str = "KeyboardEvent: key='" + event.key + "' | code='" +
+      event.code + "'";
+    let el = document.createElement("span");
+    el.innerHTML = str + "<br/>";
+    document.getElementById("output").appendChild(el);
+    }, true);
+    */
+
+    let ret = {};
+    if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
+      // Do whatever when esc is pressed
+      console.log('Dashboard - handleChips keyCode 12 - Space pressed! ')
+      let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+      ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
+      ret.it = [];
+      ret.count = 0;
+      let ar = [];
+      // let tt = ['Test', 'Prova'];
+
+      list.forEach((item, i) => {
+        // if (i === idx) {
+        // console.log(Object.assign({}, {"key3": "value3"}, item));
+        // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
+        // if (!tt.includes(item)) this.setState({ allWordsFound: false });
+        ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
+        if (this.state.sign_names.includes(item)) {
+          ret.it.push(this.state.sign_iniz[item]);
+          ret.count += 1;
+        }
+      });
+      // Object.assign
+
+      // Object.keys(obj).some(function(k) {
+      // return obj[k] === "test1";
+      // });
+      console.log('Dashboard - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
+      console.log('Dashboard - handleChips - Tot JSON: ', ret);
+      this.setState({
+        allWordsFound: ar.some(function(k) {return k.Found === false}),
+        sign_tot: ret,
+        chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+      },this.handleCloseDialog());
+    }
+    // this.setState({ lis_edit: event.target.value });
+  };
+
+  /*
+  // Versione di handleChangePicker prevista se il picker dovesse essere inserito in un componente child (InfoBox)
   handleChangePicker_child = date1 => {
     this.setState({ pickDate: date1 });
     console.log('handleChangePicker_child - date1: ', date1);
@@ -275,373 +398,135 @@ class Dashboard extends React.Component {
       this.handleChangePicker_dashboard(date1);
       // onChange={this.handleChangePicker_dashboard} value={this.state.pickDate} 
     }
-
-  // Pilotato dal picker qui nella dashboard stessa
+  */
+  
+  /**
+   * Metodo di aggiornamento data
+   * La selezione di una data e' l'unica operazione che carica i dati di un nuov giorno
+   * Questa versione e' quella pilotata dal picker qui nella dashboard stessa - ce n'e' anche una vesione che passa il bind a un eventuale componente child
+   */
   handleChangePicker_dashboard = date1 => {
-    /*
-    this.setState({ showProgress: true }); // Non funziona, bisognerebbe usare la callback
-    this.setState({ pickDate: date1 })
-    */
-    // if ()
-    // date1 != this.state.pickDate ? 
-    /*
-    Promise.resolve(this.setState({ showProgress: true })).then(() => {
-      // We're not in an event handler, so these are flushed separately.
-        // this.setState({ showProgress: true }); // Non funziona, bisognerebbe usare la callback
-        this.setState({ pickDate: date1 })
-    */
-    this.setState({ pickDate: date1 });
-    /*
-    this.setState((state) => {
-      // Important: read `state` instead of `this.state` when updating.
-      return {showProgress: true } // !state.showProgress}
-    });
-    */
-
     var datestring = ("0" + date1.getDate()).slice(-2) + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" +
     date1.getFullYear() + " " + ("0" + date1.getHours()).slice(-2) + ":" + ("0" + date1.getMinutes()).slice(-2);
-
     var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-    // var url = "/api/values/meteo/" + datestring1;
-    /*
-    console.log('handleChangePicker_dashboard - url: ', url);
-    console.log('handleChangePicker_dashboard - datestring: ', datestring);
-    console.log('handleChangePicker_dashboard - date obj: ', date1);
-    console.log('handleChangePicker_dashboard - typeof date: ', typeof date1);
-    console.log('handleChangePicker_dashboard - date.getDate(): ', date1.getDate());
-    console.log('handleChangePicker_dashboard - date.toString(): ', date1.toString());
-    console.log('handleChangePicker_dashboard - date.toISOString(): ', date1.toISOString());
-    console.log('handleChangePicker_dashboard - date.toLocaleDateString(): ', date1.toLocaleDateString());
-    console.log('handleChangePicker_dashboard - date.getYear(): ', date1.getYear());
-    console.log('handleChangePicker_dashboard - date.toISOString().split(\'T\')[0]: ', date1.toISOString().split('T')[0]);
-    console.log('handleChangePicker_dashboard - date.getUTCDate(): ', date1.getUTCDate());
-    */
-    fetch("/api/values/meteo/" + datestring1, { signal: this.mySignal }) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
-      .then((response) => {
+    fetch("/api/values/meteo/" + datestring1,
+      { signal: this.mySignal }
+      ).then((response) => {
         return response.json();
       })
       .then(data => {
         console.log('handleChangePicker_dashboard - Data: ', data);
         if (data.id_day == null) {
           this.setState({
+            pickDate:         date1,
             showActions:      false,
-            ita_orig:         'Nessun dato per il giorno selezionato' ,
-            ita_edit:         'Nessun dato per il giorno selezionato' ,
-            lis_orig:         'Nessun dato per il giorno selezionato' ,
-            lis_edit:         'Nessun dato per il giorno selezionato' }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          // this.setState({ ita_edit: 'Nessun dato per il giorno selezionato' }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          // this.setState({ lis_orig: 'Nessun dato per il giorno selezionato' }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          // this.setState({ lis_edit: 'Nessun dato per il giorno selezionato' }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            ita_orig:         'Nessun dato per il giorno selezionato',
+            ita_edit:         'Nessun dato per il giorno selezionato',
+            lis_orig:         'Nessun dato per il giorno selezionato',
+            lis_edit:         'Nessun dato per il giorno selezionato'}, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
         } else {
-          /*
-          console.log('handleChangePicker_dashboard - Data: ', data);
-                  console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data[0].text_ita: ', data.timeframe.editions[0].forecast_data[0].text_ita);
-                  var nord = data.timeframe.editions[0].forecast_data.filter(function(data){return data.id_forecast_type == 1});
-                  console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data NORD: ', nord);
-                  var nord_orig = nord.filter(function(data){return data.it_version == 1});
-                  console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data NORD orig: ', nord_orig);
-                  var nord_edit = nord.filter(function(data){return data.it_version != 1});
-                  console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data NORD edit: ', nord_edit);
-                  console.log('handleChangePicker_dashboard - NORD orig text_ita: ', nord_orig[0].text_ita);
-          */
-          /*
-                  var centro = data.timeframe.editions[0].forecast_data.filter(function(data){return data.id_forecast_type == 2});
-                  // console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data NORD: ', centro);
-                  var centro_orig = centro.filter(function(data){return data.it_version == 1});
-                  // console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data NORD orig: ', nord_orig);
-                  var centro_edit = centro.filter(function(data){return data.it_version != 2}); // Da cambiare - prende l'ultima versione se non ha ID pari a 2, quindi prendera' la 1 se c'e' solo quella
+          let orig = getTextByVersion(
+            data.timeframe.editions[0].forecast_data, 
+            this.state.edition_id, 
+            this.state.forecast_id, 
+            data.timeframe.editions[0].offsets.min, // this.state.offset_day,
+            1);
+          let edit = getTextByVersion(
+            data.timeframe.editions[0].forecast_data, 
+            this.state.edition_id, 
+            this.state.forecast_id, 
+            data.timeframe.editions[0].offsets.min, // this.state.offset_day, 
+            99);
 
-                  this.setState({ centro_ita_orig: centro_orig[0].text_ita });
-                  this.setState({ centro_ita_edit: centro_edit.length === 0 ? centro_orig[0].text_ita : centro_edit[0].text_ita });
-                  this.setState({ centro_lis_orig: centro_orig[0].text_lis });
-                  this.setState({ centro_lis_edit: centro_edit.length === 0 ? centro_orig[0].text_lis : centro_edit[0].text_lis });
-          */
-          /*
-          Array(4)
-          0:
-          edition: 1
-          date_day: "2020-01-14"
-          text_ita: "ANNUVOLAMENTI COMPATTI SULLA LIGURIA E SULLA PORZIONE PIU' OCCIDENTALE DELL'EMILIA-ROMAGNA CON DEBOLI PIOGGE ASSOCIATE; ESTESA NUVOLOSITA' BASSA E STRATIFORME SULLE AREE PIANEGGIANTI E PEDEMONTANE CON FOSCHIE DENSE E NEBBIE, IN TEMPORANEO DIRADAMENTO NELLE ORE CENTRALI DELLA GIORNATA; ALTROVE CIELO SERENO O POCO NUVOLOSO, CON AL PIU'' TRANSITO DI SPESSE VELATURE"
-          text_lis: "_SEGNI_NNUVOL_SEGNI_MENTI COMP_SEGNI_TTI SULL_SEGNI_ LIGURI_SEGNI_ E SULL_SEGNI_ PORZIONE PIU' OCCIDENT_SEGNI_LE DELL'EMILI_SEGNI_-ROM_SEGNI_GN_SEGNI_ CON DEBOLI PIOGGE _SEGNI_SSOCI_SEGNI_TE; ESTES_SEGNI_ NUVOLOSIT_SEGNI_' B_SEGNI_SS_SEGNI_ E STR_SEGNI_TIFORME SULLE _SEGNI_REE PI_SEGNI_NEGGI_SEGNI_NTI E PEDEMONT_SEGNI_NE CON FOSCHIE DENSE E NEBBIE, IN TEMPOR_SEGNI_NEO DIR_SEGNI_D_SEGNI_MENTO NELLE ORE CENTR_SEGNI_LI DELL_SEGNI_ GIORN_SEGNI_T_SEGNI_; _SEGNI_LTROVE CIELO SERENO O POCO NUVOLOSO, CON _SEGNI_L PIU'' TR_SEGNI_NSITO DI SPESSE VEL_SEGNI_TURE"
-          name_type: "NORD"
-          it_version: 1
-          li_version: 1
-          id_forecast: 69
-          id_text_ita: 158
-          id_text_lis: 156
-          offset_days: 1
-          id_text_trans: 155
-          id_forecast_type: 1
-          __proto__: Object
-          1: {edition: 1, date_day: "2020-01-14", text_ita: "Versione 4 - ANNUVOLAMENTI COMPATTI SULLA LIGURIA …UVOLOSO, CON AL PIU'' TRANSITO DI SPESSE VELATURE", text_lis: "Versione 4 - _SEGNI_NNUVOL_SEGNI_MENTI COMP_SEGNI_…I_L PIU'' TR_SEGNI_NSITO DI SPESSE VEL_SEGNI_TURE", name_type: "NORD", …}
-          2: {edition: 3, date_day: "2020-01-14", text_ita: "Versione 4 - ADDENSAMENTI COMPATTI SULLA LIGURIA C…ANCHI NEBBIA IN SUCCESSIVA, GRADUALE ATTENUAZIONE", text_lis: "Versione 4 - _SEGNI_DDENS_SEGNI_MENTI COMP_SEGNI_T…I_, GR_SEGNI_DU_SEGNI_LE _SEGNI_TTENU_SEGNI_ZIONE", name_type: "NORD", …}
-          3: {edition: 3, date_day: "2020-01-14", text_ita: "ADDENSAMENTI COMPATTI SULLA LIGURIA CON DEBOLI PIO…ANCHI NEBBIA IN SUCCESSIVA, GRADUALE ATTENUAZIONE", text_lis: "_SEGNI_DDENS_SEGNI_MENTI COMP_SEGNI_TTI SULL_SEGNI…I_, GR_SEGNI_DU_SEGNI_LE _SEGNI_TTENU_SEGNI_ZIONE", name_type: "NORD", …}
-          length: 4
-          __proto__: Array(0)
-          */
-          // console.log('handleChangePicker_dashboard - Data stringify: ', JSON.stringify(data));
-          // console.log('handleChangePicker_dashboard - Data del datepicker: ', this.state.pickDate);
-          // let teamsFromApi = data.map(team => { return {value: team, display: team} })
-          // this.state.ff = 
           this.setState({
+            pickDate:         date1,
             showActions:      true,
             testi:            data,
             offset_day:       data.timeframe.editions[0].offsets.min,
-            offsets:           Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i)=>i + data.timeframe.editions[0].offsets.min)
-          }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          //this.setState({ ita: data[1].NORD}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          //this.setState({ lis: data[0]['CENTRO E SARDEGNA']}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          // this.setState({ edition_id: 1 });
-          // this.setState({ forecast_id: 1 }); // Azzera il selettore nella toolbar a NORD
-          let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
-          // console.log('handleUpdateTextAreas - forecast_data: ', forecast_data);
+            /*
+            offsets:          [
+              [...new Set( data.timeframe.editions[0].forecast_data
+                .filter(data => {return data.edition == 1})
+                .map(data => data.offset_days)) ],
+              [...new Set( data.timeframe.editions[0].forecast_data
+                .filter(data => {return data.edition == 3})
+                .map(data => data.offset_days)) ]
+            ],
+            */
+            // offsets:          Array.from(Array( data.timeframe.editions[0].offsets.max - 1)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
 
-          // /api/values/download
+            offsets:          Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
 
-          // console.log('handleUpdateTextAreas - forecast_data filter: ', forecast_data.filter(function(data){return data.edition == 1}));
-          let nord_orig = getVersion(
-            forecast_data, 
-            this.state.edition_id, 
-            this.state.forecast_id, 
-            this.state.offset_day,
-            1);
-          // forecast_data
-              // .filter(function(data){return data.edition == 3})
-              // .filter(data => {return data.edition == this.state.edition_id})
-              // .filter(function(data){return data.it_version == 1})
-              // .filter(data => {return data.id_forecast_type == this.state.forecast_id})
-              // .filter(function(data){return data.id_forecast_type == 1}); //[0];
-              // .filter(function(data){return data.offset_days == 1});
-          let nord_edit = getVersion(forecast_data, this.state.edition_id, this.state.forecast_id, this.state.offset_day, 99);
-          // forecast_data
-              // .filter(function(data){return data.edition == 3})
-              // .filter(data => {return data.edition == this.state.edition_id})
-              // .filter(function(data){return data.it_version != 2})
-              // .reverse().find(data => {return data.it_version >= 1})
-              // .filter(data => {return data.id_forecast_type == this.state.forecast_id}) // value e' il forecast_id per adesso
-              // .filter(function(data){return data.id_forecast_type == 1}); //[0];
-              // .filter(function(data){return data.offset_days == 1});
-          /*        
-          this.setState({ ita_orig:         nord_orig[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ ita_edit:         nord_edit[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ lis_orig:         nord_orig[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ lis_edit:         nord_edit[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ ita_id:           nord_orig[0].id_text_ita });
-                  this.setState({ ita_edit_version: nord_edit[0].it_version });
-                  this.setState({ ita_notes:        'Non estratte ancora' })
-                  this.setState({ lis_id:           nord_orig[0].id_text_lis });
-                  this.setState({ lis_edit_version: nord_edit[0].it_version });
-                  this.setState({ lis_notes:        'Da estrarre', });
-          */
-
-          this.setState({
-            ita_orig:         nord_orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            ita_edit:         nord_edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_orig:         nord_orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_edit:         nord_edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            id_text_trans:    nord_edit.id_text_trans,
-            ita_id:           nord_orig.id_text_ita, // });
-            ita_edit_version: nord_edit.it_version, // });
+            ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            id_text_trans:    edit.id_text_trans,
+            ita_id:           orig.id_text_ita, // });
+            ita_edit_version: edit.it_version, // });
             ita_notes:        'Campo non estratto, da correggere', // })
-            lis_id:           nord_orig.id_text_lis, // });
-            lis_edit_version: nord_edit.it_version, // });
+            lis_id:           orig.id_text_lis, // });
+            lis_edit_version: edit.it_version, // });
             lis_notes:        'Campo non ancora estratto'
-          }, this.handleCloseDialog);
+          }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
           console.log('handleChangePicker_dashboard - this.state: ', this.state);
         }
       })
       .catch(error => {
         console.log('handleChangePicker_dashboard - Error: ', error);
       });
-      /*
-      this.setState((state) => {
-            // Important: read `state` instead of `this.state` when updating.
-            return {showProgress: false } // !state.showProgress}
-          });
-      this.setState({showDialog: false});
-      */
-      // }).then(() => {
-        // We're not in an event handler, so these are flushed separately.
-          // this.setState({ showProgress: false }); // Non funziona, bisognerebbe usare la callback
-          // this.setState({ pickDate: date1 })
-      // })
-      // this.setState({ showProgress: false });
-    };
+  };
 
-    /*
-    this.state = {
-      value: 'a', 
-      num1: 0, 
-      num2: 0,
-      sum : 0
-    };
-    this.setNum1 = this.setNum1.bind(this);
-    this.setNum2 = this.setNum2.bind(this);
-    }
-    */
-
+  /**
+   * Metodo di aggiornamento contenuti delle textarea
+   * La selezione di una nuova data, una nuova edizione, un'area diversa o un valore di offset days diverso provocano
+   * il caricamento di nuovi testi nei due campi, se disponibili
+   */
   handleUpdateTextAreas = (i) => {
-  /*
-    if( i == 1 ) {
-      console.log('handleUpdateTextAreas - i: ', i);
-      // console.log('handleUpdateTextAreas - Selezione edition_id 1');
-      this.setState({  tab_mode_dash: i });
-      // this.setState({  edition_id: 3 });
-      // this.setState({  tab_mode_dash1: 3 });
-      // this.setState({ edition_id: 1 });
-      console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-      console.log('handleUpdateTextAreas - this.state.tab_mode_dash1: ', this.state.tab_mode_dash1);
-    }
-    else if( i == 3 ) {
-      console.log('handleUpdateTextAreas - i: ', i);
-      // console.log('handleUpdateTextAreas - Selezione edition_id 3');
-      this.setState({  tab_mode_dash: i });
-      // this.setState({  edition_id: 1 });
-      this.setState({  tab_mode_dash1: 1 });
-      // console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-      // console.log('handleUpdateTextAreas - this.state.tab_mode_dash1: ', this.state.tab_mode_dash1);
-    }
-
-
-    if( i == 'a') {
-      console.log('handleUpdateTextAreas - i: ', i);
-      // console.log('handleUpdateTextAreas - Selezione edition_id 1');
-      this.setState({  tab_mode_dash: i });
-      this.setState({  edition_id: 1 });
-      this.setState({  tab_mode_dash1: 1 });
-      // this.setState({ edition_id: 1 });
-      console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-      console.log('handleUpdateTextAreas - this.state.tab_mode_dash1: ', this.state.tab_mode_dash1);
-    }
-    else if( i == 'b') {
-      console.log('handleUpdateTextAreas - i: ', i);
-      // console.log('handleUpdateTextAreas - Selezione edition_id 3');
-      this.setState({  tab_mode_dash: i });
-      this.setState({  edition_id: 3 });
-      this.setState({  tab_mode_dash1: 3 });
-      console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-      console.log('handleUpdateTextAreas - this.state.tab_mode_dash1: ', this.state.tab_mode_dash1);
-    }
-  */
-
-    // this.setState({ edition_id: i });
     console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
     console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
-    // this.setState({ forecast_id: 1 }); // Azzera il selettore nella toolbar a NORD
     try {
-      
-/*
-
-let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
-      // console.log('handleUpdateTextAreas - forecast_data: ', forecast_data);
-      // console.log('handleUpdateTextAreas - forecast_data filter: ', forecast_data.filter(function(data){return data.edition == 3}));
-      let nord_orig = forecast_data
-        // .filter(function(data){return data.edition == 3})
-        .filter(data => {return data.edition == this.state.edition_id})
-        .filter(function(data){return data.it_version == 1})
-        .filter(data => {return data.id_forecast_type == this.state.forecast_id})
-        // .filter(function(data){return data.id_forecast_type == 1}); //[0];
-        // .filter(function(data){return data.offset_days == 1});
-      let nord_edit = forecast_data
-        // .filter(function(data){return data.edition == 3})
-        .filter(data => {return data.edition == this.state.edition_id})
-        .filter(function(data){return data.it_version != 2})
-        // .reverse().find(data => {return data.it_version >= 1})
-        .filter(data => {return data.id_forecast_type == this.state.forecast_id})
-        // .filter(function(data){return data.id_forecast_type == 1}); //[0];
-        // .filter(function(data){return data.offset_days == 1});
-
-        this.setState({ ita_orig:         nord_orig[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ ita_edit:         nord_edit[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ lis_orig:         nord_orig[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ lis_edit:         nord_edit[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ ita_id:           nord_orig[0].id_text_ita });
-        this.setState({ ita_edit_version: nord_edit[0].it_version });
-        this.setState({ ita_notes:        'Non estratte ancora' })
-        this.setState({ lis_id:           nord_orig[0].id_text_lis });
-        this.setState({ lis_edit_version: nord_edit[0].it_version });
-        this.setState({ lis_notes:        'Da estrarre', });
-*/
-
-
-
-
-
-        let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
-        // console.log('handleUpdateTextAreas - forecast_data: ', forecast_data);
-        // console.log('handleUpdateTextAreas - forecast_data filter: ', forecast_data.filter(function(data){return data.edition == 1}));
-        let nord_orig = getVersion(forecast_data, this.state.edition_id, this.state.forecast_id, this.state.offset_day, 1);
-// forecast_data
-            // .filter(function(data){return data.edition == 3})
-            // .filter(data => {return data.edition == this.state.edition_id})
-            // .filter(function(data){return data.it_version == 1})
-            // .filter(data => {return data.id_forecast_type == this.state.forecast_id})
-            // .filter(function(data){return data.id_forecast_type == 1}); //[0];
-            // .filter(function(data){return data.offset_days == 1});
-        let nord_edit = getVersion(forecast_data, this.state.edition_id, this.state.forecast_id, this.state.offset_day, 99);
-// forecast_data
-            // .filter(function(data){return data.edition == 3})
-            // .filter(data => {return data.edition == this.state.edition_id})
-            // .filter(function(data){return data.it_version != 2})
-            // .reverse().find(data => {return data.it_version >= 1})
-            // .filter(data => {return data.id_forecast_type == this.state.forecast_id}) // value e' il forecast_id per adesso
-            // .filter(function(data){return data.id_forecast_type == 1}); //[0];
-            // .filter(function(data){return data.offset_days == 1});
-/*        
-
-this.setState({ ita_orig:         nord_orig[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ ita_edit:         nord_edit[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ lis_orig:         nord_orig[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ lis_edit:         nord_edit[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ ita_id:           nord_orig[0].id_text_ita });
-        this.setState({ ita_edit_version: nord_edit[0].it_version });
-        this.setState({ ita_notes:        'Non estratte ancora' })
-        this.setState({ lis_id:           nord_orig[0].id_text_lis });
-        this.setState({ lis_edit_version: nord_edit[0].it_version });
-        this.setState({ lis_notes:        'Da estrarre', });
-*/
-
-
+        // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
+        let orig = getTextByVersion(
+          this.state.testi.timeframe.editions[0].forecast_data,
+          this.state.edition_id,
+          this.state.forecast_id,
+          this.state.offset_day,
+          1);
+        console.log('handleUpdateTextAreas - orig: ', orig);
+        let edit = getTextByVersion(
+          this.state.testi.timeframe.editions[0].forecast_data, 
+          this.state.edition_id, 
+          this.state.forecast_id, 
+          this.state.offset_day, 
+          99);
+        console.log('handleUpdateTextAreas - edit: ', edit);
         this.setState({
-            ita_orig:         nord_orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            ita_edit:         nord_edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_orig:         nord_orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_edit:         nord_edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            id_text_trans:    nord_edit.id_text_trans,
-            ita_id:           nord_orig.id_text_ita, // });
-            ita_edit_version: nord_edit.it_version, // });
+            ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            id_text_trans:    edit.id_text_trans,
+            ita_id:           orig.id_text_ita, // });
+            ita_edit_version: edit.it_version, // });
             ita_notes:        'Campo non estratto, da correggere', // })
-            lis_id:           nord_orig.id_text_lis, // });
-            lis_edit_version: nord_edit.it_version, // });
+            lis_id:           orig.id_text_lis, // });
+            lis_edit_version: edit.it_version, // });
             lis_notes:        'Campo non ancora estratto'
-        });
-        /*
-        this.setState({ ita_orig:         nord_orig.text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ ita_edit:         nord_edit.text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ lis_orig:         nord_orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ lis_edit:         nord_edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        this.setState({ ita_id:           nord_orig.id_text_ita });
-        this.setState({ ita_edit_version: nord_edit.it_version });
-        this.setState({ ita_notes:        'Non estratte ancora' })
-        this.setState({ lis_id:           nord_orig.id_text_lis });
-        this.setState({ lis_edit_version: nord_edit.it_version });
-        */
-        console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-        console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
+        },
+        this.handleChips({keyCode: 32, target: {value: edit.text_lis}})
+        );
+        // console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
+        // console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
         console.log('handleUpdateTextAreas - this.state: ', this.state);
     } catch (error) {
       console.log('handleUpdateTextAreas catch - Error: ', error);
-      console.log('handleUpdateTextAreas catch - this.state.edition_id: ', this.state.edition_id);
-      console.log('handleUpdateTextAreas catch - this.state.forecast_id: ', this.state.forecast_id);
+      // console.log('handleUpdateTextAreas catch - this.state.edition_id: ', this.state.edition_id);
+      // console.log('handleUpdateTextAreas catch - this.state.forecast_id: ', this.state.forecast_id);
     }
   };
 
   /*
-    } catch (error) {
-      console.log('handleUpdateTextAreas - Error: ', error);
-    }
-  */
-
   handleEditIta(event) {
       console.log('handleEditIta - event: ', event);
       this.setState({ dirty: true });
@@ -665,6 +550,7 @@ this.setState({ ita_orig:         nord_orig[0].text_ita }); // { teams: [{value:
         num2: event.target.value,
     });
   }
+  */
 
   onVideoChildClicked = _ => {
     // this.props.click(this.props.id);
@@ -681,24 +567,19 @@ this.setState({ ita_orig:         nord_orig[0].text_ita }); // { teams: [{value:
     */
   };
 
-
-onCircProgressCompleted = _ => {
+  onCircProgressCompleted = _ => {
     // this.props.click(this.props.id);
     // console.log('onVideoChildClicked - _: ', _);
-    this.setState({ videoProgressCompleted: true }, this.handleStop); // ita: this.state.testi[0]['CENTRO E SARDEGNA']});
+    this.setState({ videoProgressCompleted: true }, this.handleStopProgress); // ita: this.state.testi[0]['CENTRO E SARDEGNA']});
     // this.setState({ lis: this.state.testi[1]['NORD']}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
     // alert('child progress comple');
-/*
-    this.setState({ ita_orig: this.state.centro_lis_orig }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    this.setState({ ita_edit: this.state.centro_ita_edit }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    this.setState({ lis_orig: this.state.centro_lis_orig }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    this.setState({ lis_edit: this.state.centro_lis_edit }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-*/
   };
 
-  handleStop() {
+  handleStopProgress() {
+    // Il metodo Stop ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
+    // Start e stop servono a far partire e a fermare l'observable che dovrebbe ritornare il valore della dimensione del file video man mano che viene generato
     this.dispatch({
-      Stop: { // Il metodo Start ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
+      Stop: {
         IdUserEdit: 2,
         IdTextIta: this.state.ita_id,
         VersionIta: this.state.ita_edit_version,
@@ -710,93 +591,41 @@ onCircProgressCompleted = _ => {
         NotesLis: "Provaaa_note_lis"
       }
     });
-  }
-/*
-  onClickp(id) {
-    console.log(id);
   };
-*/
-  handleChangeArea_dashboard(id_type, offset_day){
-    console.log('handleChangeArea_dashboard: ', id_type, offset_day);
-    // var centro_orig = centro.filter(function(data){return data.it_version == 1});
-    // console.log('handleChangePicker_dashboard - Data data.timeframe.editions[0].forecast_data NORD orig: ', nord_orig);
-    // var centro_edit = centro.filter(function(data){return data.it_version != 2}); /
-    this.setState({ ita_orig: 
-      this.state.testi.timeframe.editions[0].forecast_data
-      .filter(function(data){return data.it_version == 1})
-      .filter(function(data){return data.id_forecast_type == id_type})
-      .filter(function(data){return data.offset_days == offset_day})[0].text_ita
-      });
-    this.setState({ ita_edit: 
-      this.state.testi.timeframe.editions[0].forecast_data
-      .filter(function(data){return data.it_version != 2})
-      .filter(function(data){return data.id_forecast_type == id_type})
-      .filter(function(data){return data.offset_days == offset_day})[0].text_ita
-      });
-    this.setState({ lis_orig: 
-      this.state.testi.timeframe.editions[0].forecast_data
-      .filter(function(data){return data.it_version == 1})
-      .filter(function(data){return data.id_forecast_type == id_type})
-      .filter(function(data){return data.offset_days == offset_day})[0].text_lis
-      });
-    this.setState({ lis_edit: 
-      this.state.testi.timeframe.editions[0].forecast_data
-      .filter(function(data){return data.it_version != 2})
-      .filter(function(data){return data.id_forecast_type == id_type})
-      .filter(function(data){return data.offset_days == offset_day})[0].text_lis
-      });
-  }
-  
-  onChangeDate_1 = date1 => {
-    this.setState({ pickDate: date1 });
-    console.log('onChange - data: ', date1);
-    console.log('onChange - date.toISOString(): ', date1.toISOString());
-    this.handleChangePicker_dashboard(date1);
-    // onChange={this.handleChangePicker_dashboard} value={this.state.pickDate} 
-  }
-/*
-  handleProfileDropDown(e) {
-		e.preventDefault();
-		this.setState({
-			popOverOpen: !this.state.popOverOpen,
-			anchorEl: e.currentTarget,
-		});
-	}
-*/
-  /*
-	handleRequestClose() {
-    	this.setState({
-      		popOverOpen: false,
-    	});
-    };
-  */
-/*
-  uncheckAllToggle = () => {
-    this.setState({
-      toggle1: false, 
-      toggle2: false
-    });
-  }
-*/
 
   handleOpenDialogChangePicker = (date1) => {
     this.setState({showDialog: true}, () => this.handleChangePicker_dashboard(date1));
   };
 
   handleOpenDialogPublish = () => {
-    this.setState({showDialog: true}, this.handlePublish);
+    this.setState({
+      dialogTitle:        "Attendere, pubblicazione...",
+      dialogContent:      "Attendere, pubblicazione...",
+      showDialog: true
+    }, this.handlePublish);
   };
 
-
   handleOpenDialogTranslate = () => {
-    this.setState({showDialog: true}, this.handleTranslate);
+    this.setState({
+      dialogTitle:        "Attendere, traduzione...",
+      dialogContent:      "Attendere, traduzione...",
+      showDialog: true
+    }, this.handleTranslate);
   };
 
   handleOpenDialogPreview = () => {
-    this.setState({showDialog: true}, this.handlePreview);
+    this.setState({
+      // dialogTitle:        "Attendere, caricamento anteprima...",
+      // dialogContent:      "Attendere, caricamento anteprima...",
+      snackbarAutoHideDuration: 20000, // 20 secondi invece di 2
+      snackbarMessage:  'Attendere, rendering in corso..',
+      showSnackbar: true
+      // showDialog: false   // Niente dialog per l'anteprima (preview) - c'e' gia' il progress
+    }, this.handlePreview);
   };
 
   // TODO: aprire la Snackbar solo in fase di salvataggio o comunque quando si vuole che sia visibile, non ogni volta che si chiude la dialog
+  // OK quindi handleOpenSnackbar richiamata di volta in volta solo dove serve
   handleCloseDialog = () => {
     this.setState({showDialog: false}); // , this.handleOpenSnackbar);
   };
@@ -814,22 +643,51 @@ onCircProgressCompleted = _ => {
     this.setState({showSnackbar: false});
   };
 
-
+  /**
+   * Reimposta le textarea con l'ultima versione salvata
+   */
   handleCancel = _ => {
-      let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
-      // reimposta le textarea con l'ultima versione salvata
-      let last_edit = getVersion(forecast_data, this.state.edition_id, this.state.forecast_id, this.state.offset_day, 99);
+      // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
+      let last_edit = getTextByVersion(
+        this.state.testi.timeframe.editions[0].forecast_data,
+        this.state.edition_id,
+        this.state.forecast_id,
+        this.state.offset_day,
+        99);
       this.setState({ ita_edit:         last_edit.text_ita });
       this.setState({ lis_edit:         last_edit.text_lis });
       this.setState({ dirty: false });
+  };
+
+  handleSave = _ => {
+    this.dispatch({
+      Save: {
+        IdUserEdit: 2,
+        IdTextIta: this.state.ita_id, // Gli ID dei testi sia ita che lis servono perche' non deve essere creato un nuovo ID - bisogna riutilizzare quello che c'e'!!
+        VersionIta: this.state.ita_edit_version, // Va aumentato di 1 sia nella INSERT sia in interfaccia
+        TextIta: this.state.ita_edit, //"Provaaaa_manda_a_dashboard",
+        NotesIta: "Provaaa_note_ita",
+        IdTextLis: this.state.lis_id,
+        VersionLis: this.state.lis_edit_version,
+        TextLis: this.state.lis_edit, //"Provaaaa_manda_a_dashboard",
+        NotesLis: "Provaaa_note_lis"
+      }
+    });
+    this.setState({
+      ita_edit_version: this.state.ita_edit_version+1,
+      lis_edit_version: this.state.lis_edit_version+1,
+      dirty:            false,
+      justSaved:        true
+    }, this.handleOpenSnackbar);
   };
 
   handleTranslate_get = _ => {
     // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
     // var url = "/api/values/translate/";
     // this.setState({ showProgress: true });
-    fetch("/api/values/translate") //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
-      .then((response) => {
+    fetch("/api/values/translate",
+      { signal: this.mySignal }
+      ).then((response) => {
         return response.json();
       })
       .then(data => {
@@ -838,13 +696,13 @@ onCircProgressCompleted = _ => {
         this.setState({ justTranslated: true });
         this.setState({ lis_edit:         data.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
         /*          
-        this.setState({ lis_orig:         nord_orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ lis_edit:         nord_edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ ita_id:           nord_orig.id_text_ita });
-                  this.setState({ ita_edit_version: nord_edit.it_version });
+        this.setState({ lis_orig:         orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+                  this.setState({ lis_edit:         edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+                  this.setState({ ita_id:           orig.id_text_ita });
+                  this.setState({ ita_edit_version: edit.it_version });
                   this.setState({ ita_notes:        'Non estratte ancora' })
-                  this.setState({ lis_id:           nord_orig.id_text_lis });
-                  this.setState({ lis_edit_version: nord_edit.it_version });
+                  this.setState({ lis_id:           orig.id_text_lis });
+                  this.setState({ lis_edit_version: edit.it_version });
                   this.setState({ lis_notes:        'Da estrarre', });
                   console.log('handleChangePicker_dashboard - this.state: ', this.state);
 
@@ -862,8 +720,9 @@ onCircProgressCompleted = _ => {
     fetch(
       "/api/values/translate",
       {
+        signal: this.mySignal,
         method: 'POST',
-        body: "'"+JSON.stringify({value: btoa(this.state.ita_edit)})+"'",
+        body: "'"+JSON.stringify({value: btoa(this.state.ita_edit)})+"'", // Attenzione - il btoa Javascript sembra che converte sempre in UTF8, non in Unicode
         headers: {'Content-Type': 'application/json'}
       })
       .then(res => res.json())
@@ -879,15 +738,15 @@ onCircProgressCompleted = _ => {
   };
 
   /**
-   * La preview qui non e' immediata
-   * Quella che si chiama preview qui e' il fatto che del testo LIS presente nella textarea bisogna creare una request e aspettare il rendering
+   * Genera l'anteprima video di un testo LIS
+   * Bisogna creare una request e aspettare il rendering
    */
   handlePreview = _ => {
-    console.log('handlePreview');
-    // var url = "/api/values/request";
-
-    fetch("/api/values/request", // 1/6",
+    console.log('handlePreview - creazione request');
+    // let paaa = '';
+    fetch("/api/values/request",
     {
+      signal: this.mySignal,
       method: 'POST',
       body: "'"+JSON.stringify({
         id: this.state.id_text_trans,
@@ -898,9 +757,9 @@ onCircProgressCompleted = _ => {
     })
     .then(res => res.json())
     .then(p => {
-      console.log('test request: ', p);
+      console.log('handlePreview - Risultato request POST: ', p);
       this.dispatch({
-        Start: { // Il metodo Start ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
+        Start: { // I metodi Start e Stop hanno gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
           IdUserEdit: 2,
           IdTextIta: this.state.ita_id,
           VersionIta: this.state.ita_edit_version,
@@ -913,19 +772,66 @@ onCircProgressCompleted = _ => {
         }
       });
       this.setState({
-        lis_edit:         'Attendere, render in corso..',
+            showVideoPreview: true
+      });
+
+      fetch(
+        "/api/values/preview",
+        {
+          signal: this.mySignal,
+          method: 'POST',
+          // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
+          body: "'"+JSON.stringify(this.state.sign_tot)+"'",
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(res => res.json())
+        .then(p => {
+          console.log('handlePreview - Risultato preview POST: ' , p);
+          // paaa = p.output_preview;
+          this.dispatch({
+            Stop: { // Il metodo Stop ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
+              IdUserEdit: 2,
+              IdTextIta: this.state.ita_id,
+              VersionIta: this.state.ita_edit_version,
+              TextIta: this.state.ita_edit,
+              NotesIta: "Provaaa_note_ita",
+              IdTextLis: this.state.lis_id,
+              VersionLis: this.state.lis_edit_version,
+              TextLis: this.state.lis_edit,
+              NotesLis: "Provaaa_note_lis"
+            }
+          });
+
+          this.setState({
+            path_postergen: p.output_preview+'.jpg',
+            path_videogen: p.output_preview+'.mp4',
+            // showVideoPreview: true,
+            justPreviewed:    true,
+            snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
+          }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+      }).catch(error => {
+        console.log('handlePreview - preview Error: ', error);
+      });
+      /*
+      console.log('handlePreview - preview paaa: ', paaa);
+
+      this.setState({
+        path_videogen: paaa,
         showVideoPreview: true,
-        justPreviewed:    true 
-      }, this.handleCloseDialog);
+        justPreviewed:    true,
+        snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
+      }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+      */
     })
     .catch(error => {
-      console.log('handlePreview - Error: ', error);
+      console.log('handlePreview - request Error: ', error);
     });
-  }
+  };
 
   /**
    * Pubblica il video su FTP
-   * Operazione "asincrona" - ci potrebbe volere un po' a pubblicarlo
+   * Operazione "asincrona" - ci potrebbe volere un po' a pubblicare il video
+   * Molto probabimente un'operazione da agganciare al componente children che visualizza il video
    * Per il momento qui vengono fatte solo delle prove di passaggio di dati JSON in POST a delle api
    * L'endpoint dovra' probabilmente ricevere un ID o direttamente un path video
    * e girarlo a un comando di copia da locale a FTP
@@ -950,6 +856,7 @@ onCircProgressCompleted = _ => {
     
     fetch("/api/values/testpost_2", // 1/6",
     {
+      signal: this.mySignal,
       method: 'POST',
       body: "'"+JSON.stringify({value: 'bacon'})+"'",
       headers: {'Content-Type': 'application/json'}
@@ -959,6 +866,7 @@ onCircProgressCompleted = _ => {
       console.log('testpost_2: ' , p);
       fetch("/api/values/testpost_3", // 1/6",
       {
+        signal: this.mySignal,
         method: 'POST',
         body: JSON.stringify({value: 'bacon'}),
         headers: {'Content-Type': 'application/json'}
@@ -970,6 +878,7 @@ onCircProgressCompleted = _ => {
         this.setState({ snackbarMessage: 'Video pubblicato su ftp://test@test.com' }, this.handleOpenSnackbar)
         fetch("/api/values/testpost_1/88", // 1/6",
         {
+          signal: this.mySignal,
           method: 'POST',
           body: "'"+JSON.stringify({value: 'bacon'})+"'",
           headers: {'Content-Type': 'application/json'}
@@ -980,6 +889,7 @@ onCircProgressCompleted = _ => {
           fetch(
             "/api/values/translate",
             {
+              signal: this.mySignal,
               method: 'POST',
               body: "'"+JSON.stringify({value: 'UkVTSURVRSBQSU9HR0UgTkVMTEUgUFJJTUUgT1JFIERFTCBNQVRUSU5PIFNVTExFIEFSRUUgQVBQRU5OSU5JQ0hFIEVNSUxJQU5FIEUgTFVOR08gTEUgWk9ORSBDT1NUSUVSRSBBRFJJQVRJQ0hFLCBNQSBJTiBTVUNDRVNTSVZPIFJBUElETyBNSUdMSU9SQU1FTlRPIENPTiBDSUVMTyBURVJTTy5CRUwgVEVNUE8gU1VMIFJFU1RBTlRFIFNFVFRFTlRSSU9ORSwgQSBQQVJURSBVTiBQTycgREkgTlVCSSBDT01QQVRURSBBVFRFU0UgTkVMTEEgUFJJTUEgUEFSVEUgREVMTEEgTUFUVElOQVRBIFNVTExFIEFSRUUgQUxQSU5FIENPTiBERUJPTEkgTkVWSUNBVEUgQSBBU1NPQ0lBVEUgQSBQQVJUSVJFIERBSSAxMjAwIEEgTUVUUkkuQUwgUFJJTU8gTUFUVElOTyBFIERPUE8gSUwgVFJBTU9OVE8gRk9STUFaSU9ORSBESSBGT1NDSElFIERFTlNFIEUgQkFOQ0hJIERJIE5FQkJJQSBFIFNVTExBIFBJQU5VUkEgRSBQQURBTkE='})+"'",
               headers: {'Content-Type': 'application/json'}
@@ -1007,6 +917,7 @@ onCircProgressCompleted = _ => {
     /*
     fetch("/api/values/testpost_1/88", // 1/6",
     {
+      signal: this.mySignal,
       method: 'POST',
       // body: '"ggegrergerg"',
       body: JSON.stringify({value: 'bacon'}),
@@ -1040,20 +951,10 @@ onCircProgressCompleted = _ => {
               console.log('handlePublish - data Error: ', error);
             });
     */
-  }
+  };
 
   render() {
-    // let { dirty, tab_mode_dash, edition_idn } = this.state;
-    let { dirty, showActions, justTranslated, justSaved, justPreviewed } = this.state; // showProgress
-    // let tab_mode_dashb = tab_mode_dash;
-    /*
-    console.log('Dashboard.js - deliver: ', deliver);
-    if (deliver)
-      console.log('Dashboard.js - deliverable 1: ', deliver);
-    else
-      console.log('Dashboard.js - deliverable 2: ', deliver);
-    */
-
+    let { dirty, showActions, justTranslated, justSaved, justPreviewed } = this.state;
 
     const dashboardStyles = {
       dialogTitle: {
@@ -1065,7 +966,6 @@ onCircProgressCompleted = _ => {
       },
       buttons: {
         marginTop: 5, //30
-        // float: 'right'
         float: 'left'
       },
       buttonStyle: { 
@@ -1079,35 +979,11 @@ onCircProgressCompleted = _ => {
       }
     };
 
-    // console.log('handleUpdateTextAreas - edition_id: ', edition_id);
-    /*
-    const handleUpdateTextAreas1 = (i) => {
-      console.log('handleUpdateTextAreas1 - i: ', i);
-      this.setState({ edition_idn: 1 });
-      if( i == 'a') {
-        console.log('handleUpdateTextAreas1 - i: ', i);
-        // console.log('handleUpdateTextAreas - Selezione edition_id 1');
-        this.setState({ tab_mode_dash: i });
-        this.setState({ edition_idn: 1 });
-        // console.log('handleUpdateTextAreas1 - edition_id: ', edition_id);
-      }
-      else if( i == 'b') {
-        console.log('handleUpdateTextAreas1 - i: ', i);
-        // console.log('handleUpdateTextAreas - Selezione edition_id 3');
-        this.setState({ tab_mode_dash: i });
-        this.setState({ edition_idn: 3 });
-        // console.log('handleUpdateTextAreas1 - edition_id: ', edition_id);
-      }
-      console.log('handleUpdateTextAreas1 - tab_mode_dash: ', tab_mode_dash);
-      console.log('handleUpdateTextAreas1 - edition_idn: ', edition_idn);
-    };
-    */
-
     const handleTranslate1 = _ => {
       // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
       // var url = "/api/values/translate/";
       // this.setState({ showProgress: true });
-      fetch("/api/values/translate") //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
+      fetch("/api/values/translate", { signal: this.mySignal }) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
         .then((response) => {
           return response.json();
         })
@@ -1115,13 +991,13 @@ onCircProgressCompleted = _ => {
           console.log('handleChangePicker_dashboard - Data: ', data);
           this.setState({ lis_edit:         data.translation }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
           /*          
-          this.setState({ lis_orig:         nord_orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                    this.setState({ lis_edit:         nord_edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                    this.setState({ ita_id:           nord_orig.id_text_ita });
-                    this.setState({ ita_edit_version: nord_edit.it_version });
+          this.setState({ lis_orig:         orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+                    this.setState({ lis_edit:         edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+                    this.setState({ ita_id:           orig.id_text_ita });
+                    this.setState({ ita_edit_version: edit.it_version });
                     this.setState({ ita_notes:        'Non estratte ancora' })
-                    this.setState({ lis_id:           nord_orig.id_text_lis });
-                    this.setState({ lis_edit_version: nord_edit.it_version });
+                    this.setState({ lis_id:           orig.id_text_lis });
+                    this.setState({ lis_edit_version: edit.it_version });
                     this.setState({ lis_notes:        'Da estrarre', });
                     console.log('handleChangePicker_dashboard - this.state: ', this.state);
           */
@@ -1131,12 +1007,7 @@ onCircProgressCompleted = _ => {
           console.log('handleChangePicker_dashboard - Error: ', error);
         });
     };
-/*
-    const handleCancel = _ => {
-      // this.dispatch({ Cancel: Id });
-      // this.setState({ dirty: false });
-    };
-*/
+
     const handleEditIta1 = event => {
       console.log('handleEditIta - event: ', event);
       this.setState({ dirty: true });
@@ -1149,56 +1020,6 @@ onCircProgressCompleted = _ => {
       this.setState({ lis_edit: event.target.value });
     };
 
-    /*
-    it_version: 4
-    li_version: 4
-    id_forecast: 88
-    id_text_ita: 217
-    id_text_lis: 215
-    offset_days: 1
-    id_text_trans: 213
-    id_forecast_type: 1
-
-
-    this.setState({ ita_orig:         nord_orig[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            this.setState({ ita_edit:         nord_edit[0].text_ita }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            this.setState({ lis_orig:         nord_orig[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            this.setState({ lis_edit:         nord_edit[0].text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            this.setState({ ita_id:           nord_orig[0].id_text_ita });
-            this.setState({ ita_edit_version: nord_edit[0].it_version });
-            this.setState({ ita_notes:        'Non estratte ancora' })
-            this.setState({ lis_id:           nord_orig[0].id_text_lis });
-            this.setState({ lis_edit_version: nord_edit[0].it_version });
-    */
-    const handleSave = _ => {
-      // this.setState({ ita_orig: 'Attendere..handleSave' });
-      // console.log('handleSave - this.state.ita_id: ', this.state.ita_id);
-      // console.log('handleSave - this.state.ita_edit_version: ', this.state.ita_edit_version);
-      // console.log('handleSave - this.state.ita_edit: ', this.state.ita_edit);
-      // console.log('handleSave - this.state.lis_id: ', this.state.lis_id);
-      // console.log('handleSave - this.state.lis_edit_version: ', this.state.lis_edit_version);
-      // console.log('handleSave - this.state.lis_edit: ', this.state.lis_edit);
-
-      this.dispatch({
-        Save: {
-          IdUserEdit: 2,
-          IdTextIta: this.state.ita_id, // Gli ID dei testi sia ita che lis servono perche' non deve essere creato un nuovo ID - bisogna riutilizzare quello che c'e'!!
-          VersionIta: this.state.ita_edit_version, // Va aumentato di 1 sia nella INSERT sia in interfaccia
-          TextIta: this.state.ita_edit, //"Provaaaa_manda_a_dashboard",
-          NotesIta: "Provaaa_note_ita",
-          IdTextLis: this.state.lis_id,
-          VersionLis: this.state.lis_edit_version,
-          TextLis: this.state.lis_edit, //"Provaaaa_manda_a_dashboard",
-          NotesLis: "Provaaa_note_lis"
-        }
-      });
-      this.setState({
-        ita_edit_version: this.state.ita_edit_version+1,
-        lis_edit_version: this.state.lis_edit_version+1,
-        dirty:            false,
-        justSaved:        true
-      }, this.handleOpenSnackbar);
-    };
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <BasePage title="Meteo" navigation="Applicazione / Meteo">
@@ -1297,7 +1118,7 @@ onCircProgressCompleted = _ => {
   {showActions ?
                 <div style={dashboardStyles.buttons}>
                   <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
-                  <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={justTranslated} />
+                  <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={justTranslated} />
                 </div>
   : null}
               </div>
@@ -1308,6 +1129,9 @@ onCircProgressCompleted = _ => {
                   <div style={globalStyles.navigation}>Testo LIS originale{this.state.lis_edit_version ? ' (versione 1)' : '' }:</div>
                 </div>
                 <label>{this.state.lis_orig}</label>
+
+                value={this.state.lis_edit}
+                onChange={handleEditLis1}
                 */}
                 <div style={dashboardStyles.buttons}>
                   <CardExampleExpandable title={"Testo LIS originale" + (this.state.lis_edit_version ? " (versione 1)" : "") } subtitle="Cliccare per espandere" text={this.state.lis_orig} />
@@ -1316,41 +1140,58 @@ onCircProgressCompleted = _ => {
                   <div style={globalStyles.navigation}>Testo LIS editato{this.state.lis_edit_version ? ' (versione ' + this.state.lis_edit_version + ')' : '' }:</div>
                 </div>
                 <div style={dashboardStyles.buttons}>
-                  <TextareaAutosize cols={42} rows={20} maxRows={25} value={this.state.lis_edit} onChange={handleEditLis1} />
+                  <TextareaAutosize
+                    cols={42}
+                    rows={20}
+                    maxRows={25}
+                    value={this.state.lis_edit}
+                    onChange={(event) => {
+                        this.setState({
+                          lis_edit:       event.target.value,
+                        }, this.handleChips(event))
+                    }}
+                    onKeyDown={(event) => {
+                        this.setState({
+                          lis_edit:       event.target.value,
+                        }, this.handleChips(event))
+                    }}
+                  />
+                </div>
+                <div style={dashboardStyles.buttons}>
+                  <ChipExampleSimple1 chips={this.state.chips}/>
                 </div>
   {showActions ?
                 <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Salva"           onClick={handleSave}                     style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
-                  <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed} />
+                  <RaisedButton label="Salva"           onClick={this.handleSave}                style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
+                  <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
                   {/*
                   <br />
                   <RaisedButton label="Pubblica"        onClick={this.handleOpenDialogPublish}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed} />
                   */}
+                  {/*<VideoPreview poster={this.state.Poster} source={this.state.Src} onPublish={this.onVideoChildClicked} />*/}
                 </div>
   : null}
               </div>
 
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
-                {/*<h3 style={globalStyles.navigation}>Video:</h3>*/}
-                {/*<label>test</label>
-                poster={require("../../../../../../../../Desktop/output_image.jpg")} >
-                <source src={require("../../../../../../../../Desktop/output.mp4")}/>
-                datanew={this.state.Utilization} label="Video LIS" text_orig="Video generato in 2 sec" text_edit={this.state.lis_edit}
-                {this.state.tab_mode_dash === 'non e\' dizionario - qui deve esserci il check "se la versione corrente di testi ita/lis e\' gia\' stata renderizzata, visualizza il video, passando le URL del poster e del video' ? 
-                */}
-                {/* onClicked={this.onVideoChildClicked} onChanged={this.handleEditLis}/> */}
-                {/* onClicked={this.onVideoChildClicked} onChanged={this.handleEditLis}/> */}
-  {
+{/*
   this.state.path_video != null ? 
-                <VideoPreview Poster="dist/6e6432a4ede73a7d3e1459eb7ffd3fbe.jpg" Src="dist/videos/output.mp4" />
+                <VideoPreview poster={this.state.Poster} source={this.state.path_video} onPublish={this.onVideoChildClicked} />
   :
   this.state.showVideoPreview ? 
   !this.state.videoProgressCompleted ? 
-                <CircularProgressExampleDeterminate onCompleted={this.onCircProgressCompleted} />
+                <CircularProgressExampleDeterminate progress={this.state.Progress} onCompleted={this.onCircProgressCompleted} />
   :
-                <VideoPreview Poster="dist/6e6432a4ede73a7d3e1459eb7ffd3fbe.jpg" Src="dist/videos/output.mp4" onPublish={this.onVideoChildClicked} />
+                <VideoPreview poster={this.state.path_postergen} source={this.state.path_videogen} onPublish={this.onVideoChildClicked} />
   : null
-  }
+*/}
+
+{
+this.state.path_videogen ? 
+                <video controls autoPlay={true} width="320" height="240" key={this.state.path_videogen}><source src={this.state.path_videogen} /></video>
+:
+  null
+}
               </div>
             </div>
             <Dialog
@@ -1366,7 +1207,7 @@ onCircProgressCompleted = _ => {
             {/* this.state.showProgress ? <CircularProgress size={200} thickness={12} /> : null */}
             <Snackbar 
               open={this.state.showSnackbar}
-              autoHideDuration={this.state.snackbarHide}
+              autoHideDuration={this.state.snackbarAutoHideDuration}
               onRequestClose={this.handleCloseSnackbar}
               message={this.state.snackbarMessage}
             />

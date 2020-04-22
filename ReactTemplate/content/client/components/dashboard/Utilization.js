@@ -141,18 +141,33 @@ const VideoPreview = props => {
   };
 
   // {/* Questo require dovrebbe essere quello che fa creare a webpack la cartella videos e ci mette dentro questo file*/}
-
+  // preload={"none"}
   return (
     <Paper style={styles.paper}>
       <div>
-        <Player preload={"none"} poster={props.Poster} >
-          <source src={props.Src}/>
-          <ControlBar disableCompletely={true} />
+        <Player 
+          key={props.source}
+          preload={"auto"}
+          poster={props.poster}
+          autoPlay={true}
+        >
+          <source src={props.source}/>
+          <ControlBar disableCompletely={false} />
         </Player>
       </div>
       <div>
         <RaisedButton label="Pubblica" onClick={props.onPublish} />
       </div>
+      {/*
+        <div >
+          <video 
+            width="320"
+            height="240"
+            key={props.source}>
+            <source src={props.source} />
+          </video>
+        </div>
+      */}
     </Paper>
   );
 };
@@ -165,7 +180,7 @@ const CardExampleExpandable = props => (
       actAsExpander={true}
       showExpandableButton={true}
     />
-    <CardText expandable={true}>
+    <CardText style={{fontSize: 8}} expandable={true}>
       {props.text}
     </CardText>
   </Card>
@@ -178,8 +193,8 @@ Utilization.propTypes = {
 
 VideoPreview.propTypes = {
   // datanew: PropTypes.array
-  Poster: PropTypes.string,
-  Src: PropTypes.string,
+  poster: PropTypes.string,
+  source: PropTypes.string,
   onPublish: PropTypes.func //.required
 };
 /*
