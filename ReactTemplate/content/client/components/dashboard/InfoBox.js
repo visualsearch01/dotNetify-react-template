@@ -1,24 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Paper from 'material-ui/Paper';
-import { white, grey800 } from 'material-ui/styles/colors';
+import { blue300, indigo900, white, grey800 } from 'material-ui/styles/colors';
 import { typography } from 'material-ui/styles';
-
 import DatePicker from 'react-date-picker';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+import Popover, { PopoverAnimationVertical } from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
-
 import CircularProgress from 'material-ui/CircularProgress';
-
 import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
 import FontIcon from 'material-ui/FontIcon';
 import SvgIconFace from 'material-ui/svg-icons/action/face';
-import {blue300, indigo900} from 'material-ui/styles/colors';
-
 // import MobileTearSheet from '../../../MobileTearSheet';
-import {List, ListItem, makeSelectable} from 'material-ui/List';
+import { List, ListItem, makeSelectable } from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 
 const PopoverStyle = {
@@ -263,7 +258,8 @@ class ChipExampleSimple extends React.Component {
   render() {
     return (
       <div style={chipStyles.wrapper}>
-{ /* props.data.map((item, idx) => (
+      {/*
+      props.data.map((item, idx) => (
           <div key={idx}>
             <ListItem
               leftAvatar={<Avatar icon={<Wallpaper />} />}
@@ -277,7 +273,10 @@ class ChipExampleSimple extends React.Component {
             />
             <Divider inset={true} />
           </div>
-        )) */}
+        ))
+       src={require( "../../../../../../../../source/Workspaces/SmallTFS/Images/1301300283_button_ok.png")}
+       src={require( "../../../../../../../../source/Workspaces/SmallTFS/Images/1301300293_desktop.png")}
+      */}
 
         <Chip
           style={chipStyles.chip}
@@ -295,7 +294,7 @@ class ChipExampleSimple extends React.Component {
           onClick={handleTouchTap}
           style={chipStyles.chip}
         >
-          <Avatar src={require( "../../../../../../../../source/Workspaces/SmallTFS/Images/1301300283_button_ok.png")} />
+          <Avatar />
           Image Avatar Chip
         </Chip>
         <Chip
@@ -303,7 +302,7 @@ class ChipExampleSimple extends React.Component {
           onClick={handleTouchTap}
           style={chipStyles.chip}
         >
-          <Avatar src={require( "../../../../../../../../source/Workspaces/SmallTFS/Images/1301300293_desktop.png")} />
+          <Avatar />
           Deletable Avatar Chip
         </Chip>
         <Chip
@@ -514,7 +513,6 @@ const ListExampleSelectable1 = () => (
 */
 // export default ListExampleSelectable;
 
-
 InfoBox.propTypes = {
   Icon: PropTypes.any,
   Color: PropTypes.string,
@@ -523,17 +521,16 @@ InfoBox.propTypes = {
   onChangeDate: PropTypes.func //.required
 };
 
-
 CircularProgressExampleDeterminate.propTypes = {
   progress: PropTypes.number,
   onCompleted: PropTypes.func //.required
 };
 // export default InfoBox;
 export {
-// export default 
-InfoBox, //;
-// export const 
-CircularProgressExampleDeterminate, //;
-ChipExampleSimple,
-ListExampleSelectable
+  // export default 
+  InfoBox, //;
+  // export const 
+  CircularProgressExampleDeterminate, //;
+  ChipExampleSimple,
+  ListExampleSelectable
 }

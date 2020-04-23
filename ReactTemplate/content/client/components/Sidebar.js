@@ -249,19 +249,12 @@ const Sidebar = props => {
     console.log('Sidebar ConsoleLog - children: ', children);
     return false;
   };
-/*
-PROPS
-A React component should use props to store information that can be changed, but can only be changed by a different component.
-STATE
-A React component should use state to store information that the component itself can change.
-style={styles.autocomplete.menu}
-*/
   return (
     <Drawer docked={true} open={open}>
       <ConsoleLog>{ menus_del1 }</ConsoleLog>
       <div style={styles.logo}>
         {/*logoTitle*/}
-        <img heigth="57px" width="57px" src={require("../../../../../../../Desktop/Rai _Logo RGB.png")} />
+        <img heigth="57px" width="57px" src="dist/Rai _Logo RGB.png" />
         Progetto LIS
       </div>
       <div style={styles.avatar.div}>

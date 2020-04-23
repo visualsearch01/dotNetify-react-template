@@ -186,8 +186,10 @@ class TablePage_1 extends React.Component {
       // Employees:          [],
       // Pages:              [],
       // ShowNotification:   false,
+      sign_json:          [],    // Oggetto "finale" da passare all'endpoint preview
       sign_tot:           [],    // Array con la lista dei segni come arriva dall'endpoint api - serve per poter fare di nuovo il reduce in caso di filter
       sign_names:         [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
+      sign_array:         [],    // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
       sign_iniz:          [],    // Array completo dei segni, raggruppati per iniziale e ordinati lettere/numeri
       sign_filtered:      [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
       sign_selected:      null,  // Oggetto che rappresenta l'eventuale segno cliccato nella lista
@@ -247,10 +249,12 @@ class TablePage_1 extends React.Component {
       })
       .then(data => {
         let sign_names = [];
+        let sign_array = [];
         let sign_group = data.reduce((r, e) => {
           // get first letter of name of current element
           // if(e.name.includes("gga")) {
           sign_names.push(e.name);
+          sign_array[e.name] = e;
           let Iniziale = e.name[0].toUpperCase();
           // if there is no property in accumulator with this letter create it
           if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name], Signs_object: [e]}; //[e]}
@@ -274,11 +278,13 @@ class TablePage_1 extends React.Component {
         console.log('TablePage_1 - handleGetSigns sign_group: ', sign_group);
         console.log('TablePage_1 - handleGetSigns sign_names: ', sign_names);
         console.log('TablePage_1 - handleGetSigns sign_iniz: ',  sign_iniz);
+        console.log('Dashboard - handleGetSigns sign_array: ',  sign_array);
 
         this.setState({
           sign_tot:       data,
           sign_names:     sign_names,
           sign_iniz:      sign_iniz,
+          sign_array:     sign_array,
           sign_filtered:  sign_iniz
         });
 
@@ -361,13 +367,31 @@ class TablePage_1 extends React.Component {
   };
 
   handleChips = (event) => {
-    console.log('TablePage_1 - handleChips event: ', event)
-    // console.log('TablePage_1 - handleChips input: ', input)
+    console.log('Dashboard - handleChips event.key: ', event.key);
+    console.log('Dashboard - handleChips event.keyCode: ', event.keyCode);
+    console.log('Dashboard - handleChips event.Code: ', event.code);
+    // console.log('Dashboard - handleChips input: ', input)
     // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-    if ([8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
+
+    /*        
+    <script>
+    window.addEventListener("keydown", function(event) {
+    let str = "KeyboardEvent: key='" + event.key + "' | code='" +
+      event.code + "'";
+    let el = document.createElement("span");
+    el.innerHTML = str + "<br/>";
+    document.getElementById("output").appendChild(el);
+    }, true);
+    */
+
+    let ret = {};
+    if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
       // Do whatever when esc is pressed
       console.log('TablePage_1 - handleChips keyCode 12 - Space pressed! ')
       let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+      ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
+      ret.it = [];
+      ret.count = 0;
       let ar = [];
       // let tt = ['Test', 'Prova'];
 
@@ -377,6 +401,10 @@ class TablePage_1 extends React.Component {
         // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
         // if (!tt.includes(item)) this.setState({ allWordsFound: false });
         ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
+        if (this.state.sign_names.includes(item)) {
+          ret.it.push(this.state.sign_array[item]);
+          ret.count += 1;
+        }
       });
       // Object.assign
 
@@ -384,8 +412,10 @@ class TablePage_1 extends React.Component {
       // return obj[k] === "test1";
       // });
       console.log('TablePage_1 - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
+      console.log('TablePage_1 - handleChips - Tot JSON: ', ret);
       this.setState({
         allWordsFound: ar.some(function(k) {return k.Found === false}),
+        sign_json: ret,
         chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
       });
     }
@@ -604,7 +634,9 @@ class TablePage_1 extends React.Component {
             signal: this.mySignal,
             method: 'POST',
             // 'mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere'
-            body: "'"+JSON.stringify({value: btoa(this.state.lis_edit)})+"'",
+            // body: "'"+JSON.stringify({value: btoa(this.state.lis_edit)})+"'",
+            // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
+            body: "'"+JSON.stringify(this.state.sign_json)+"'",
             headers: {'Content-Type': 'application/json'}
         })
         .then(res => res.json())

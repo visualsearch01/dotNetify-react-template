@@ -150,13 +150,13 @@ class Dashboard extends React.Component {
       UtilizationLabel2:        "Testo LIS originale",
       RecentActivities:         [],
       
-      sign_tot:                 [],    // Array con la lista dei segni come arriva dall'endpoint api - serve per poter fare di nuovo il reduce in caso di filter
+      sign_json:                [],    // Oggetto "finale" da passare all'endpoint preview
       sign_names:               [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
-      sign_iniz:                [],    // Array completo dei segni, raggruppati per iniziale e ordinati lettere/numeri
-      // sign_filtered:            [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
-      // sign_selected:            null,  // Oggetto che rappresenta l'eventuale segno cliccato nella lista
+      sign_array:               [],    // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
+      // sign_filtered:         [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
+      // sign_selected:         null,  // Oggetto che rappresenta l'eventuale segno cliccato nella lista
       chips:                    [],    // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
-      allWordsFound:      false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
+      allWordsFound:            false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
       
       pickDate:                 new Date(), // .toISOString().split('T')[0], // Data iniziale (oggi) - Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
       edition_id:               1, // ID dell'edizione di default da visualizzare (ID 1, cioe' 9:00)
@@ -285,12 +285,12 @@ class Dashboard extends React.Component {
       })
       .then(data => {
         let sign_names = [];
-        let sign_iniz = [];
+        let sign_array = [];
         let sign_group = data.reduce((r, e) => {
           // get first letter of name of current element
           // if(e.name.includes("gga")) {
           sign_names.push(e.name);
-          sign_iniz[e.name] = e;
+          sign_array[e.name] = e;
           let Iniziale = e.name[0].toUpperCase();
           // if there is no property in accumulator with this letter create it
           if(!r[Iniziale]) r[Iniziale] = {Iniziale, Signs: [e.name], Signs_object: [e]}; //[e]}
@@ -315,12 +315,12 @@ class Dashboard extends React.Component {
         console.log('Dashboard - handleGetSigns data: ',       data); // 0: {id: 60, name: "a"}
         console.log('Dashboard - handleGetSigns sign_group: ', sign_group);
         console.log('Dashboard - handleGetSigns sign_names: ', sign_names);
-        console.log('Dashboard - handleGetSigns sign_iniz: ',  sign_iniz);
+        console.log('Dashboard - handleGetSigns sign_array: ',  sign_array);
 
         this.setState({
-          // sign_tot:       data,
+          // sign_json:       data,
           sign_names:     sign_names,
-          sign_iniz:      sign_iniz,
+          sign_array:      sign_array,
           // sign_filtered:  sign_iniz
         });
 
@@ -369,7 +369,7 @@ class Dashboard extends React.Component {
         // if (!tt.includes(item)) this.setState({ allWordsFound: false });
         ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
         if (this.state.sign_names.includes(item)) {
-          ret.it.push(this.state.sign_iniz[item]);
+          ret.it.push(this.state.sign_array[item]);
           ret.count += 1;
         }
       });
@@ -382,7 +382,7 @@ class Dashboard extends React.Component {
       console.log('Dashboard - handleChips - Tot JSON: ', ret);
       this.setState({
         allWordsFound: ar.some(function(k) {return k.Found === false}),
-        sign_tot: ret,
+        sign_json: ret,
         chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
       },this.handleCloseDialog());
     }
@@ -781,7 +781,7 @@ class Dashboard extends React.Component {
           signal: this.mySignal,
           method: 'POST',
           // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
-          body: "'"+JSON.stringify(this.state.sign_tot)+"'",
+          body: "'"+JSON.stringify(this.state.sign_json)+"'",
           headers: {'Content-Type': 'application/json'}
         })
         .then(res => res.json())
