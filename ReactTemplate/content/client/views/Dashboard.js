@@ -1113,7 +1113,15 @@ class Dashboard extends React.Component {
                   <div style={globalStyles.navigation}>Testo ITA editato{this.state.ita_edit_version ? ' (versione ' + this.state.ita_edit_version + ')' : '' }:</div>
                 </div>
                 <div style={dashboardStyles.buttons}>
-                  <TextareaAutosize cols={42} rows={20} maxRows={25} value={this.state.ita_edit} onChange={handleEditIta1} />
+                  <TextareaAutosize
+                    cols={42}
+                    rows={20}
+                    maxRows={25}
+                    minRows={3}
+                    style={{overflowY: 'scroll'}}
+                    value={this.state.ita_edit}
+                    onChange={handleEditIta1}
+                  />
                 </div>
   {showActions ?
                 <div style={dashboardStyles.buttons}>
@@ -1144,6 +1152,8 @@ class Dashboard extends React.Component {
                     cols={42}
                     rows={20}
                     maxRows={25}
+                    minRows={3}
+                    style={{overflowY: 'scroll'}}
                     value={this.state.lis_edit}
                     onChange={(event) => {
                         this.setState({

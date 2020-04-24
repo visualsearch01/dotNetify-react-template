@@ -742,6 +742,9 @@ class TablePage_1 extends React.Component {
             </Tabs>
 
             <div className="row">
+              
+              
+              
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
                 <TextField
                   hintText="Digitare per filtrare"
@@ -790,20 +793,118 @@ class TablePage_1 extends React.Component {
                   <ListExampleSelectable children={this.state.sign_filtered} onChangeSign={this.handleChangeSign} filtered={this.state.sign_iniz == this.state.sign_filtered ? null : true}/>
                 </div>  
               </div>
+
+
+              <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
 {
-  this.state.tab_mode_table1 === 'dizionario' ? 
+this.state.tab_mode_table1 === 'dizionario' && this.state.videoUrl != '' ? 
+                <div style={Table_1Styles.buttons}>
+                  <video controls autoPlay={true} width="320" height="240" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
+                </div>
+:
+  null
+}
+
+
+{
+this.state.tab_mode_table1 === 'traduzione' ? 
+                <React.Fragment>
+                <div style={Table_1Styles.buttons}>
+                Testo ITA:
+                  <TextareaAutosize
+                    cols={40}
+                    rows={20}
+                    maxRows={25}
+                    minRows={3}
+                    style={{overflowY: 'scroll'}}
+                    onChange={handleEditIta}
+                  />
+                </div>
+                
+                <div style={Table_1Styles.buttons}>
+                  Segni LIS:
+                  <TextareaAutosize
+                    cols={40}
+                    rows={20}
+                    maxRows={25}
+                    minRows={3}
+                    style={{overflowY: 'scroll'}}
+                    inputRef={this.inputRef}
+                    ref={el=>this.input=el}
+                    className="form-control"
+                    id="targetField"
+                    value={this.state.lis_edit}
+                    onChange={(event) => {
+                      if (typeof(this.input)==='object'&&this.input!==null) {
+                        const selectionStart = this.input.props.inputRef.selectionStart;
+                        console.log('TextareaAutosize onKeyDown - selectionStart: ', selectionStart);
+                        const selectionEnd = this.input.props.inputRef.selectionEnd;
+                        console.log('TextareaAutosize onKeyDown - selectionEnd: ', selectionEnd);
+                        this.setState({
+                          lis_edit:       event.target.value,
+                          selectionStart: selectionStart,
+                          selectionEnd:   selectionEnd
+                        }, this.handleChips(event))
+                      }
+                    }}
+
+                    onKeyDown={(event) => {
+                      if (typeof(this.input)==='object'&&this.input!==null) {
+                        const selectionStart = this.input.props.inputRef.selectionStart;
+                        console.log('TextareaAutosize onKeyDown - selectionStart: ', selectionStart);
+                        // document.getElementById('pos').innerHTML = selectionStart;
+                        document.getElementById('pos').value = selectionStart;
+                        const selectionEnd = this.input.props.inputRef.selectionEnd;
+                        console.log('TextareaAutosize onKeyDown - selectionEnd: ', selectionEnd);
+                        this.setState({
+                          lis_edit:       event.target.value,
+                          selectionStart: selectionStart,
+                          selectionEnd:   selectionEnd
+                        }, this.handleChips(event))
+                      }
+                    }}
+                                        
+                    onClick={(event) => {
+                      if (typeof(this.input)==='object'&&this.input!==null) {
+                        const selectionStart = this.input.props.inputRef.selectionStart;
+                        console.log('TextareaAutosize onClick - selectionStart: ', selectionStart);
+                        const selectionEnd = this.input.props.inputRef.selectionEnd;
+                        console.log('TextareaAutosize onClick - selectionEnd: ', selectionEnd);
+                        this.setState({
+                          lis_edit:       event.target.value,
+                          selectionStart: selectionStart,
+                          selectionEnd:   selectionEnd
+                        }, this.handleChips(event))
+                      }
+                    }}
+                  />
+                  <div className="mr-auto">Cursor at position: {this.state.selectionStart} (<input type='text' id="pos" />)</div>
+                </div>
+                <div style={Table_1Styles.buttons}>
+                  <ChipExampleSimple1 chips={this.state.chips}/>
+                </div>
+                { /* <ChipExampleSimple /> */ }
+                <div style={Table_1Styles.buttons}>
+                  { /* <input id="targetField" /> */ }
+                  { /* <button onClick={this.handleDownloadTxtFile}>Download txt</button> */ }
+                  <RaisedButton label="Scarica txt" onClick={this.handleDownloadTxtFile} style={Table_1Styles.saveButton} primary={true} />
+                  <input type="file" onChange={this.handleTxtFileChange}></input>
+                  <RaisedButton label="Carica txt"  onClick={this.handleTxtFileUpload} disabled={false} style={Table_1Styles.saveButton} primary={true} />
+                </div>
+
+                <div style={Table_1Styles.buttons}>
+                  <RaisedButton label="Anteprima"   onClick={this.handleSave} disabled={this.state.allWordsFound} style={Table_1Styles.saveButton} primary={true} />
+                </div>
+                </React.Fragment>
+:
+  null
+}
+              </div>
               
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
-              {/* DIZIONARIO */}
-                {/*
-                <div style={Table_1Styles.buttons}>
-                  <div style={globalStyles.navigation}>Descrizione segno:</div>
-                </div>
-                */}
-                <div style={Table_1Styles.buttons}>
-                  { /* <TextareaAutosize cols={40} rows={20} maxRows={25} value={this.state.ita_edit} onChange={handleEditIta} /> */ }
 {
-  this.state.sign_selected ?
+  this.state.tab_mode_table1 === 'dizionario' && this.state.sign_selected ?
+                <div style={Table_1Styles.buttons}>
                   <table>
                     <tbody>
                       <tr>
@@ -888,133 +989,16 @@ class TablePage_1 extends React.Component {
                       </tr>
                     </tbody>
                   </table>
+                </div>
   :
   null
 }
-                </div>
-              </div>
-:
-              <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
-              {/* TRADUZIONE */}
-                <div style={Table_1Styles.buttons}>
-                  <div style={globalStyles.navigation}>Testo ITA:</div>
-                </div>
-                <div style={Table_1Styles.buttons}>
-                  <TextareaAutosize
-                    cols={40}
-                    rows={20}
-                    maxRows={25}
-                    onChange={handleEditIta}
-                  />
-                </div>
-                <div style={Table_1Styles.buttons}>
-                  <div style={globalStyles.navigation}>Segni LIS:</div>
-                </div>
-                <div style={Table_1Styles.buttons}>
-                  {/*
-                  onChange={this.handleChangeLisText}
-                  {this.handleArrowKeysDown}
-                  value={this.state.ita_edit}
-                  value={this.state.lis_edit}
-                  ref={el=>this.input=el}
-                  */}
-                  <TextareaAutosize
-                    cols={40}
-                    rows={20}
-                    maxRows={25}
-                    inputRef={this.inputRef}
-                    ref={el=>this.input=el}
-                    className="form-control"
-                    id="targetField"
-                    value={this.state.lis_edit}
-                    onChange={(event) => {
-                      if (typeof(this.input)==='object'&&this.input!==null) {
-                        const selectionStart = this.input.props.inputRef.selectionStart;
-                        console.log('TextareaAutosize onKeyDown - selectionStart: ', selectionStart);
-                        const selectionEnd = this.input.props.inputRef.selectionEnd;
-                        console.log('TextareaAutosize onKeyDown - selectionEnd: ', selectionEnd);
-                        this.setState({
-                          lis_edit:       event.target.value,
-                          selectionStart: selectionStart,
-                          selectionEnd:   selectionEnd
-                        }, this.handleChips(event))
-                      }
-                    }}
-
-                    onKeyDown={(event) => {
-                      if (typeof(this.input)==='object'&&this.input!==null) {
-                        const selectionStart = this.input.props.inputRef.selectionStart;
-                        console.log('TextareaAutosize onKeyDown - selectionStart: ', selectionStart);
-                        // document.getElementById('pos').innerHTML = selectionStart;
-                        document.getElementById('pos').value = selectionStart;
-                        const selectionEnd = this.input.props.inputRef.selectionEnd;
-                        console.log('TextareaAutosize onKeyDown - selectionEnd: ', selectionEnd);
-                        this.setState({
-                          lis_edit:       event.target.value,
-                          selectionStart: selectionStart,
-                          selectionEnd:   selectionEnd
-                        }, this.handleChips(event))
-                      }
-                    }}
-                                        
-                    onClick={(event) => {
-                      if (typeof(this.input)==='object'&&this.input!==null) {
-                        const selectionStart = this.input.props.inputRef.selectionStart;
-                        console.log('TextareaAutosize onClick - selectionStart: ', selectionStart);
-                        const selectionEnd = this.input.props.inputRef.selectionEnd;
-                        console.log('TextareaAutosize onClick - selectionEnd: ', selectionEnd);
-                        this.setState({
-                          lis_edit:       event.target.value,
-                          selectionStart: selectionStart,
-                          selectionEnd:   selectionEnd
-                        }, this.handleChips(event))
-                      }
-                    }}
-                  />
-                  <div className="mr-auto">Cursor at position: {this.state.selectionStart} (<input type='text' id="pos" />)</div>
-                </div>
-                <div style={Table_1Styles.buttons}>
-                  <ChipExampleSimple1 chips={this.state.chips}/>
-                </div>
-                { /* <ChipExampleSimple /> */ }
-                <div style={Table_1Styles.buttons}>
-                  { /* <input id="targetField" /> */ }
-                  { /* <button onClick={this.handleDownloadTxtFile}>Download txt</button> */ }
-                  <RaisedButton label="Scarica txt" onClick={this.handleDownloadTxtFile} style={Table_1Styles.saveButton} primary={true} />
-                  <input type="file" onChange={this.handleTxtFileChange}></input>
-                  <RaisedButton label="Carica txt"  onClick={this.handleTxtFileUpload} disabled={false} style={Table_1Styles.saveButton} primary={true} />
-                </div>
-
-                <div style={Table_1Styles.buttons}>
-                  <RaisedButton label="Anteprima"   onClick={this.handleSave} disabled={this.state.allWordsFound} style={Table_1Styles.saveButton} primary={true} />
-                </div>
 
 {
 this.state.tab_mode_table1 === 'traduzione' && this.state.videoUrl != '' ? 
-                <video controls autoPlay={true} width="320" height="240" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
-:
-  null
-}
-              </div>
-}              
-              <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
-                { /*
                 <div style={Table_1Styles.buttons}>
-                  width="320" height="240"
-                  <video 
-                    width="320"
-                    height="240"
-                    key={this.state.videoUrl}>
-                    <source src={this.state.videoUrl} />
-                  </video>
-                  poster={this.state.path_postergen} 
-                  <VideoPreview poster={this.state.videoPoster} source={this.state.videoUrl} />
+                  <video controls autoPlay={true} width="320" height="240" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
                 </div>
-                style={{display: (this.state.videoUrl != null ? 'inline': 'none')}}
-                <button onClick={() => this.updateVideo()}>Next</button> */}
-{
-this.state.tab_mode_table1 === 'dizionario' && this.state.videoUrl != '' ? 
-                <video controls autoPlay={true} width="320" height="240" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
 :
   null
 }

@@ -893,8 +893,11 @@ namespace dotnetify_react_template.server.Controllers
                     </ALEAOutput>
                 ";
                 string fileName = "sentence_" + DateTime.Now.ToString("MM_dd_yyyy_HH_mm_ss");
-                string xmlName = _savePath + @"\" + fileName + ".xml";
-                System.IO.File.WriteAllText(xmlName, xml);
+                // string xmlName = _savePath + @"\" + fileName + ".xml";
+                // System.IO.File.WriteAllText(xmlName, xml);
+
+                string xmlName = _savePath + @"\" + fileName + "_ok.xml"; // Scrivi direttamente il file xml giusto invece del mockup
+                // System.IO.File.WriteAllText(xmlName, xml); // Disabilita scrittura mockup
 
 
                 /*
