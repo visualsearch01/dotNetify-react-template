@@ -87,8 +87,8 @@ function getTextByVersion(timeFrameJsonArray, edition_id, id_forecast_type, offs
   if (!(Array.isArray(res) && res.length)) {
     console.log('getTextByVersion - res vuoto - popolato oggetto di default');
     return {
-      text_ita:         'Nessun dato per la selezionato corrente',
-      text_lis:         'Nessun dato per la selezionato corrente',
+      text_ita:         'Nessun dato per la selezione corrente',
+      text_lis:         'Nessun dato per la selezione corrente',
       id_text_trans:    0,
       id_text_ita:      0,
       it_version:       0,
@@ -150,7 +150,7 @@ class Dashboard extends React.Component {
       UtilizationLabel2:        "Testo LIS originale",
       RecentActivities:         [],
       
-      sign_json:                [],    // Oggetto "finale" da passare all'endpoint preview
+      sign_json:                {},    // Oggetto "finale" da passare all'endpoint preview
       sign_names:               [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
       sign_array:               [],    // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
       // sign_filtered:         [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
@@ -163,6 +163,7 @@ class Dashboard extends React.Component {
       forecast_id:              1, // ID del tipo di forecast di default (NORD)
       offset_day:               1, // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
       offsets:                  [],// Possibili valori di offset nella lista di valori per la data selezionata
+      offsets_calc1:            [],
       testi:                    null, // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
       
       ita_id:                   0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
@@ -252,20 +253,27 @@ class Dashboard extends React.Component {
 
   handleChangeEditionId = (event, index, value) => {
     console.log('handleChangeEditionId - value: ', value);
+    console.log('handleChangeEditionId - this.state.offsets_calc1[value]: ', this.state.offsets_calc1[value]);
     // this.setState({ value_ed: value});
-    this.setState({ edition_id: value }, this.handleUpdateTextAreas);
+    this.setState({
+      offsets:    this.state.offsets_calc1[value],
+      edition_id: value
+      }, this.handleUpdateTextAreas);
     // this.handleUpdateTextAreas(value);
   };
 
   handleChangeForecastId = (event, index, value) => {
     console.log('handleChangeForecastId - value: ', value);
+    console.log('handleChangeForecastId - this.state.offsets_calc1.shift(): ', this.state.offsets_calc1.shift());
+    console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
     // this.setState({ value_area: value });
-    this.setState({ forecast_id: value,  offset_day: (value === 7 ? // 2 : 1
-      // this.state.offsets[0][0] : // 2 : 
-      // this.state.offsets[0][1]   // 1
-
-      this.state.offsets[1] :
-      this.state.offsets[0]
+    this.setState({
+      forecast_id: value,
+      offset_day: (value === 7 ? // 2 : 1
+        // this.state.offsets[0][0] : // 2 : 
+        // this.state.offsets[0][1]   // 1
+        this.state.offsets[1] :
+        this.state.offsets[0]
     )}, this.handleUpdateTextAreas); //.id});
     // this.handleUpdateTextAreas(7);
   };
@@ -334,59 +342,69 @@ class Dashboard extends React.Component {
   };
 
   handleChips = (event) => {
-    console.log('Dashboard - handleChips event.key: ', event.key);
-    console.log('Dashboard - handleChips event.keyCode: ', event.keyCode);
-    console.log('Dashboard - handleChips event.Code: ', event.code);
-    // console.log('Dashboard - handleChips input: ', input)
-    // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-
-    /*        
-    <script>
-    window.addEventListener("keydown", function(event) {
-    let str = "KeyboardEvent: key='" + event.key + "' | code='" +
-      event.code + "'";
-    let el = document.createElement("span");
-    el.innerHTML = str + "<br/>";
-    document.getElementById("output").appendChild(el);
-    }, true);
-    */
-
-    let ret = {};
-    if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
-      // Do whatever when esc is pressed
-      console.log('Dashboard - handleChips keyCode 12 - Space pressed! ')
-      let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
-      ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
-      ret.it = [];
-      ret.count = 0;
-      let ar = [];
-      // let tt = ['Test', 'Prova'];
-
-      list.forEach((item, i) => {
-        // if (i === idx) {
-        // console.log(Object.assign({}, {"key3": "value3"}, item));
-        // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
-        // if (!tt.includes(item)) this.setState({ allWordsFound: false });
-        ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
-        if (this.state.sign_names.includes(item)) {
-          ret.it.push(this.state.sign_array[item]);
-          ret.count += 1;
-        }
-      });
-      // Object.assign
-
-      // Object.keys(obj).some(function(k) {
-      // return obj[k] === "test1";
-      // });
-      console.log('Dashboard - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
-      console.log('Dashboard - handleChips - Tot JSON: ', ret);
+    if (event.target.value.indexOf('Nessun dato') !== -1) {
+      console.log('Dashboard - handleChips - testo vuoto');
       this.setState({
-        allWordsFound: ar.some(function(k) {return k.Found === false}),
-        sign_json: ret,
-        chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+        allWordsFound: false,
+        sign_json: {},
+        chips: []
       },this.handleCloseDialog());
+
+    } else {
+      console.log('Dashboard - handleChips event.key: ', event.key);
+      console.log('Dashboard - handleChips event.keyCode: ', event.keyCode);
+      console.log('Dashboard - handleChips event.Code: ', event.code);
+      // console.log('Dashboard - handleChips input: ', input)
+      // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+
+      /*        
+      <script>
+      window.addEventListener("keydown", function(event) {
+      let str = "KeyboardEvent: key='" + event.key + "' | code='" +
+        event.code + "'";
+      let el = document.createElement("span");
+      el.innerHTML = str + "<br/>";
+      document.getElementById("output").appendChild(el);
+      }, true);
+      */
+
+      let ret = {};
+      if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
+        // Do whatever when esc is pressed
+        console.log('Dashboard - handleChips keyCode 12 - Space pressed! ')
+        let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+        ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
+        ret.it = [];
+        ret.count = 0;
+        let ar = [];
+        // let tt = ['Test', 'Prova'];
+
+        list.forEach((item, i) => {
+          // if (i === idx) {
+          // console.log(Object.assign({}, {"key3": "value3"}, item));
+          // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
+          // if (!tt.includes(item)) this.setState({ allWordsFound: false });
+          ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
+          if (this.state.sign_names.includes(item)) {
+            ret.it.push(this.state.sign_array[item]);
+            ret.count += 1;
+          }
+        });
+        // Object.assign
+
+        // Object.keys(obj).some(function(k) {
+        // return obj[k] === "test1";
+        // });
+        console.log('Dashboard - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
+        console.log('Dashboard - handleChips - Tot JSON: ', ret);
+        this.setState({
+          allWordsFound: ar.some(function(k) {return k.Found === false}),
+          sign_json: ret,
+          chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+        },this.handleCloseDialog());
+      }
+      // this.setState({ lis_edit: event.target.value });
     }
-    // this.setState({ lis_edit: event.target.value });
   };
 
   /*
@@ -420,29 +438,50 @@ class Dashboard extends React.Component {
           this.setState({
             pickDate:         date1,
             showActions:      false,
-            ita_orig:         'Nessun dato per il giorno selezionato',
-            ita_edit:         'Nessun dato per il giorno selezionato',
-            lis_orig:         'Nessun dato per il giorno selezionato',
-            lis_edit:         'Nessun dato per il giorno selezionato'}, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            ita_orig:         'Nessun dato per la data selezionata',
+            ita_edit:         'Nessun dato per la data selezionata',
+            lis_orig:         'Nessun dato per la data selezionata',
+            lis_edit:         'Nessun dato per la data selezionata'}, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
         } else {
+          let offsets_calc = [
+              [...new Set( data.timeframe.editions[0].forecast_data
+                .filter(data => {return data.edition == 1})
+                .map(data => data.offset_days)) ],
+              [...new Set( data.timeframe.editions[0].forecast_data
+                .filter(data => {return data.edition == 3})
+                .map(data => data.offset_days)) ]
+            ];
+          console.log('handleChangePicker_dashboard - offsets_calc: ', offsets_calc);
+
+          let offsets_calc1 = [];
+          offsets_calc1[1] = [...new Set( data.timeframe.editions[0].forecast_data
+                .filter(data => {return data.edition == 1})
+                .map(data => data.offset_days)) ];
+          offsets_calc1[3] = [...new Set( data.timeframe.editions[0].forecast_data
+                .filter(data => {return data.edition == 3})
+                .map(data => data.offset_days)) ];
+          // offsets_calc1 = offsets_calc1.filter(Array);
+          console.log('handleChangePicker_dashboard - offsets_calc1: ', offsets_calc1);
+
           let orig = getTextByVersion(
             data.timeframe.editions[0].forecast_data, 
             this.state.edition_id, 
             this.state.forecast_id, 
-            data.timeframe.editions[0].offsets.min, // this.state.offset_day,
+            offsets_calc1[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day,
             1);
           let edit = getTextByVersion(
             data.timeframe.editions[0].forecast_data, 
             this.state.edition_id, 
             this.state.forecast_id, 
-            data.timeframe.editions[0].offsets.min, // this.state.offset_day, 
+            offsets_calc1[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day, 
             99);
 
           this.setState({
             pickDate:         date1,
             showActions:      true,
             testi:            data,
-            offset_day:       data.timeframe.editions[0].offsets.min,
+            offsets_calc1:    offsets_calc1,
+            offset_day:       offsets_calc1[1][0], //data.timeframe.editions[0].offsets.min,
             /*
             offsets:          [
               [...new Set( data.timeframe.editions[0].forecast_data
@@ -455,7 +494,7 @@ class Dashboard extends React.Component {
             */
             // offsets:          Array.from(Array( data.timeframe.editions[0].offsets.max - 1)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
 
-            offsets:          Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
+            offsets:          offsets_calc1[1], // Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
 
             ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
@@ -485,7 +524,12 @@ class Dashboard extends React.Component {
   handleUpdateTextAreas = (i) => {
     console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
     console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
+    console.log('handleUpdateTextAreas - this.state.offset_day: ', this.state.offset_day);
     try {
+      // this.setState({
+        // offset_day:       this.state.offsets_calc1[this.state.edition_id][0],
+      //   offsets:          this.state.offsets_calc1[this.state.edition_id]
+      // }, () => {
         // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
         let orig = getTextByVersion(
           this.state.testi.timeframe.editions[0].forecast_data,
@@ -519,6 +563,7 @@ class Dashboard extends React.Component {
         // console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
         // console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
         console.log('handleUpdateTextAreas - this.state: ', this.state);
+      // });
     } catch (error) {
       console.log('handleUpdateTextAreas catch - Error: ', error);
       // console.log('handleUpdateTextAreas catch - this.state.edition_id: ', this.state.edition_id);
