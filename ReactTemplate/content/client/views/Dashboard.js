@@ -1,11 +1,23 @@
 import React from 'react';
 import dotnetify from 'dotnetify';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+/*
 import DownloadIcon from 'material-ui/svg-icons/file/cloud-download';
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload';
 import LatencyIcon from 'material-ui/svg-icons/notification/network-check';
 import UserIcon from 'material-ui/svg-icons/action/face';
 import DateIcon from 'material-ui/svg-icons/action/alarm';
+import NavigationExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
+import FolderIcon from 'material-ui/svg-icons/file/folder-open';
+import NotificationsIcon from 'material-ui/svg-icons/social/notifications';
+// import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
+// import UploadIcon from 'material-ui/svg-icons/file/cloud-upload';
+
+import IconMenu from 'material-ui/IconMenu';
+import IconButton from 'material-ui/IconButton';
+import FontIcon from 'material-ui/FontIcon';
+import SvgIcon from 'material-ui/SvgIcon';
+*/
 import { cyan600, pink600, purple600, orange600 } from 'material-ui/styles/colors';
 import { InfoBox, CircularProgressExampleDeterminate, ChipExampleSimple, ListExampleSelectable } from '../components/dashboard/InfoBox';
 import Traffic from '../components/dashboard/Traffic';
@@ -25,31 +37,22 @@ import TextareaAutosize from 'react-textarea-autosize';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
-import IconMenu from 'material-ui/IconMenu';
-import IconButton from 'material-ui/IconButton';
-import FontIcon from 'material-ui/FontIcon';
-import SvgIcon from 'material-ui/SvgIcon';
-import NavigationExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
+
 // import MenuItem from 'material-ui/MenuItem';
 import DropDownMenu from 'material-ui/DropDownMenu';
 // import RaisedButton from 'material-ui/RaisedButton';
 import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle } from 'material-ui/Toolbar';
 import TextField from 'material-ui/TextField'
-// import {Tabs, Tab} from 'material-ui/Tabs';
+import {Tabs, Tab} from 'material-ui/Tabs';
 import FlatButton from 'material-ui/FlatButton';
-// import FontIcon from 'material-ui/FontIcon';
 // import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
-// import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
+
 import Toggle from 'material-ui/Toggle';
 // import {Snackbar, SnackbarBody } from 'material-ui/Snackbar';
 import Snackbar from 'material-ui/Snackbar';
 import CircularProgress from 'material-ui/CircularProgress';
 import Dialog from 'material-ui/Dialog';
 import Badge from 'material-ui/Badge';
-// import UploadIcon from 'material-ui/svg-icons/file/cloud-upload';
-import FolderIcon from 'material-ui/svg-icons/file/folder-open';
-// import IconButton from 'material-ui/IconButton';
-import NotificationsIcon from 'material-ui/svg-icons/social/notifications';
 
 function getTextByVersion(timeFrameJsonArray, edition_id, id_forecast_type, offset_days, version) {
   console.log('getTextByVersion - edition_id: ', edition_id);
@@ -141,7 +144,10 @@ class Dashboard extends React.Component {
       justPreviewed:            false, // Subito dopo una preview, abilita il publish che e' l'ultima fase
       dialogTitle:              "Attendere, caricamento...",
       dialogContent:            "Attendere, caricamento...",
+      
       Traffic:                  [],
+      RequestData:              {},
+      /*
       ServerUsage:              [],
       ServerUsageLabel:         [],
       Utilization:              [],
@@ -149,7 +155,7 @@ class Dashboard extends React.Component {
       UtilizationLabel1:        "Testo ITA originale",
       UtilizationLabel2:        "Testo LIS originale",
       RecentActivities:         [],
-      
+      */
       sign_json:                {},    // Oggetto "finale" da passare all'endpoint preview
       sign_names:               [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
       sign_array:               [],    // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
@@ -158,7 +164,10 @@ class Dashboard extends React.Component {
       chips:                    [],    // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
       allWordsFound:            false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
       
-      pickDate:                 new Date(), // .toISOString().split('T')[0], // Data iniziale (oggi) - Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
+      pickDate:                 new Date(), // '2020-04-21'), 
+      // .toISOString().split('T')[0], // Data iniziale (oggi)
+      // Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
+      // La data va forzata se si arriva da un link di una request
       edition_id:               1, // ID dell'edizione di default da visualizzare (ID 1, cioe' 9:00)
       forecast_id:              1, // ID del tipo di forecast di default (NORD)
       offset_day:               1, // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
@@ -184,6 +193,7 @@ class Dashboard extends React.Component {
 
       path_postergen:           null, // Path poster generato in anteprima
       path_videogen:            null, // Path video generato in anteprima
+      videoName:          '',
       /*
       centro_ita_orig:    '',
       centro_ita_edit:    '',
@@ -236,6 +246,7 @@ class Dashboard extends React.Component {
   mySignal = this.abortController.signal;
 
   componentWillUnmount() {
+    console.log('Dashboard - componentWillUnmount()');
     this.abortController.abort();
     this.vm.$destroy();
     // Component is attempting to connect to an already active 'Dashboard'.
@@ -249,6 +260,7 @@ class Dashboard extends React.Component {
     console.log('Dashboard - componentDidMount this.state.pickDate: ', this.state.pickDate);
     this.handleGetSigns();
     this.handleChangePicker_dashboard(this.state.pickDate);
+    console.log('Dashboard - componentDidMount this.state-------------------: ', this.state);
   };
 
   handleChangeEditionId = (event, index, value) => {
@@ -529,7 +541,7 @@ class Dashboard extends React.Component {
       // this.setState({
         // offset_day:       this.state.offsets_calc1[this.state.edition_id][0],
       //   offsets:          this.state.offsets_calc1[this.state.edition_id]
-      // }, () => {
+      // }, () => { // Come definire un blocco di codice come callback senza dover creare una funzione apposta
         // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
         let orig = getTextByVersion(
           this.state.testi.timeframe.editions[0].forecast_data,
@@ -658,6 +670,19 @@ class Dashboard extends React.Component {
     }, this.handleTranslate);
   };
 
+  handleOpenDialogSave = () => {
+    this.setState({
+      // dialogTitle:        "Attendere, caricamento anteprima...",
+      // dialogContent:      "Attendere, caricamento anteprima...",
+      snackbarAutoHideDuration: 20000, // 20 secondi invece di 2
+      snackbarMessage:  'Attendere, salvataggio in corso..',
+      showSnackbar: true
+      // Il fatto che il metodo chiamato come cappello al salva, traduci ecc possa attivare la dialog non significa che la attivi sempre
+      // per salva e anteprima per ora si preferisce non appesantire con la dialog bianca enorme
+      // showDialog: false
+    }, this.handleSave);
+  };
+
   handleOpenDialogPreview = () => {
     this.setState({
       // dialogTitle:        "Attendere, caricamento anteprima...",
@@ -665,7 +690,8 @@ class Dashboard extends React.Component {
       snackbarAutoHideDuration: 20000, // 20 secondi invece di 2
       snackbarMessage:  'Attendere, rendering in corso..',
       showSnackbar: true
-      // showDialog: false   // Niente dialog per l'anteprima (preview) - c'e' gia' il progress
+      // Niente dialog per l'anteprima (preview) - c'e' gia' il progress (UPDATE - ci dovrebbe essere...vediamo)
+      // showDialog: false
     }, this.handlePreview);
   };
 
@@ -705,6 +731,7 @@ class Dashboard extends React.Component {
   };
 
   handleSave = _ => {
+    /*
     this.dispatch({
       Save: {
         IdUserEdit: 2,
@@ -718,12 +745,64 @@ class Dashboard extends React.Component {
         NotesLis: "Provaaa_note_lis"
       }
     });
-    this.setState({
-      ita_edit_version: this.state.ita_edit_version+1,
-      lis_edit_version: this.state.lis_edit_version+1,
-      dirty:            false,
-      justSaved:        true
-    }, this.handleOpenSnackbar);
+    */
+
+    console.log('Dashboard handleSave - creazione text_trad');
+    fetch(
+      "/api/values/text_trad", // La chiamata text_trad salva la coppia di testi e l'aggancio nella text_trans e text_trans2
+      {
+        signal: this.mySignal,
+        method: 'POST',
+        body: "'"+JSON.stringify({
+          IdUserEdit: 3,
+          IdTextIta: this.state.ita_id,
+          TextIta: this.state.ita_edit,
+          VersionIta: this.state.ita_edit_version,
+          NotesIta: "Provaaa_note_ita dashboard " + this.state.ita_edit,
+          IdTextLis: this.state.lis_id,
+          TextLis: this.state.lis_edit,
+          VersionLis: this.state.lis_edit_version,
+          NotesLis: "Provaaa_note_lis dashboard " + this.state.lis_edit
+        })+"'",
+        headers: {'Content-Type': 'application/json'}
+      })
+    .then(res => res.json())
+    .then(p => {
+      console.log('Dasboard handleSave - Risultato text_trad POST: ', p);
+      console.log('Dashboard handleSave - creazione request - bisogna passare l\'id_text_trans nella trans2');
+      // return Ok("{\"id_text_trans\": \"" + lastId + "\"}");
+
+      fetch("/api/values/request",
+      {
+        signal: this.mySignal,
+        method: 'POST',
+        body: "'"+JSON.stringify({
+          name_video: this.state.videoName,
+          id: p.id_text_trans, // this.state.id_text_trans,
+          path_video: this.state.path_videogen, // '/path/to/video_idtrans'+this.state.id_text_trans, // L'ultimo video generato
+          notes: "Note_request id_text_trans: " + p.id_text_trans + " - Attenzione, questo e' l'id sulla trans2"
+        })+"'",
+        headers: {'Content-Type': 'application/json'}
+      })
+      .then(res => res.json())
+      .then(p => {
+        console.log('Dashboard handleSave - Risultato request POST: ', p);
+        this.setState({
+          ita_edit_version: this.state.ita_edit_version + 1,
+          lis_edit_version: this.state.lis_edit_version + 1,
+          id_text_trans:    p.id_text_trans,
+          dirty:            false,
+          justSaved:        true
+        }, this.handleOpenSnackbar);
+      })
+      .catch(error => {
+        console.log('Dashboard handleSave - POST request Error: ', error);
+      });
+    })
+    .catch(error => {
+      console.log('Dashboard handleSave - POST text_trad Error: ', error);
+    });
+    
   };
 
   handleTranslate_get = _ => {
@@ -787,15 +866,22 @@ class Dashboard extends React.Component {
    * Bisogna creare una request e aspettare il rendering
    */
   handlePreview = _ => {
-    console.log('handlePreview - creazione request');
+    console.log('Dashboard handlePreview - creazione anteprima - non salva nulla su DB');
+
+    // Attiva il progress sul player a intervalli di 1 secondo
+    var keepVideoLoading = setInterval(function() {
+      document.getElementById("meteo_video").load();
+    }, 1000);
     // let paaa = '';
+    /*
     fetch("/api/values/request",
     {
       signal: this.mySignal,
       method: 'POST',
       body: "'"+JSON.stringify({
+        name_video: this.state.videoName,
         id: this.state.id_text_trans,
-        path: '/path/to/video_idtrans'+this.state.id_text_trans,
+        path_video: this.state.path_videogen, // '/path/to/video_idtrans'+this.state.id_text_trans,
         notes: 'note_request_idtrans'+this.state.id_text_trans
       })+"'",
       headers: {'Content-Type': 'application/json'}
@@ -803,22 +889,24 @@ class Dashboard extends React.Component {
     .then(res => res.json())
     .then(p => {
       console.log('handlePreview - Risultato request POST: ', p);
-      this.dispatch({
-        Start: { // I metodi Start e Stop hanno gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
-          IdUserEdit: 2,
-          IdTextIta: this.state.ita_id,
-          VersionIta: this.state.ita_edit_version,
-          TextIta: this.state.ita_edit,
-          NotesIta: "Provaaa_note_ita",
-          IdTextLis: this.state.lis_id,
-          VersionLis: this.state.lis_edit_version,
-          TextLis: this.state.lis_edit,
-          NotesLis: "Provaaa_note_lis"
-        }
-      });
-      this.setState({
-            showVideoPreview: true
-      });
+    */
+
+    this.dispatch({
+      StartObserve: { // I metodi Start e Stop hanno gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
+        IdUserEdit: 2,
+        IdTextIta: this.state.ita_id,
+        VersionIta: this.state.ita_edit_version,
+        TextIta: this.state.ita_edit,
+        NotesIta: "Provaaa_note_ita",
+        IdTextLis: this.state.lis_id,
+        VersionLis: this.state.lis_edit_version,
+        TextLis: this.state.lis_edit,
+        NotesLis: "Provaaa_note_lis"
+      }
+    });
+    this.setState({
+      showVideoPreview: true // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
+    }, () => {
 
       fetch(
         "/api/values/preview",
@@ -828,49 +916,54 @@ class Dashboard extends React.Component {
           // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
           body: "'"+JSON.stringify(this.state.sign_json)+"'",
           headers: {'Content-Type': 'application/json'}
-        })
-        .then(res => res.json())
-        .then(p => {
-          console.log('handlePreview - Risultato preview POST: ' , p);
-          // paaa = p.output_preview;
-          this.dispatch({
-            Stop: { // Il metodo Stop ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
-              IdUserEdit: 2,
-              IdTextIta: this.state.ita_id,
-              VersionIta: this.state.ita_edit_version,
-              TextIta: this.state.ita_edit,
-              NotesIta: "Provaaa_note_ita",
-              IdTextLis: this.state.lis_id,
-              VersionLis: this.state.lis_edit_version,
-              TextLis: this.state.lis_edit,
-              NotesLis: "Provaaa_note_lis"
-            }
-          });
+      })
+      .then(res => res.json())
+      .then(p => {
+        clearInterval(keepVideoLoading);
+        console.log('handlePreview - Risultato preview POST: ' , p);
+        // paaa = p.output_preview;
+        this.dispatch({
+          StopObserve: { // Il metodo Stop ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
+            IdUserEdit: 2,
+            IdTextIta: this.state.ita_id,
+            VersionIta: this.state.ita_edit_version,
+            TextIta: this.state.ita_edit,
+            NotesIta: "Provaaa_note_ita",
+            IdTextLis: this.state.lis_id,
+            VersionLis: this.state.lis_edit_version,
+            TextLis: this.state.lis_edit,
+            NotesLis: "Provaaa_note_lis"
+          }
+        });
 
-          this.setState({
-            path_postergen: p.output_preview+'.jpg',
-            path_videogen: p.output_preview+'.mp4',
-            // showVideoPreview: true,
-            justPreviewed:    true,
-            snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
-          }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+        this.setState({
+          path_postergen: p.output_preview + '.jpg',
+          path_videogen: p.output_preview + '.mp4',
+          // showVideoPreview: true,
+          justPreviewed:    true,
+          snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
+        }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
       }).catch(error => {
         console.log('handlePreview - preview Error: ', error);
+        clearInterval(keepVideoLoading);
       });
-      /*
-      console.log('handlePreview - preview paaa: ', paaa);
+    });
+    /*
+    console.log('handlePreview - preview paaa: ', paaa);
 
-      this.setState({
-        path_videogen: paaa,
-        showVideoPreview: true,
-        justPreviewed:    true,
-        snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
-      }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
-      */
+    this.setState({
+      path_videogen: paaa,
+      showVideoPreview: true,
+      justPreviewed:    true,
+      snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
+    }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+    */
+    /*
     })
     .catch(error => {
       console.log('handlePreview - request Error: ', error);
     });
+    */
   };
 
   /**
@@ -1057,6 +1150,12 @@ class Dashboard extends React.Component {
       console.log('handleEditIta - event: ', event);
       this.setState({ dirty: true });
       this.setState({ ita_edit: event.target.value });
+      // let textVal = 
+      // const input = document.getElementById('myTextarea');  
+      // input.focus();
+      // input.setSelectionRange(2, 5);
+      
+      // this.refs.myTextarea.setSelectionRange(2, 5);
     };
 
     const handleEditLis1 = event => {
@@ -1065,10 +1164,16 @@ class Dashboard extends React.Component {
       this.setState({ lis_edit: event.target.value });
     };
 
+    const RenderConsoleLog = ({ children }) => {
+      console.log('TablePage RenderConsoleLog: ', children);
+      return false;
+    };
+
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <BasePage title="Meteo" navigation="Applicazione / Meteo">
           <div>
+          <RenderConsoleLog>{this.state}</RenderConsoleLog>
             <Toolbar style={{
                   // position: 'fixed', // 'relative', // 'fixed',
                   // height: 50, //'5%', // 57, //'5%', // 57,
@@ -1110,20 +1215,36 @@ class Dashboard extends React.Component {
                   <MenuItem value={6} primaryText="MARI" />
                   <MenuItem value={7} primaryText="TUTTA ITALIA" />
                 </DropDownMenu>
+  {
+    this.state.forecast_id == 7 ?
+                <React.Fragment>
                 <ToolbarSeparator />
                 <ToolbarTitle text="Giorno" style={{padding: 10}} />
-                <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay} disabled={this.state.forecast_id != 7}>
+                <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay}>
                   {this.state.offsets.map(item => <MenuItem key={item} value={item} primaryText={'+' + item} />)}
                   {/*
+                  disabled={this.state.forecast_id != 7}
                     <MenuItem value={1} primaryText="+1" disabled={this.state.forecast_id == 7}/>
                     <MenuItem value={2} primaryText="+2" />
                     <MenuItem value={3} primaryText="+3" />
                     <MenuItem value={4} primaryText="+4" />
                   */}
                 </DropDownMenu>
+                </React.Fragment>
+  : null}
+               
                 {/*<ToolbarSeparator />*/}
               </ToolbarGroup>
             </Toolbar>
+            <Tabs style={{width: '100%', float: 'left'}} value={this.state.forecast_id} onChange={this.handleChangeTabArea}>
+              <Tab label="NORD" value={1} disabled={this.state.forecast_id === 1}></Tab>
+              <Tab label="CENTRO E SARDEGNA" value={2} disabled={this.state.forecast_id === 2}></Tab>
+              <Tab label="SUD E SICILIA" value={3} disabled={this.state.forecast_id === 3}></Tab>
+              <Tab label="TEMPERATURE" value={4} disabled={this.state.forecast_id === 4}></Tab>
+              <Tab label="VENTI" value={5} disabled={this.state.forecast_id === 5}></Tab>
+              <Tab label="MARI" value={6} disabled={this.state.forecast_id === 6}></Tab>
+              <Tab label="TUTTA ITALIA" value={7} disabled={this.state.forecast_id === 7}></Tab>
+            </Tabs>
             {/*
             <div className="row">
               <div className="col-xs-12 col-sm-6 col-md-3 col-lg-3 m-b-15 ">
@@ -1163,10 +1284,16 @@ class Dashboard extends React.Component {
                     rows={20}
                     maxRows={25}
                     minRows={3}
+                    id='myTextarea' 
                     style={{overflowY: 'scroll'}}
                     value={this.state.ita_edit}
                     onChange={handleEditIta1}
                   />
+                  {/*this.state.User1.Name}<br />
+                  {this.state.VersionITA}<br />
+                  {this.state.Color.Red*/}<br />
+                  {this.state.TextITA}<br />
+                  {/*this.state.Reqtrans.ForecastDate*/}<br />
                 </div>
   {showActions ?
                 <div style={dashboardStyles.buttons}>
@@ -1211,23 +1338,13 @@ class Dashboard extends React.Component {
                         }, this.handleChips(event))
                     }}
                   />
+                  {this.state.TextLIS}
                 </div>
                 <div style={dashboardStyles.buttons}>
                   <ChipExampleSimple1 chips={this.state.chips}/>
                 </div>
-  {showActions ?
-                <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Salva"           onClick={this.handleSave}                style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
-                  <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
-                  {/*
-                  <br />
-                  <RaisedButton label="Pubblica"        onClick={this.handleOpenDialogPublish}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed} />
-                  */}
-                  {/*<VideoPreview poster={this.state.Poster} source={this.state.Src} onPublish={this.onVideoChildClicked} />*/}
-                </div>
-  : null}
-              </div>
 
+              </div>
               <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
 {/*
   this.state.path_video != null ? 
@@ -1239,14 +1356,35 @@ class Dashboard extends React.Component {
   :
                 <VideoPreview poster={this.state.path_postergen} source={this.state.path_videogen} onPublish={this.onVideoChildClicked} />
   : null
+  {
+this.state.path_videogen ? 
+
+  {showActions ?
+                <div style={dashboardStyles.buttons}>
+                  <RaisedButton label="Salva"           onClick={this.handleSave}                style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
+                  <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
+                  {/*
+                  <br />
+                  <RaisedButton label="Pubblica"        onClick={this.handleOpenDialogPublish}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed} />
+                  */}
+                  {/*<VideoPreview poster={this.state.Poster} source={this.state.Src} onPublish={this.onVideoChildClicked} />* / }
+                </div>
+  : null}
+              </div>
+
 */}
 
-{
-this.state.path_videogen ? 
-                <video controls autoPlay={true} width="320" height="240" key={this.state.path_videogen}><source src={this.state.path_videogen} /></video>
-:
-  null
-}
+                <video id="meteo_video" controls autoPlay={true} width="320" height="240" key={this.state.path_videogen}><source src={this.state.path_videogen} /></video>
+                <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={{float: 'left'}} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
+                <TextField
+                  hintText="Nome video..."
+                  style={{width: '95%'}}
+                  onChange={event => 
+                    this.setState({ videoName: event.target.value })
+                  }
+                />
+                <RaisedButton label="Salva"           onClick={this.handleOpenDialogSave}      style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
+
               </div>
             </div>
             <Dialog

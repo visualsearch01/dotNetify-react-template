@@ -36,7 +36,6 @@ class FormPage extends React.Component {
     */
     console.log('Form - dotnetify: ', dotnetify);
 
-
     this.state = {
       dirty:            false,
       Employees:        [],
@@ -92,16 +91,17 @@ class FormPage extends React.Component {
   */
 
   componentWillUnmount() {
-    window.removeEventListener('beforeunload', this.handleLeavePage);
+    // window.removeEventListener('beforeunload', this.handleLeavePage);
+    console.log('Form - componentWillUnmount');
     this._isMounted = false;
     this.abortController.abort();
-    // this.vm.$destroy();
+    this.vm.$destroy();
   }
 
   componentDidMount() {
     this._isMounted = true;
     console.log('Form - componentDidMount');
-    window.addEventListener('beforeunload', this.handleLeavePage);    
+    // window.addEventListener('beforeunload', this.handleLeavePage);    
   };
 
   handleLeavePage(e) {
@@ -223,9 +223,10 @@ class FormPage extends React.Component {
         marginTop: 0, //30,
         float: 'left', // 'right'
         fontWeight: 8,
+        fontSize: 20,
       },
       textfield: {  
-        fontSize: 10,
+        fontSize: 20,
       },
       buttons: {
         marginTop: 10, //30,

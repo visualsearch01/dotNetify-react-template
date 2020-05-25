@@ -16,8 +16,9 @@ namespace dotnetify_react_template
    public interface IEmployeeService
    {
       IList<EmployeeModel> GetAll();
+      LisRequest GetRequest(int id);
       IList<LisRequest> GetRequests();
-      IList<RequestInfo> GetRequestInfo();
+      IList<LisRequestTrans> GetRequestsTrans(int id);
       IList<LisSetting> GetAllSet();
       EmployeeModel GetById(int id);
       string getCs();
@@ -108,8 +109,9 @@ namespace dotnetify_react_template
       }
 
       public IList<EmployeeModel> GetAll() => _employees; // .ForEach(emp => {emp.IndirizzoEmail = _product;} ); //  .ForEach(x => { if(x.RemoveMe) someList.Remove(x); }); 
+      public LisRequest GetRequest(int id) => new LisRequestDBContext(_connectionString).GetLisRequest(id); // _requests;
       public IList<LisRequest> GetRequests() => new LisRequestDBContext(_connectionString).GetLisRequests(); // _requests;
-      public IList<RequestInfo> GetRequestInfo() => new LisRequestDBContext(_connectionString).GetLisRequestInfo(); // _requests;
+      public IList<LisRequestTrans> GetRequestsTrans(int id) => new LisRequestDBContext(_connectionString).GetLisRequestsTrans(id); // _requests;
       public IList<LisSetting> GetAllSet() => new LisSettingDBContext(_connectionString).GetLisSettings(); // _settings;
       public EmployeeModel GetById(int id) => _employees.FirstOrDefault(i => i.Id == id);
       // public EmployeeModel GetById(int id) => _employees.FirstOrDefault(i => i.Id == id);

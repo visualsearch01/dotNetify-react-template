@@ -119,7 +119,7 @@ namespace dotnetify_react_template.server.Controllers
             } // _connection closed and disposed here
             */
             string result = "{data: 'Nessun dato per il giorno selezionato'}";
-            _logger.LogInformation("ValuesController - Chiamata Get_meteo");
+            _logger.LogWarning("ValuesController - Chiamata Get_meteo");
             try
             {
                 // MySqlConnection _connection;
@@ -145,7 +145,7 @@ namespace dotnetify_react_template.server.Controllers
                 return Ok(result);
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpGet(\"meteo\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpGet(\"meteo\")]. Error: " + ex.Message);
                 Console.WriteLine("ValuesController - Error in [HttpGet(\"meteo\")]. Error: " + ex.Message);
                 return Ok("{\"meteo\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
@@ -162,7 +162,7 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult Get_meteo_id(string id)
         {
             string result = "[{'CENTRO E SARDEGNA':'Inizializzazione..'},{'NORD':'Inizializzazione..'}]";
-            _logger.LogInformation("ValuesController - Chiamata Get_meteo_id");
+            _logger.LogWarning("ValuesController - Chiamata Get_meteo_id");
             try
             {
                 using (_connection = new MySqlConnection(this._connectionString))
@@ -276,7 +276,7 @@ namespace dotnetify_react_template.server.Controllers
                 return Ok(result);
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpGet(\"meteo/id\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpGet(\"meteo/id\")]. Error: " + ex.Message);
                 Console.WriteLine("ValuesController - Error in [HttpGet(\"meteo/id\")]. Error: " + ex.Message);
                 return Ok("{\"meteo_id\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
@@ -387,7 +387,7 @@ namespace dotnetify_react_template.server.Controllers
             string result = "{data: 'Nessun segno disponibile'}";
             List<string> res = new List<string>();
             List<Item> res1 = new List<Item>();
-            _logger.LogInformation("ValuesController - Chiamata Get_sign");
+            _logger.LogWarning("ValuesController - Chiamata Get_sign");
             try
             {
                 using (_connection = new MySqlConnection(this._connectionString))
@@ -449,7 +449,7 @@ namespace dotnetify_react_template.server.Controllers
                 // res.Add(reader
                 // return new OkObjectResult(new Item { Id = 123, Name = "Hero" });
             } catch (MySqlException ex) {
-                _logger.LogInformation("ValuesController - Error in [HttpGet(\"Get_sign\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpGet(\"Get_sign\")]. Error: " + ex.Message);
                 Console.WriteLine("ValuesController - Error in [HttpGet(\"Get_sign\")]. Error: " + ex.Message);
                 return Ok("{\"sign\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
@@ -470,9 +470,9 @@ namespace dotnetify_react_template.server.Controllers
                 _connection = new MySqlConnection(this._connectionString);
                 _connection.Open();
                 
-                _logger.LogInformation("ValuesController - Chiamata Post().");
-                _logger.LogInformation("ValuesController - value:");
-                _logger.LogInformation(value);
+                _logger.LogWarning("ValuesController - Chiamata Post().");
+                _logger.LogWarning("ValuesController - value:");
+                _logger.LogWarning(value);
                 object vmArgs = null;
                 vmArgs = JsonConvert.DeserializeObject(value);
 
@@ -481,8 +481,8 @@ namespace dotnetify_react_template.server.Controllers
                 // var name= results.Name;
 
                 // object o = JsonConvert.DeserializeObject(json1);
-                _logger.LogInformation("ValuesController - vmArgs:");
-                _logger.LogInformation(vmArgs.ToString());
+                _logger.LogWarning("ValuesController - vmArgs:");
+                _logger.LogWarning(vmArgs.ToString());
                 // JavaScriptSerializer js = new JavaScriptSerializer();
                 // IDictionary<string, string> rre = js.Deserialize<IDictionary<string, string>>(value);
                 using (_connection) {
@@ -508,7 +508,7 @@ namespace dotnetify_react_template.server.Controllers
                 _connection.Close();
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"menu\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"menu\")]. Error: " + ex.Message);
             }
         }
 
@@ -524,9 +524,9 @@ namespace dotnetify_react_template.server.Controllers
                 _connection = new MySqlConnection(this._connectionString);
                 _connection.Open();
                 
-                _logger.LogInformation("ValuesController - Chiamata Post().");
-                _logger.LogInformation("ValuesController - value:");
-                _logger.LogInformation(value);
+                _logger.LogWarning("ValuesController - Chiamata Post().");
+                _logger.LogWarning("ValuesController - value:");
+                _logger.LogWarning(value);
                 object vmArgs = null;
                 vmArgs = JsonConvert.DeserializeObject(value);
 
@@ -535,8 +535,8 @@ namespace dotnetify_react_template.server.Controllers
                 // var name= results.Name;
 
                 // object o = JsonConvert.DeserializeObject(json1);
-                _logger.LogInformation("ValuesController - vmArgs:");
-                _logger.LogInformation(vmArgs.ToString());
+                _logger.LogWarning("ValuesController - vmArgs:");
+                _logger.LogWarning(vmArgs.ToString());
                 // JavaScriptSerializer js = new JavaScriptSerializer();
                 // IDictionary<string, string> rre = js.Deserialize<IDictionary<string, string>>(value);
                 using (_connection) {
@@ -555,7 +555,7 @@ namespace dotnetify_react_template.server.Controllers
                 _connection.Close();
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"setting\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"setting\")]. Error: " + ex.Message);
             }
         }
 
@@ -564,8 +564,8 @@ namespace dotnetify_react_template.server.Controllers
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         public ActionResult<string> Post_test0(int id, [FromBody] string json)
         {
-            _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            _logger.LogInformation("ValuesController POST test - json: " + json);
+            _logger.LogWarning("ValuesController POST test - post_id: " + id);
+            _logger.LogWarning("ValuesController POST test - json: " + json);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
             var idf = results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
@@ -580,8 +580,8 @@ namespace dotnetify_react_template.server.Controllers
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         public ActionResult<string> Post_test1(int id, [FromBody] string json)
         {
-            _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            // _logger.LogInformation("ValuesController POST test - value: " + value);
+            _logger.LogWarning("ValuesController POST test - post_id: " + id);
+            // _logger.LogWarning("ValuesController POST test - value: " + value);
             // dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             // var idf = results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
@@ -597,8 +597,8 @@ namespace dotnetify_react_template.server.Controllers
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         public ActionResult<string> Post_test2([FromBody] string json)
         {
-            // _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            _logger.LogInformation("ValuesController POST test - value: " + json);
+            // _logger.LogWarning("ValuesController POST test - post_id: " + id);
+            _logger.LogWarning("ValuesController POST test - value: " + json);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
             var idf = results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
@@ -614,8 +614,8 @@ namespace dotnetify_react_template.server.Controllers
         // public ActionResult<string> Post( int id, [FromBody] string value) // added FromBody as this is how you are sending the data
         public ActionResult<string> Post_test3([FromBody] PostInfo json)
         {
-            // _logger.LogInformation("ValuesController POST test - post_id: " + id);
-            _logger.LogInformation("ValuesController POST test - value: " + json);
+            // _logger.LogWarning("ValuesController POST test - post_id: " + id);
+            _logger.LogWarning("ValuesController POST test - value: " + json);
             // dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             var idf = json.value; // ["value"]; // results.value;
             // return new JsonResult<string>("rr"); // value, new JsonSerializerSettings(), Encoding.UTF8, this);
@@ -640,9 +640,10 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult InsertText([FromBody] string value)
         {
             long lastId;
-            _logger.LogInformation("ValuesController text_trad POST - value: " + value);
+            long lastItaId;
+            long lastLisId;
+            _logger.LogWarning("ValuesController text_trad POST - value: " + value);
             dynamic changes = JsonConvert.DeserializeObject<dynamic>(value);
-            // var idf = results.value;
             try
             {
                 using (_connection = new MySqlConnection(this._connectionString))
@@ -650,20 +651,55 @@ namespace dotnetify_react_template.server.Controllers
                     _connection.Open();
                     using(MySqlCommand command = new MySqlCommand()) {
                         command.Connection = _connection;
+                        Console.WriteLine("ValuesController text_trad - changes.IdTextIta: " + changes.IdTextIta);
+                        Console.WriteLine("ValuesController text_trad - changes.IdTextLis: " + changes.IdTextLis);
+                        // int.TryParse(changes.IdTextIta, out int itaId);
+                        // int.TryParse(changes.IdTextLis, out int lisId);
+                        // int itaId = changes.IdTextIta;
+                        // int lisId = changes.IdTextLis;
                         command.Parameters.Clear();
-                        command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ((select MAX(id_text_ita)+1 from (select * from lis_text_ita) AS T1), ?id_user, ?version, ?text, ?notes);";
-                        // command.Parameters.AddWithValue("?id_text_ita", changes.IdTextIta);
+                        if (changes.IdTextIta == 0) {
+                          command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ((SELECT MAX(id_text_ita)+1 FROM (select * from lis_text_ita) AS T1), ?id_user, ?version, ?text, ?notes);";
+                          // command.Parameters.AddWithValue("?id_text_ita", (changes.IdTextIta ? changes.IdTextIta : "(SELECT MAX(id_text_ita)+1 FROM (select * from lis_text_ita) AS T1)"));
+                          // Cannot implicitly convert type 'Newtonsoft.Json.Linq.JValue' to 'bool'. An explicit conversion exists (are you missing a cast?)
+                        } else {
+                          command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES (?id_text_ita, ?id_user, ?version, ?text, ?notes);";
+                          command.Parameters.AddWithValue("?id_text_ita", changes.IdTextIta);
+                        }
                         command.Parameters.AddWithValue("?id_user", changes.IdUserEdit);
-                        command.Parameters.AddWithValue("?version", 1);
+                        command.Parameters.AddWithValue("?version", (changes.VersionIta + 1)); // 1);
                         command.Parameters.AddWithValue("?text", changes.TextIta); // Gia' escapato .Replace("'", "''"));
                         command.Parameters.AddWithValue("?notes", changes.NotesIta); // .Replace("'", "''"));
                         command.ExecuteNonQuery();
+                        // lastItaId = 0;
                         Console.WriteLine("ValuesController text_trad POST - INSERT ITA OK");
+
                         command.Parameters.Clear();
-                        command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES ((select MAX(id_text_lis)+1 from (select * from lis_text_lis) AS T2), ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
-                        // command.Parameters.AddWithValue("?id_text_lis", changes.IdTextLis);
+                        command.CommandText = "SELECT MAX(id_text_ita) AS id_text_ita FROM lis_text_ita;";
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                          reader.Read(); // )
+                          lastItaId = reader.GetInt32("id_text_ita");
+                        }
+
+
+                        command.Parameters.Clear();
+                        command.CommandText = "SELECT MAX(id_text_lis) AS id_text_lis FROM lis_text_lis;";
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                          reader.Read(); // )
+                          lastLisId = reader.GetInt32("id_text_lis");
+                        }
+
+                        command.Parameters.Clear();
+                        if (changes.IdTextLis == 0) {
+                          command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES ((SELECT MAX(id_text_lis)+1 FROM (select * from lis_text_lis) AS T2), ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
+                        } else {
+                          command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES (?id_text_lis, ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
+                          command.Parameters.AddWithValue("?id_text_lis", changes.IdTextLis);
+                        }
                         command.Parameters.AddWithValue("?id_user", changes.IdUserEdit);
-                        command.Parameters.AddWithValue("?version", 1);
+                        command.Parameters.AddWithValue("?version", (changes.VersionLis + 1)); // 1);
                         command.Parameters.AddWithValue("?text", changes.TextLis); // .Replace("'", "''"));
                         command.Parameters.AddWithValue("?notes", changes.NotesLis); //.Replace("'", "''"));
                         command.ExecuteNonQuery();
@@ -671,21 +707,28 @@ namespace dotnetify_react_template.server.Controllers
                         command.Parameters.Clear();
                         command.CommandText = "INSERT INTO lis_text_trans (id_text_ita, id_text_lis) VALUES ((SELECT MAX(id_text_ita) FROM lis_text_ita AS T3), (SELECT MAX(id_text_lis) FROM lis_text_lis AS T4));";
                         command.ExecuteNonQuery();
+                        Console.WriteLine("ValuesController text_trad POST - INSERT TRANS OK");
+                        command.Parameters.Clear();
+                        command.CommandText = "INSERT INTO lis_text_trans2 (id_text_ita, version_ita, id_text_lis, version_lis) VALUES ((SELECT MAX(id_text_ita) FROM lis_text_ita AS T3), ?vita, (SELECT MAX(id_text_lis) FROM lis_text_lis AS T4), ?vlis);";
+                        command.Parameters.AddWithValue("?vita", (changes.VersionIta + 1)); // 1);
+                        command.Parameters.AddWithValue("?vlis", (changes.VersionLis + 1)); // 1);
+                        // ValuesController - Error in [HttpPost"text_trad")]. Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '_binary '5'' at line 1
+                        command.ExecuteNonQuery();
                         // dbcmd.ExecuteNonQuery();
                         lastId = command.LastInsertedId;
-                        Console.WriteLine("ValuesController text_trad POST - INSERT TRANS OK");
+                        Console.WriteLine("ValuesController text_trad POST - INSERT TRANS2 OK, lastId: " + lastId);
                     }
                     _connection.Close();
                 }
-                return Ok("{\"id_text_trans\": \"" + lastId + "\"}");
+                return Ok("{\"id_text_trans\": \"" + lastId + "\",\"id_text_ita\": \"" + lastItaId + "\",\"id_text_lis\": \"" + lastLisId + "\"}");
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPost\"text_trad\")]. Error: " + ex.Message);
-                Console.WriteLine("ValuesController - Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
-                return Ok("{\"text_trad\": \"Non Okei_mysqlex\"}");
+                _logger.LogWarning("ValuesController - MySQL Error in [HttpPost\"text_trad\")]. Error: " + ex.Message);
+                Console.WriteLine("ValuesController - MySQL Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
+                return Ok("{\"id_text_trans\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
-                Console.WriteLine(ex.Message);
-                return Ok("{\"text_trad\": \"Non Okei_ex\"}");
+                Console.WriteLine("ValuesController - Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
+                return Ok("{\"id_text_trans\": \"Non Okei_ex\"}");
             }
             // return content;
         }
@@ -698,7 +741,7 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult InsertRequest([FromBody] string value)
         {
             long lastId;
-            _logger.LogInformation("ValuesController POST - value: " + value);
+            _logger.LogWarning("ValuesController POST - value: " + value);
             dynamic changes = JsonConvert.DeserializeObject<dynamic>(value);
             // var idf = changes.value;
             try {
@@ -707,9 +750,10 @@ namespace dotnetify_react_template.server.Controllers
                     using(MySqlCommand command = new MySqlCommand()) {
                         command.Connection = _connection;
                         command.Parameters.Clear();
-                        command.CommandText = "INSERT INTO lis_request ( id_translation, path_video, notes) VALUES (?id, ?path, ?notes)";
+                        command.CommandText = "INSERT INTO lis_request (name_request, id_translation, path_video, notes) VALUES (?name, ?id, ?path, ?notes)";
+                        command.Parameters.AddWithValue("?name", changes.name_video);
                         command.Parameters.AddWithValue("?id", changes.id);
-                        command.Parameters.AddWithValue("?path", changes.path);
+                        command.Parameters.AddWithValue("?path", changes.path_video);
                         // command.Parameters.AddWithValue("?url_menu", "/path/to/menuvalue");
                         command.Parameters.AddWithValue("?notes", changes.notes);
                         command.ExecuteNonQuery();
@@ -729,7 +773,7 @@ namespace dotnetify_react_template.server.Controllers
                 return Ok("{\"id_request\": \"" + lastId + "\"}");
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPost\"request\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost\"request\")]. Error: " + ex.Message);
                 Console.WriteLine("ValuesController - Error in [HttpPost(\"request\")]. Error: " + ex.Message);
                 return Ok("{\"request\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
@@ -746,7 +790,7 @@ namespace dotnetify_react_template.server.Controllers
         [HttpPost("translate")]
         public ActionResult Post_translate([FromBody] string json) //  [FromBody] string b)
         {
-            _logger.LogInformation("ValuesController.cs - POST translate - value: " + json);
+            _logger.LogWarning("ValuesController.cs - POST translate - value: " + json);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
             var translateText = results.value;
             Console.WriteLine("ValuesController.cs - POST translate - translateText: " + translateText);
@@ -773,12 +817,12 @@ namespace dotnetify_react_template.server.Controllers
                 // return Ok("{\"expiresAt\": \"2015-11-03T10:15:57.000Z\", \"status\": \"SUCCESS\", \"relayState\": \"/myapp/some/deep/link/i/want/to/return/to\", \"sessionToken\": \"00Fpzf4en68pCXTsMjcX8JPMctzN2Wiw4LDOBL_9pe\", \"_embedded\": { \"user\": { \"id\": \"00ub0oNGTSWTBKOLGLNR\", \"passwordChanged\": \"2015-09-08T20:14:45.000Z\", \"profile\": { \"login\": \"dade.murphy@example.com\", \"firstName\": \"Dade\", \"lastName\": \"Murphy\", \"locale\": \"en_US\", \"timeZone\": \"America/Los_Angeles\" } } } } ");
                 // return Ok(ff); // new string[] { "value1", "value2_" + product };
             } catch(InvalidOperationException ex){
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
                 Console.WriteLine(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
             }
             catch(Exception ex) {
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
                 Console.WriteLine(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
             }
@@ -789,24 +833,24 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult Preview1([FromBody] string value) //  [FromBody] string b)
         {
             try {
-                //_logger.LogInformation("ValuesController POST preview - value: " + value);
+                //_logger.LogWarning("ValuesController POST preview - value: " + value);
                 Console.WriteLine("ValuesController.cs - POST preview - value: " + value);
                 dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
                 // string sentenceText = results.value; // .Replace("=","");
-                // _logger.LogInformation("ValuesController POST publish - value: ");
-                // _logger.LogInformation(idf);
+                // _logger.LogWarning("ValuesController POST publish - value: ");
+                // _logger.LogWarning(idf);
                 Console.WriteLine("ValuesController.cs - POST preview - deserialize result: " + results);
 
-                // return Ok("{\"output_preview\": \"" + sentenceText + "_/video_gen/mp4/output_2sec.mp4\"}");
-                return Ok("{\"output_preview\": \"video_gen/mp4/" + results.tot + "\"}");
-                // return Ok("{\"output_preview\": \"video_gen/mp4/output_5.333sec.mp4\"}");
+                // return Ok("{\"output_preview\": \"" + sentenceText + "_//video_gen/mp4/output_2sec.mp4\"}");
+                return Ok("{\"output_preview\": \"/video_gen/mp4/" + results.tot + "\"}");
+                // return Ok("{\"output_preview\": \"/video_gen/mp4/output_5.333sec.mp4\"}");
             } catch(InvalidOperationException ex){
-                // _logger.LogInformation("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
+                // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
                 Console.WriteLine(ex.Message);
                 return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
             }
             catch(Exception ex) {
-                // _logger.LogInformation("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
+                // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
                 Console.WriteLine(ex.Message);
                 return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
             }
@@ -816,7 +860,7 @@ namespace dotnetify_react_template.server.Controllers
         [HttpPost("preview")]
         public ActionResult Preview([FromBody] string value) //  [FromBody] string b)
         {
-            //_logger.LogInformation("ValuesController POST preview - value: " + value);
+            //_logger.LogWarning("ValuesController POST preview - value: " + value);
             Console.WriteLine("ValuesController.cs - POST preview - value: " + value);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
 
@@ -827,8 +871,8 @@ namespace dotnetify_react_template.server.Controllers
             // ret.it = [];
 
             // string sentenceText = results.value; // .Replace("=","");
-            // _logger.LogInformation("ValuesController POST publish - value: ");
-            // _logger.LogInformation(idf);
+            // _logger.LogWarning("ValuesController POST publish - value: ");
+            // _logger.LogWarning(idf);
             // Console.WriteLine("ValuesController.cs - POST preview - sentenceText enc base64 UTF8: " + sentenceText);
 
             /*
@@ -855,7 +899,7 @@ namespace dotnetify_react_template.server.Controllers
                 returnValue = System.Text.Encoding.UTF8.GetString(encodedDataAsBytes);
             }
             catch(Exception ex) {
-                _logger.LogInformation("ValuesController - Error in [HttpPost(\"preview\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"preview\")]. Error: " + ex.Message);
                 Console.WriteLine("ValuesController - Error in [HttpPost(\"preview\")]. Error: " + ex.Message);
                 // TESTTTTT______mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere
                 byte[] encodedDataAsBytes = System.Convert.FromBase64String("VEVTVFRUVFRfX19fX19tb3N0cmEgcGVyZmV0dG8gYmFtYmlubyBhbHRvIHR1dHRpX2VfZHVlIGNpYXNjdW5vIHNwaWVnYXJlIGFjY29yZG8gZXNwZXJpZW56YSBzdW8gYXZlcmU=");
@@ -874,190 +918,189 @@ namespace dotnetify_react_template.server.Controllers
             // Console.WriteLine("ValuesController.cs - POST preview - sentenceText dec base64 UTF8: " + returnValue);
 
             try {
-                string xml = @"
-                    <?xml version=""1.0"" encoding=""UTF-8""?>
-                    <ALEAOutput>
-                        <newSentence italianText=""" + results.tot + @""" lemmaNumber=""11"" text="""" writtenLISSentence=""" + results.tot + @""">
-                            <newLemma endTime="""" idAtlasSign=""01459"" lemma=""" + results.it[0].name + @""" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""03116"" lemma=""perfetto"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""00247"" lemma=""bambino"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""03006"" lemma=""alto"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""02477"" lemma=""tutti_e_due"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""00487"" lemma=""ciascuno"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""02266"" lemma=""spiegare"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""00025"" lemma=""accordo"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""00835"" lemma=""esperienza"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""02826"" lemma=""suo"" startTime="""" />
-                            <newLemma endTime="""" idAtlasSign=""00224"" lemma=""avere"" startTime="""" />
-                        </newSentence>
-                    </ALEAOutput>
-                ";
-                string fileName = "sentence_" + DateTime.Now.ToString("MM_dd_yyyy_HH_mm_ss");
-                // string xmlName = _savePath + @"\" + fileName + ".xml";
-                // System.IO.File.WriteAllText(xmlName, xml);
+              /*
+              string xml = @"
+                  <?xml version=""1.0"" encoding=""UTF-8""?>
+                  <ALEAOutput>
+                      <newSentence italianText=""" + results.tot + @""" lemmaNumber=""11"" text="""" writtenLISSentence=""" + results.tot + @""">
+                          <newLemma endTime="""" idAtlasSign=""01459"" lemma=""" + results.it[0].name + @""" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""03116"" lemma=""perfetto"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""00247"" lemma=""bambino"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""03006"" lemma=""alto"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""02477"" lemma=""tutti_e_due"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""00487"" lemma=""ciascuno"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""02266"" lemma=""spiegare"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""00025"" lemma=""accordo"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""00835"" lemma=""esperienza"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""02826"" lemma=""suo"" startTime="""" />
+                          <newLemma endTime="""" idAtlasSign=""00224"" lemma=""avere"" startTime="""" />
+                      </newSentence>
+                  </ALEAOutput>
+              ";
+              */
+              string fileName = "sentence_" + DateTime.Now.ToString("MM_dd_yyyy_HH_mm_ss");
+              // string xmlName = _savePath + @"\" + fileName + ".xml";
+              // System.IO.File.WriteAllText(xmlName, xml);
 
-                string xmlName = _savePath + @"\" + fileName + "_ok.xml"; // Scrivi direttamente il file xml giusto invece del mockup
-                // System.IO.File.WriteAllText(xmlName, xml); // Disabilita scrittura mockup
+              string xmlName = _savePath + @"\" + fileName + "_ok.xml"; // Scrivi direttamente il file xml giusto invece del mockup
+              // System.IO.File.WriteAllText(xmlName, xml); // Disabilita scrittura mockup
 
+              /*
+              <?xml version="1.0" encoding="UTF-8"?>
+              <ALEAOutput>
+                  <newSentence italianText="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero" lemmaNumber="11" text="" writtenLISSentence="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero">
+                      <newLemma endTime="" idAtlasSign="01459" lemma="mattino" startTime="" />
+                      <newLemma endTime="" idAtlasSign="03116" lemma="perfetto" startTime="" />
+                      <newLemma endTime="" idAtlasSign="00247" lemma="bambino" startTime="" />
+                      <newLemma endTime="" idAtlasSign="03006" lemma="alto" startTime="" />
+                      <newLemma endTime="" idAtlasSign="02477" lemma="tutti_e_due" startTime="" />
+                      <newLemma endTime="" idAtlasSign="00487" lemma="ciascuno" startTime="" />
+                      <newLemma endTime="" idAtlasSign="02266" lemma="spiegare" startTime="" />
+                      <newLemma endTime="" idAtlasSign="00025" lemma="accordo" startTime="" />
+                      <newLemma endTime="" idAtlasSign="00835" lemma="esperienza" startTime="" />
+                      <newLemma endTime="" idAtlasSign="02826" lemma="suo" startTime="" />
+                      <newLemma endTime="" idAtlasSign="00224" lemma="avere" startTime="" />
+                  </newSentence>
+              </ALEAOutput>
+              */
+              XDocument sentenceDocument = new XDocument(new XDeclaration("1.0", "UTF-8", null));
 
-                /*
+              // At this point RejectedXmlList.Root is still null, so add a unique root element.
+              XElement root = new XElement("ALEAOutput");
 
+              XElement sentence =
+                new XElement("newSentence",
+                new XAttribute("italianText", results.tot), 
+                new XAttribute("lemmaNumber", results.count),
+                new XAttribute("text", results.tot),
+                new XAttribute("writtenLISSentence", results.tot));
 
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <ALEAOutput>
-                        <newSentence italianText="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero" lemmaNumber="11" text="" writtenLISSentence="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero">
-                            <newLemma endTime="" idAtlasSign="01459" lemma="mattino" startTime="" />
-                            <newLemma endTime="" idAtlasSign="03116" lemma="perfetto" startTime="" />
-                            <newLemma endTime="" idAtlasSign="00247" lemma="bambino" startTime="" />
-                            <newLemma endTime="" idAtlasSign="03006" lemma="alto" startTime="" />
-                            <newLemma endTime="" idAtlasSign="02477" lemma="tutti_e_due" startTime="" />
-                            <newLemma endTime="" idAtlasSign="00487" lemma="ciascuno" startTime="" />
-                            <newLemma endTime="" idAtlasSign="02266" lemma="spiegare" startTime="" />
-                            <newLemma endTime="" idAtlasSign="00025" lemma="accordo" startTime="" />
-                            <newLemma endTime="" idAtlasSign="00835" lemma="esperienza" startTime="" />
-                            <newLemma endTime="" idAtlasSign="02826" lemma="suo" startTime="" />
-                            <newLemma endTime="" idAtlasSign="00224" lemma="avere" startTime="" />
-                        </newSentence>
-                    </ALEAOutput>
-                
+              // RejectedXmlList.Add(roo);
+              // Add elements for each Parameter to the root element
+              // foreach (Parameter Myparameter in Parameters)
+              /*
+                              e":"","validatore":""},{"id":573,"name":"pioggia","name_player":"pioggia.lis","name_editor":"28600-pioggia-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":240,"name":"diminuire","name_player":"diminuire.lis","name_editor":"11950-diminuire-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":729,"name":"tempo","name_player":"tempo.lis","name_editor":"36400-tempo-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":165,"name":"brutto","name_player":"brutto.lis","name_editor":"08200-brutto-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":118,"name":"area","name_player":"area.lis","name_editor":"05850-area-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":92,"name":"altro","name_player":"altro.lis","name_editor":"04550-altro-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""}],"count":12}
+              Cannot convert type 'Newtonsoft.Json.Linq.JObject' to 'dotnetify_react_template.server.Controllers.ChipElement'
+              infoinfo: Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker[2]
+                  Executed action method dotnetify_react_template.server.Controllers.ValuesController.Preview (dotnetify_react_template), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 488.147ms.
+              : Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker[2]
+                  Executed action method dotnetify_react_template.server.Controllers.ValuesController.Preview (dotnetify_react_template), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 488.147ms.
+              infoinfo: Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor[1]
+              */
 
-                */
-                XDocument sentenceDocument = new XDocument(new XDeclaration("1.0", "UTF-8", null));
+              foreach (ChipElement y in chips)
+              {
+                  if (true)
+                  {
+                      // XElement xelement = new XElement(Myparameter.ParameterName, CurrentData.ToString());
+                      // RejectedXmlList.Root.Add(xelement);
+                      sentence.Add(new XElement("newLemma", 
+                          new XAttribute("endTime", ""), 
+                          new XAttribute("idAtlasSign", y.id),
+                          new XAttribute("lemma", y.name),
+                          new XAttribute("startTime", "") ));
+                  }
+              }
+              root.Add(sentence);
+              sentenceDocument.Add(root);
+              Console.WriteLine("ValuesController.cs - xml2:");
+              // Console.WriteLine(RejectedXmlList);
+              var sw1 = new StringWriter();
+              root.Save(sw1);
+              string result1 = sw1.GetStringBuilder().ToString();
+              Console.WriteLine(result1);
 
-                // At this point RejectedXmlList.Root is still null, so add a unique root element.
-                XElement root = new XElement("ALEAOutput");
+              // The XDeclaration will be available when you use one of the XDocument.Save methods. For example:
 
-                XElement sentence = new XElement("newSentence",
-                            new XAttribute("italianText", results.tot), 
-                            new XAttribute("lemmaNumber", results.count),
-                            new XAttribute("text", results.tot),
-                            new XAttribute("writtenLISSentence", results.tot));
+              string path = Path.Combine(_savePath, fileName + "_ok.xml");
+              sentenceDocument.Save(path);
 
-                // RejectedXmlList.Add(roo);
-                // Add elements for each Parameter to the root element
-                // foreach (Parameter Myparameter in Parameters)
-                /*
-                                e":"","validatore":""},{"id":573,"name":"pioggia","name_player":"pioggia.lis","name_editor":"28600-pioggia-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":240,"name":"diminuire","name_player":"diminuire.lis","name_editor":"11950-diminuire-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":729,"name":"tempo","name_player":"tempo.lis","name_editor":"36400-tempo-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":165,"name":"brutto","name_player":"brutto.lis","name_editor":"08200-brutto-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":118,"name":"area","name_player":"area.lis","name_editor":"05850-area-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""},{"id":92,"name":"altro","name_player":"altro.lis","name_editor":"04550-altro-","code":"","contesto":"","progetto":"","contributo":"","inteprete":"","animatore":"","validatore":""}],"count":12}
-                Cannot convert type 'Newtonsoft.Json.Linq.JObject' to 'dotnetify_react_template.server.Controllers.ChipElement'
-                infoinfo: Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker[2]
-                    Executed action method dotnetify_react_template.server.Controllers.ValuesController.Preview (dotnetify_react_template), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 488.147ms.
-                : Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker[2]
-                    Executed action method dotnetify_react_template.server.Controllers.ValuesController.Preview (dotnetify_react_template), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 488.147ms.
-                infoinfo: Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor[1]
-                */
-                foreach (ChipElement y in chips)
-                {
-                    if (true)
-                    {
-                        // XElement xelement = new XElement(Myparameter.ParameterName, CurrentData.ToString());
-                        // RejectedXmlList.Root.Add(xelement);
-                        sentence.Add(new XElement("newLemma", 
-                            new XAttribute("endTime", ""), 
-                            new XAttribute("idAtlasSign", y.id),
-                            new XAttribute("lemma", y.name),
-                            new XAttribute("startTime", "") ));
-                    }
-                }
-                root.Add(sentence);
-                sentenceDocument.Add(root);
-                Console.WriteLine("ValuesController.cs - xml2:");
-                // Console.WriteLine(RejectedXmlList);
-                var sw1 = new StringWriter();
-                root.Save(sw1);
-                string result1 = sw1.GetStringBuilder().ToString();
-                Console.WriteLine(result1);
+              /*
+              <?xml version="1.0" encoding="utf-8"?>
+              <ALEAOutput>
+              <newSentence italianText="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero" lemmaNumber="10" text="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero" writtenLISSentence="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero">
+                  <newLemma endTime="" idAtlasSign="440" lemma="mattino" startTime="" />
+                  <newLemma endTime="" idAtlasSign="595" lemma="presto" startTime="" />
+                  <newLemma endTime="" idAtlasSign="440" lemma="mattino" startTime="" />
+                  <newLemma endTime="" idAtlasSign="571" lemma="piemonte" startTime="" />
+                  <newLemma endTime="" idAtlasSign="702" lemma="sud" startTime="" />
+                  <newLemma endTime="" idAtlasSign="449" lemma="metri" startTime="" />
+                  <newLemma endTime="" idAtlasSign="508" lemma="nuvolosita" startTime="" />
+                  <newLemma endTime="" idAtlasSign="491" lemma="neve" startTime="" />
+                  <newLemma endTime="" idAtlasSign="794" lemma="vento" startTime="" />
+                  <newLemma endTime="" idAtlasSign="398" lemma="leggero" startTime="" />
+              </newSentence>
+              </ALEAOutput>
+              */
 
-                // The XDeclaration will be available when you use one of the XDocument.Save methods. For example:
+              try {
+                  ProcessStartInfo startInfo = new ProcessStartInfo();
+                  startInfo.FileName = @"powershell.exe";
+                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' """;
+                  startInfo.RedirectStandardOutput = true;
+                  startInfo.RedirectStandardError = true;
+                  startInfo.UseShellExecute = false;
+                  startInfo.CreateNoWindow = true;
+                  
+                  Process process = new Process();
+                  process.StartInfo = startInfo;
+                  process.Start();
 
-                string path = Path.Combine(_savePath, fileName + "_ok.xml");
-                sentenceDocument.Save(path);
+                  /*
+                  Process p = new Process();
+                  p.StartInfo.RedirectStandardOutput = true;
+                  p.StartInfo.RedirectStandardError = true;         
+                  p.StartInfo.UseShellExecute = false; 
 
-                /*
-                <?xml version="1.0" encoding="utf-8"?>
-                <ALEAOutput>
-                <newSentence italianText="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero" lemmaNumber="10" text="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero" writtenLISSentence="mattino presto mattino piemonte sud metri nuvolosita neve vento leggero">
-                    <newLemma endTime="" idAtlasSign="440" lemma="mattino" startTime="" />
-                    <newLemma endTime="" idAtlasSign="595" lemma="presto" startTime="" />
-                    <newLemma endTime="" idAtlasSign="440" lemma="mattino" startTime="" />
-                    <newLemma endTime="" idAtlasSign="571" lemma="piemonte" startTime="" />
-                    <newLemma endTime="" idAtlasSign="702" lemma="sud" startTime="" />
-                    <newLemma endTime="" idAtlasSign="449" lemma="metri" startTime="" />
-                    <newLemma endTime="" idAtlasSign="508" lemma="nuvolosita" startTime="" />
-                    <newLemma endTime="" idAtlasSign="491" lemma="neve" startTime="" />
-                    <newLemma endTime="" idAtlasSign="794" lemma="vento" startTime="" />
-                    <newLemma endTime="" idAtlasSign="398" lemma="leggero" startTime="" />
-                </newSentence>
-                </ALEAOutput>
-                */
+                  StringBuilder sb = new StringBuilder("/COVERAGE ");
+                  sb.Append("helloclass.exe");
+                  p.StartInfo.FileName = "vsinstr.exe";
+                  p.StartInfo.Arguments = sb.ToString();
+                  p.Start();
 
-                try {
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.FileName = @"powershell.exe";
-                    startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' """;
-                    startInfo.RedirectStandardOutput = true;
-                    startInfo.RedirectStandardError = true;
-                    startInfo.UseShellExecute = false;
-                    startInfo.CreateNoWindow = true;
-                    
-                    Process process = new Process();
-                    process.StartInfo = startInfo;
-                    process.Start();
+                  string stdoutx = p.StandardOutput.ReadToEnd();         
+                  string stderrx = p.StandardError.ReadToEnd();             
+                  p.WaitForExit();
 
-                    /*
-                    Process p = new Process();
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.StartInfo.RedirectStandardError = true;         
-                    p.StartInfo.UseShellExecute = false; 
+                  Console.WriteLine("Exit code : {0}", p.ExitCode);
+                  Console.WriteLine("Stdout : {0}", stdoutx);
+                  Console.WriteLine("Stderr : {0}", stderrx);
+                  */
+                  string standardOutput = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
+                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput);
 
-                    StringBuilder sb = new StringBuilder("/COVERAGE ");
-                    sb.Append("helloclass.exe");
-                    p.StartInfo.FileName = "vsinstr.exe";
-                    p.StartInfo.Arguments = sb.ToString();
-                    p.Start();
+                  string standardError = process.StandardError.ReadToEnd().Replace(System.Environment.NewLine, "");
+                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardError: " + standardError);
 
-                    string stdoutx = p.StandardOutput.ReadToEnd();         
-                    string stderrx = p.StandardError.ReadToEnd();             
-                    p.WaitForExit();
+                  process.WaitForExit();
 
-                    Console.WriteLine("Exit code : {0}", p.ExitCode);
-                    Console.WriteLine("Stdout : {0}", stdoutx);
-                    Console.WriteLine("Stderr : {0}", stderrx);
-                    */
-                    string standardOutput = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                    Console.WriteLine("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput);
+                  process.Dispose();
+                  GC.Collect(); // Just for the diagnostics....
 
-                    string standardError = process.StandardError.ReadToEnd().Replace(System.Environment.NewLine, "");
-                    Console.WriteLine("ValuesController.cs - POST preview powershell StandardError: " + standardError);
+                  // return Ok("{\"output_preview\": \"" + sentenceText + "_//video_gen/mp4/output_2sec.mp4\"}");
+                  return Ok("{\"output_preview\": \"/video_gen/mp4/" + standardOutput + "\"}");
+                  // return Ok("{\"output_preview\": \"/video_gen/mp4/output_5.333sec.mp4\"}");
 
-                    process.WaitForExit();
+              } catch(InvalidOperationException ex){
+                  // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
+                  Console.WriteLine(ex.Message);
+                  return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
+              } catch(Exception ex) {
+                  // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
+                  Console.WriteLine(ex.Message);
+                  return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
+              }
 
-                    process.Dispose();
-                    GC.Collect(); // Just for the diagnostics....
-
-                    // return Ok("{\"output_preview\": \"" + sentenceText + "_/video_gen/mp4/output_2sec.mp4\"}");
-                    return Ok("{\"output_preview\": \"video_gen/mp4/" + standardOutput + "\"}");
-                    // return Ok("{\"output_preview\": \"video_gen/mp4/output_5.333sec.mp4\"}");
-
-                } catch(InvalidOperationException ex){
-                    // _logger.LogInformation("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                    Console.WriteLine(ex.Message);
-                    return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
-                } catch(Exception ex) {
-                    // _logger.LogInformation("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                    Console.WriteLine(ex.Message);
-                    return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
-                }
-
-            } catch(InvalidOperationException ex){
-                // _logger.LogInformation("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                Console.WriteLine(ex.Message);
-                return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
-            }
-            catch(Exception ex) {
-                // _logger.LogInformation("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                Console.WriteLine(ex.Message);
-                return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
-            }
+          } catch(InvalidOperationException ex){
+              // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
+              Console.WriteLine(ex.Message);
+              return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
+          }
+          catch(Exception ex) {
+              // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
+              Console.WriteLine(ex.Message);
+              return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
+          }
         }
         
         [HttpPost("upload_1")]
@@ -1093,7 +1136,7 @@ namespace dotnetify_react_template.server.Controllers
             {
                 if (formFile.Length > 0)
                 {
-                    _logger.LogInformation("ValuesController - upload: " + formFile);
+                    _logger.LogWarning("ValuesController - upload: " + formFile);
                     Console.WriteLine("ValuesController - upload: " + formFile);
                     uploadFilePath = Path.Combine(
                         Directory.GetCurrentDirectory(),
@@ -1105,7 +1148,7 @@ namespace dotnetify_react_template.server.Controllers
                         await formFile.CopyToAsync(stream);
                     }
                 } else {
-                    _logger.LogInformation("ValuesController - upload: no files");
+                    _logger.LogWarning("ValuesController - upload: no files");
                     Console.WriteLine("ValuesController - upload KO:");
                     return Ok(new { count = 0, uploadFileSize = 0, uploadFilePath = "no files" });
                 }
@@ -1120,8 +1163,8 @@ namespace dotnetify_react_template.server.Controllers
         // public void Put(int id, [FromBody] string value)
         public void UpdateMenu(int id, [FromBody] string value)
         {
-            _logger.LogInformation("ValuesController PUT - post_id: " + id);
-            _logger.LogInformation("ValuesController PUT - value: " + value);
+            _logger.LogWarning("ValuesController PUT - post_id: " + id);
+            _logger.LogWarning("ValuesController PUT - value: " + value);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             var idf = results.value;
             try {
@@ -1142,7 +1185,7 @@ namespace dotnetify_react_template.server.Controllers
                 _connection.Close();
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPut(\"menu\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPut(\"menu\")]. Error: " + ex.Message);
             }
         }
 
@@ -1151,8 +1194,8 @@ namespace dotnetify_react_template.server.Controllers
         // public void Put(int id, [FromBody] string value)
         public void UpdateSetting(string id, [FromBody] string value)
         {
-            _logger.LogInformation("ValuesController PUT - post_id: " + id);
-            _logger.LogInformation("ValuesController PUT - value: " + value);
+            _logger.LogWarning("ValuesController PUT - post_id: " + id);
+            _logger.LogWarning("ValuesController PUT - value: " + value);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             var idf = results.value;
 
@@ -1174,7 +1217,7 @@ namespace dotnetify_react_template.server.Controllers
                 _connection.Close();
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogInformation("ValuesController - Error in [HttpPut(\"setting\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPut(\"setting\")]. Error: " + ex.Message);
             }
         }
 

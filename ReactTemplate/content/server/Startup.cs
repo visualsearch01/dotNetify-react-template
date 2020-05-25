@@ -31,9 +31,10 @@ namespace dotnetify_react_template
    {
       private IConfiguration _configuration { get; }
       private string _connectionString;
-      
-      public Startup(IHostingEnvironment env)
-      {
+      ILogger _logger;
+
+      public Startup(IHostingEnvironment env, ILogger<Startup> logger) {
+        _logger = logger;
          var builder = new ConfigurationBuilder()
             .SetBasePath(env.ContentRootPath)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -49,14 +50,14 @@ namespace dotnetify_react_template
          Console.WriteLine("Startup.cs - costruttore, configurazione: " + _configuration.ToString());
       }
       */
-      public void ConfigureServices(IServiceCollection services)
-      {
+      public void ConfigureServices(IServiceCollection services) {
          // Add OpenID Connect server to produce JWT access tokens.
          // string connectionString = _configuration["ConnectionStrings:lis"];
 
          // La stringa di connesione viene passata solo all'istanza auth server e all EmployeeService, cosi' che le query vengano eseguite solo da li'
          _connectionString =  _configuration.GetConnectionString("lis"); //  _configuration.GetValue<string>("ConnectionStrings:lis");
-         Console.WriteLine("Startup.cs - ConfigureServices, stringa DB: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
+         _logger.LogWarning("Startup!");
+         _logger.LogWarning("Startup.cs - ConfigureServices, stringa DB: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
          // services.AddDbContext<HouserContext>(o => o.UseMySql(connectionString));
          // services.AddDbContext<ApplicationDbContext>(options =>
          // options.UseMySQL(Configuration.GetConnectionString("ConnectionStrings:lis")));
@@ -134,8 +135,7 @@ namespace dotnetify_react_template
                 .AddOAuthValidation();
         }
       */
-      public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-      {
+      public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) {
          loggerFactory.AddConsole(_configuration.GetSection("Logging"));
          loggerFactory.AddDebug();
 
@@ -198,6 +198,7 @@ namespace dotnetify_react_template
 
          app.UseMvc(routes =>
          {
+            Console.WriteLine("Startup.cs - UseMvc routes: " + routes);
             routes.MapRoute(
                name: "api",
                // template: "api/{controller=Values}/{action=values}/{id?}"

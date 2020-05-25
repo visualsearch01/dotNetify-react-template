@@ -29,7 +29,7 @@ import { white } from 'material-ui/styles/colors';
 import auth from '../auth';
 
 const Header = props => {
-  const { styles, onSidebarToggle, onDeliverableToggle, deliv, time } = props;
+  const { styles, onSidebarToggle, onDeliverableToggle, deliv, servertime } = props;
   console.log('Header - props.deliv: ', deliv);
   const style = {
     appBar: {
@@ -84,7 +84,7 @@ const Header = props => {
         }
         iconElementRight={
           <div style={style.iconsRightContainer}>
-            <label>Data {/*time*/}</label>
+            <label>{servertime}</label>
             <IconMenu
               color={white}
               iconButtonElement={

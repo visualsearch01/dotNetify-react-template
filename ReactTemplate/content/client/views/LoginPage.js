@@ -13,6 +13,23 @@ class LoginPage extends React.Component {
     // this.state = { user: 'guest', password: 'dotnetify' };
     this.state = { user: 'rai', password: 'rai' };
   }
+  _isMounted = false;
+  abortController = new AbortController();
+  mySignal = this.abortController.signal;
+  componentWillUnmount() {
+    // window.removeEventListener('beforeunload', this.handleLeavePage);
+    console.log('Form - componentWillUnmount');
+    this._isMounted = false;
+    this.abortController.abort();
+    // this.vm.$destroy();
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    console.log('Form - componentDidMount');
+    // window.addEventListener('beforeunload', this.handleLeavePage);    
+  };
+
 
   render() {
     let { user, password, error } = this.state;
@@ -78,7 +95,7 @@ class LoginPage extends React.Component {
             <Paper style={styles.paper}>
               <div>
                 <span style={styles.logo} />
-                <span style={styles.text}>Progetto LIS</span>
+                <span style={styles.text}>RAI Virtual LIS</span>
               </div>
               { /*<form>*/ }
               <form onSubmit={onFormSubmit}>

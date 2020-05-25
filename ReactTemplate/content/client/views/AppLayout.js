@@ -19,7 +19,6 @@ const recentsIcon = <FontIcon className="material-icons">restore</FontIcon>;
 const favoritesIcon = <FontIcon className="material-icons">favorite</FontIcon>;
 const nearbyIcon = <IconLocationOn />;
 
-
 const Content = props => {
   console.log('Content deliverable_id: ', props.deliv_id);
   return (
@@ -52,25 +51,32 @@ class AppLayout extends React.Component {
     this.vm.onRouteEnter = (path, template) => (template.Target = 'Content');
 
     this.state = {
-      Greetings: "",
-      ServerTime: "",
+      // Greetings: "",
+      // ServerTime: "",
       rightSidebarOpen: false,
       leftSidebarOpen: props.width === LARGE,
       Menus_del1: [],
       Menus_del2: [],
+      Menus_amm: [],
       currentDate: new Date().getDate(), //Current Date
       BottomNavigationSelectedIndex: 0,
       deliverable: true // Per ora, pre rendere piu' facile il toggle, deliverable e' bool (false = 1 deliv, true 2 deliv)
     };
+    console.log('AppLayout - this: ', this);
     console.log('AppLayout - dotnetify: ', dotnetify);
     // this.handleDeliverableToggle2 = this.handleDeliverableToggle2.bind(this);
     console.log('AppLayout userid da backend: ', props.userid);
+    // console.log('AppLayout - Greetings: ', Greetings);
+    console.log('AppLayout - this.state: ', this.state);
+    // console.log('AppLayout - this.state.Greetings: ', this.state.Greetings);
+    // console.log('AppLayout - this.state.ServerTime: ', this.state.ServerTime);
   }
 
   abortController = new AbortController();
   mySignal = this.abortController.signal;
 
   componentWillUnmount() {
+    console.log('AppLayout - componentWillUnmount()');
     this.abortController.abort();
     this.vm.$destroy();
     // Component is attempting to connect to an already active 'Dashboard'.
@@ -93,7 +99,8 @@ class AppLayout extends React.Component {
   }
   */
   componentDidMount() {
-    console.log('ApplLayout - componentDidMount');
+    console.log('AppLayout - componentDidMount - this.state.Greetings: ', this.state.Greetings);
+    console.log('AppLayout - componentDidMount');
     // window.addEventListener('beforeunload', this.handleLeavePage);
   };
 
@@ -140,7 +147,7 @@ class AppLayout extends React.Component {
   handleRightSidebarToggle = () => this.setState({rightSidebarOpen: !this.state.rightSidebarOpen});
 
   render() {
-    let { leftSidebarOpen, Menus_del1, Menus_del2, UserAvatar, UserName, UserId, deliverable } = this.state;
+    let { leftSidebarOpen, Menus_del1, Menus_del2, Menus_amm, UserAvatar, UserName, UserId, deliverable } = this.state;
     let userAvatarUrl = UserAvatar ? UserAvatar : null;
     const paddingLeftSidebar = 236; // '10%'; //280; //300; // 236;
     const styles = {
@@ -237,24 +244,26 @@ class AppLayout extends React.Component {
       // this.setState({ deliverable: !this.state.deliverable });
     };
 
-    return ( true ? // this.state.deliverable == 1 ? 
+    return ( true ? // this.state.deliverable == 1 ? {"LIS_d_" + (+deliverable)} // {this.state.Greetings}
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <div>
-          <Header styles={styles.header} onSidebarToggle={this.handleSidebarToggle1} onDeliverableToggle={this.handleDeliverableToggle1} deliv={deliverable} time={this.state.ServerTime} />
+          <Header styles={styles.header} onSidebarToggle={this.handleSidebarToggle1} onDeliverableToggle={this.handleDeliverableToggle1} deliv={deliverable} servertime={this.state.ServerTime} />
           <Sidebar
             vm={this.vm}
-            logoTitle={"LIS_d_" + (+deliverable)}
-            open={leftSidebarOpen}
+            logoTitle={"Virtual LIS"}
+            leftSidebarOpen={leftSidebarOpen}
             userAvatarUrl={userAvatarUrl}
             menus_del1={Menus_del1}
             menus_del2={Menus_del2}
+            menus_amm={Menus_amm}
             username={UserName}
             userid={UserId}
             deliv={deliverable}
           />
-          <Content deliv_id={(+deliverable)} styles={styles.container} />
-
+          
+          <div id="Content" data_id={(+deliverable)} style={styles.container} />
           { /*
+          <Content deliv_id={(+deliverable)} styles={styles.container} />
           <div id="Content" data_id={(+deliverable)} style={styles.container} />
           <div>
             <RaisedButton
@@ -318,6 +327,7 @@ AppLayout.propTypes = {
   UserId: PropTypes.number,
   menus_del1: PropTypes.array,
   menus_del2: PropTypes.array,
+  menus_amm: PropTypes.array,
   width: PropTypes.number
 };
 
