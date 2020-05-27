@@ -151,12 +151,16 @@ class TablePage extends React.Component {
       console.log('TablePage RenderConsoleLog: ', children);
       return false;
     };
-
+    // title={"Lista video " + this.state.Mode} 
+    // <RenderConsoleLog>{Requests}</RenderConsoleLog>
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
-        <BasePage title={"Lista video " + this.state.Mode} navigation="Applicazione / Video">
+        <BasePage navigation="Applicazione / Video">
           <div>
-            <RenderConsoleLog>{Requests}</RenderConsoleLog>
+            <Tabs>
+              <Tab style={{fontSize: 32, fontWeight: 'bold'}} label="I miei video" value="I miei video"></Tab>
+            </Tabs>            
+
             {/*
               <div>
                 <FloatingActionButton onClick={handleAdd} style={styles.addButton} backgroundColor={pink500} mini={true}>
@@ -295,6 +299,7 @@ class TablePage_1 extends React.Component {
       selectionEnd:       0,
       showVideoPreview:   false, // Mostra anteprima video
       // position:           0,
+      previewing:            false, // Subito dopo una preview, abilita il publish che e' l'ultima fase
 
       /*
       ita_id:                   0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
@@ -334,39 +339,41 @@ class TablePage_1 extends React.Component {
     console.log('TablePage_1 - componentDidMount');
     console.log('TablePage_1 - this.props.location: ', this.props.location);
     this._isMounted = true;
-    window.addEventListener('beforeunload', this.handleLeavePage);
+    // window.addEventListener('beforeunload', this.handleLeavePage);
     // document.addEventListener("keydown", this.handleSpaceKeyDown, false);
     this.handleGetSigns();
     this.setState({
       sign_filtered: this.state.sign_iniz
+    }, () => {
+      console.log('TablePage_1 - componentDidMount - Caricamento segno di benvenuto');
+      this.handleChangeSign(
+        /*
+        {id: 911, 
+        animatore: "Francesca Sasso - 48HStudio ",
+        code: "",
+        contesto: "",
+        contributo: "",
+        inteprete: "Nadia Decarolis",
+        name: "amico",
+        name_editor: "04720-amico-",
+        name_player: "amico.lis",
+        progetto: "PPE",
+        validatore: ""}
+      */  
+        {id: 161,
+        animatore: "",
+        code: "",
+        contesto: "",
+        contributo: "",
+        inteprete: "",
+        name: "benvenuto",
+        name_editor: "08000-benvenuto-",
+        name_player: "benvenuto.lis",
+        progetto: "",
+        validatore: ""}
+      );
+      // this.updateVideo('benvenuto');// {
     });
-    console.log('TablePage_1 - componentDidMount - Caricamento segno di benvenuto');
-    this.handleChangeSign(
-      /*
-      {id: 911, 
-      animatore: "Francesca Sasso - 48HStudio ",
-      code: "",
-      contesto: "",
-      contributo: "",
-      inteprete: "Nadia Decarolis",
-      name: "amico",
-      name_editor: "04720-amico-",
-      name_player: "amico.lis",
-      progetto: "PPE",
-      validatore: ""}
-      */
-      {id: 161,
-      animatore: "",
-      code: "",
-      contesto: "",
-      contributo: "",
-      inteprete: "",
-      name: "benvenuto",
-      name_editor: "08000-benvenuto-",
-      name_player: "benvenuto.lis",
-      progetto: "",
-      validatore: ""}
-    );
   };
 
   handleLeavePage(e) {
@@ -418,6 +425,11 @@ class TablePage_1 extends React.Component {
           sign_iniz:      sign_iniz,
           sign_array:     sign_array,
           sign_filtered:  sign_iniz
+        }, () => {
+          if (this.state.Mode == 'dizionario') {
+            console.log('TablePage_1 - componentDidMount - Caricamento segno di benvenuto');
+            this.updateVideo('benvenuto');// {
+          }
         });
 
         // this.setState({ dirty: true });
@@ -504,7 +516,6 @@ class TablePage_1 extends React.Component {
     console.log('TablePage_1 - handleChips event.Code: ', event.code);
     // console.log('Dashboard - handleChips input: ', input)
     // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-
     /*        
     <script>
     window.addEventListener("keydown", function(event) {
@@ -515,7 +526,6 @@ class TablePage_1 extends React.Component {
     document.getElementById("output").appendChild(el);
     }, true);
     */
-
     let ret = {};
     if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
       // Do whatever when esc is pressed
@@ -526,7 +536,6 @@ class TablePage_1 extends React.Component {
       ret.count = 0;
       let ar = [];
       // let tt = ['Test', 'Prova'];
-
       list.forEach((item, i) => {
         // if (i === idx) {
         // console.log(Object.assign({}, {"key3": "value3"}, item));
@@ -539,41 +548,21 @@ class TablePage_1 extends React.Component {
         }
       });
       // Object.assign
-
       // Object.keys(obj).some(function(k) {
       // return obj[k] === "test1";
       // });
-      console.log('TablePage_1 - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
+      // allWordsFound:  false
+      console.log('TablePage_1 - handleChips - Check array at least one false value: ', !ar.some(function(k) {return k.Found === false}));
       console.log('TablePage_1 - handleChips - Tot JSON: ', ret);
       this.setState({
-        allWordsFound: ar.some(function(k) {return k.Found === false}),
+        allWordsFound: !ar.some(function(k) {return k.Found === false}),
         sign_json: ret,
         chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
       });
     }
     // this.setState({ lis_edit: event.target.value });
   };
-  /*
-  handleSpaceKeyDown1(event, yo){
-    console.log('TablePage_1 - handleSpaceKeyDown1 event: ', event)
-    console.log('TablePage_1 - handleSpaceKeyDown1 yo.props.inputRef.selectionStart: ', yo.props.inputRef.selectionStart)
-  };
 
-  handleRender = () => {
-    var url = "/api/values/download/";
-    fetch("/api/values/download", { signal: this.mySignal })
-      .then(response => {
-        const filename =  'glossario.csv'; //response.headers.get('Content-Disposition').split('filename=')[1];
-        response.blob().then(blob => {
-          let url = window.URL.createObjectURL(blob);
-          let a = document.createElement('a');
-          a.href = url;
-          a.download = filename;
-          a.click();
-      });
-   });
-  };
-  */
   handleUpdateTab = (value) => {
     console.log('TablePage_1 - handleUpdateTab - value: ', value);
     // this.setState({ value_area: value });
@@ -613,27 +602,84 @@ class TablePage_1 extends React.Component {
     element.click();
   };
 
-  handleTxtFileChange = (event) => {
+  handleItaTxtFileChange = (event) => {
     this.setState({
       file: event.target.files[0]
+    }, () => {
+
+      if(!this.state.file) {
+        this.setState({error: 'Please upload a file.'})
+        return;
+      }
+      if(this.state.file.size >= 2000000) {
+        this.setState({error: 'File size exceeds limit of 2MB.'})
+        return;
+      }
+      const reader = new FileReader()
+      new Promise((resolve, reject) => {
+        reader.onload = event => resolve(event.target.result)
+        reader.onerror = error => reject(error)
+        reader.readAsText(this.state.file)
+      }).then(content => {
+        // target.value = content
+        // console.log('TablePage_1 - cont: ', content);
+        this.setState({ ita_edit: content }); // .replace(/\n/g, 'accapo').trim()
+        /*
+          warnwarn: dotnetify_react_template.server.Controllers.ValuesController[0]
+                ValuesController text_trad POST - value: {"IdUserEdit":4,"IdTextIta":0,"TextIta":"file
+          : dotnetify_react_template.server.Controllers.ValuesController[0]
+                ValuesController text_trad POST - value: {"IdUserEdit":4,"IdTextIta":0,"TextIta":"file
+          infoinfo: Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker[2]
+        */
+      }).catch(error => console.log('TablePage_1 - handleUploadItaTxtFile error: ', error))
+
+    });
+  };
+
+  handleLisTxtFileChange = (event) => {
+    this.setState({
+      file: event.target.files[0]
+    }, () => {
+
+      if(!this.state.file) {
+        this.setState({error: 'Please upload a file.'})
+        return;
+      }
+      if(this.state.file.size >= 2000000) {
+        this.setState({error: 'File size exceeds limit of 2MB.'})
+        return;
+      }
+      const reader = new FileReader()
+      new Promise((resolve, reject) => {
+        reader.onload = event => resolve(event.target.result)
+        reader.onerror = error => reject(error)
+        reader.readAsText(this.state.file)
+      }).then(content => {
+        // target.value = content
+        // console.log('TablePage_1 - cont: ', content);
+        this.setState({ lis_edit: content }, () => {
+          // this.handleChips(event);
+          this.handleChips({keyCode: 32, target: {value: content}});
+        });
+      }).catch(error => console.log('TablePage_1 - handleUploadItaTxtFile error: ', error))
+
     });
   };
 
   handleUploadItaTxtFile = (event) => {
     event.preventDefault();
-    this.setState({error: '', msg: ''});
- 
+    this.setState({error: '', msg: ''}, () => {
+      document.getElementById('my-file-ita').click();
+    });
+    /*
     if(!this.state.file) {
       this.setState({error: 'Please upload a file.'})
       return;
     }
- 
     if(this.state.file.size >= 2000000) {
       this.setState({error: 'File size exceeds limit of 2MB.'})
       return;
     }
-
-
     const reader = new FileReader()
     new Promise((resolve, reject) => {
       reader.onload = event => resolve(event.target.result)
@@ -644,7 +690,7 @@ class TablePage_1 extends React.Component {
       // console.log('TablePage_1 - cont: ', content);
       this.setState({ ita_edit: content });
     }).catch(error => console.log('TablePage_1 - handleUploadItaTxtFile error: ', error))
-
+    */
     /*
     const reader = new FileReader()
     reader.onload = event => console.log(this.state.file); // desired file content
@@ -654,22 +700,20 @@ class TablePage_1 extends React.Component {
     */
   };
 
-  // handleUploadLisTxtFile = _ => {}  
   handleUploadLisTxtFile = (event) => {
     event.preventDefault();
-    this.setState({error: '', msg: ''});
- 
+    this.setState({error: '', msg: ''}, () => {
+      document.getElementById('my-file-lis').click();
+    });
+    /*
     if(!this.state.file) {
       this.setState({error: 'Please upload a file.'})
       return;
     }
- 
     if(this.state.file.size >= 2000000) {
       this.setState({error: 'File size exceeds limit of 2MB.'})
       return;
     }
-
-
     const reader = new FileReader()
     new Promise((resolve, reject) => {
       reader.onload = event => resolve(event.target.result)
@@ -680,7 +724,7 @@ class TablePage_1 extends React.Component {
       // console.log('TablePage_1 - cont: ', content);
       this.setState({ lis_edit: content });
     }).catch(error => console.log('TablePage_1 - handleUploadLisTxtFile error: ', error))
-
+    */
     /*
     const reader = new FileReader()
     reader.onload = event => console.log(this.state.file); // desired file content
@@ -771,7 +815,6 @@ class TablePage_1 extends React.Component {
     }
   };
 
-
   handlePreview = _ => {
     console.log('TablePage_1 handlePreview - creazione anteprima - non salva nulla su DB');
 
@@ -813,7 +856,9 @@ class TablePage_1 extends React.Component {
     });
     */
     this.setState({
-      showVideoPreview: true // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
+      videoUrl: null,
+      showVideoPreview: true, // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
+      previewing:       true,
     }, () => {
 
       fetch(
@@ -847,12 +892,12 @@ class TablePage_1 extends React.Component {
         */
         this.setState({
           // ita_edit: p.output_preview+'.jpg',
-          videoUrl: p.output_preview + '.mp4'
+          videoUrl: p.output_preview + '.mp4',
           
           // path_postergen: p.output_preview + '.jpg',
           // path_videogen: p.output_preview + '.mp4',
           // showVideoPreview: true,
-          // justPreviewed:    true,
+          previewing:    false,
           // snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
         }); // , this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
       }).catch(error => {
@@ -866,7 +911,7 @@ class TablePage_1 extends React.Component {
     this.setState({
       path_videogen: paaa,
       showVideoPreview: true,
-      justPreviewed:    true,
+      previewing:    true,
       snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
     }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
     */
@@ -878,103 +923,115 @@ class TablePage_1 extends React.Component {
     */
   };
 
-
-  handleSave = _ => {
+  handleSave = (buttonName) => {
     console.log('TablePage_1 handleSave - creazione text_trad e request');
-        
-    fetch(
-      "/api/values/text_trad",
-      {
-        signal: this.mySignal,
-        method: 'POST',
-        body: "'"+JSON.stringify({
-          IdUserEdit: 4,
-          IdTextIta: 0,
-          TextIta: this.state.ita_edit, //"Provaaaa_manda_a_dashboard",
-          VersionIta: this.state.ita_edit_version, // La versione qui parte da 0 e rimane 0 perche' viene salvata sempre una versione 1 di una nuova coppia
+    console.log('TablePage_1 handleSave - nome bottone:', buttonName);
+
+    // if (buttonName == 'SalvaNuovo') {
+    this.setState({
+      ita_id: buttonName == 'SalvaNuovo' ? 0 : this.state.ita_id,
+      ita_edit_version: buttonName == 'SalvaNuovo' ? 0 : this.state.ita_edit_version,
+      lis_id: buttonName == 'SalvaNuovo' ? 0 : this.state.lis_id,
+      lis_edit_version: buttonName == 'SalvaNuovo' ? 0 : this.state.lis_edit_version
+    }, () => {
+      // }
+      fetch(
+        "/api/values/text_trad",
+        {
+          signal: this.mySignal,
+          method: 'POST',
+          // La versione qui parte da 0 e rimane 0 perche' viene salvata sempre una versione 1 di una nuova coppia
           // deve diventare:
           // Mantengo il conteggio della versione corrente incrementando
           // oppure se uso il comando Salva come nuovo.., riparto da 0 (che verra' portato a 1 in backend)
-          NotesIta: "Provaaa_note ita_tablepage_1 " + this.state.ita_edit,
-          IdTextLis: 0,
-          TextLis: this.state.lis_edit, //"Provaaaa_manda_a_dashboard",
-          VersionLis: this.state.lis_edit_version,
-          NotesLis: "Provaaa_note lis_tablepage_1 " + this.state.lis_edit
-        })+"'",
-        headers: {'Content-Type': 'application/json'}
-      })
-    .then(res => res.json())
-    .then(p1 => {
-      console.log('TablePage_1 handleSave - Risultato text_trad POST: ', p1);
-      // TablePage.js:900 TablePage_1 handleSave - Risultato text_trad POST:  {id_text_trans: "503", id_text_ita: "507", id_text_lis: "504"}
-      console.log('TablePage_1 handleSave - creazione request');
-      fetch("/api/values/request",
-      {
-        signal: this.mySignal,
-        method: 'POST',
-        body: "'"+JSON.stringify({
-          name_video: this.state.videoName,
-          id: p1.id_text_trans, // ID text_trans sulla trans2
-          path_video: this.state.videoUrl,
-          notes: "note_request id_text_trans: " + p1.id_text_trans
-        })+"'",
-        headers: {'Content-Type': 'application/json'}
-      })
+          body: "'"+JSON.stringify({
+            IdUserEdit: 4,
+            IdTextIta:  this.state.ita_id, // 0,
+            TextIta:    this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"), //"Provaaaa_manda_a_dashboard",
+            VersionIta: this.state.ita_edit_version, 
+            NotesIta:   "Provaaa_note ita_tablepage_1 ", // + this.state.ita_edit,
+            IdTextLis:  this.state.lis_id, // 0,
+            TextLis:    this.state.lis_edit, //"Provaaaa_manda_a_dashboard",
+            VersionLis: this.state.lis_edit_version,
+            NotesLis:   "Provaaa_note lis_tablepage_1 " + this.state.lis_edit
+          })+"'",
+          headers: {'Content-Type': 'application/json'}
+        })
       .then(res => res.json())
-      .then(p2 => {
-        console.log('TablePage_1 handleSave - Risultato request POST: ', p2);
-        console.log('TablePage_1 handleSave - Assegnazione p1.id e versioni', p1.id_text_ita, p1.id_text_lis);
-        this.setState({
-          ita_id:           p1.id_text_ita,
-          lis_id:           p1.id_text_lis,
-          ita_edit_version: this.state.ita_edit_version + 1,
-          lis_edit_version: this.state.lis_edit_version + 1
-        });
-        /*
-        console.log('TablePage_1 handleSave - creazione preview');
-        fetch(
-          "/api/values/preview",
-          {
-            signal: this.mySignal,
-            method: 'POST',
-            // 'mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere'
-            // body: "'"+JSON.stringify({value: btoa(this.state.lis_edit)})+"'",
-            // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
-            body: "'"+JSON.stringify(this.state.sign_json)+"'",
-            headers: {'Content-Type': 'application/json'}
+      .then(p1 => {
+        console.log('TablePage_1 handleSave - Risultato text_trad POST: ', p1);
+        // TablePage.js:900 TablePage_1 handleSave - Risultato text_trad POST:  {id_text_trans: "503", id_text_ita: "507", id_text_lis: "504"}
+        console.log('TablePage_1 handleSave - creazione request');
+        fetch("/api/values/request",
+        {
+          signal: this.mySignal,
+          method: 'POST',
+          body: "'"+JSON.stringify({
+            name_video: this.state.videoName,
+            id:         p1.id_text_trans, // ID text_trans sulla trans2
+            path_video: this.state.videoUrl,
+            notes:      "note_request id_text_trans: " + p1.id_text_trans
+          })+"'",
+          headers: {'Content-Type': 'application/json'}
         })
         .then(res => res.json())
-        .then(p => {
-          clearInterval(keepVideoLoading);
-          console.log('TablePage_1 handleSave - Risultato preview POST: ', p);
+        .then(p2 => {
+          console.log('TablePage_1 handleSave - Risultato request POST: ', p2);
+          console.log('TablePage_1 handleSave - Assegnazione p1.id e versioni', p1.id_text_ita, p1.id_text_lis);
           this.setState({
-            ita_edit: p.output_preview+'.jpg',
-            videoUrl: p.output_preview+'.mp4'
-            // path_postergen: p.output_preview+'.jpg',
-            // path_videogen: p.output_preview+'.mp4',
-            // showVideoPreview: true,
-            // justPreviewed:    true,
-            // snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
-          }); // , this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+            ita_id:           p1.id_text_ita,
+            lis_id:           p1.id_text_lis,
+            ita_edit_version: this.state.ita_edit_version + 1, // == 0 ? 1 : this.state.ita_edit_version + 1,
+            lis_edit_version: this.state.lis_edit_version + 1  // == 0 ? 1 : this.state.lis_edit_version + 1
+            // Attenzione
+            // Da fronted si arriva al backend SEMPRE con la versione corrente che parte da 0
+            // e che viene SEMPRE incrementata NEL BACKEND
+            // oppure resettata a 0 (che diventara' 0 + 1 nel backend) se si fa SALVA COME NUOVO
+          });
+          /*
+          console.log('TablePage_1 handleSave - creazione preview');
+          fetch(
+            "/api/values/preview",
+            {
+              signal: this.mySignal,
+              method: 'POST',
+              // 'mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere'
+              // body: "'"+JSON.stringify({value: btoa(this.state.lis_edit)})+"'",
+              // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
+              body: "'"+JSON.stringify(this.state.sign_json)+"'",
+              headers: {'Content-Type': 'application/json'}
+          })
+          .then(res => res.json())
+          .then(p => {
+            clearInterval(keepVideoLoading);
+            console.log('TablePage_1 handleSave - Risultato preview POST: ', p);
+            this.setState({
+              ita_edit: p.output_preview+'.jpg',
+              videoUrl: p.output_preview+'.mp4'
+              // path_postergen: p.output_preview+'.jpg',
+              // path_videogen: p.output_preview+'.mp4',
+              // showVideoPreview: true,
+              // previewing:    true,
+              // snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
+            }); // , this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
+          })
+          .catch(error => {
+            console.log('TablePage_1 handleSave - preview Error: ', error);
+          });
+          */
         })
         .catch(error => {
-          console.log('TablePage_1 handleSave - preview Error: ', error);
+          console.log('TablePage_1 handleSave - request Error: ', error);
         });
-        */
       })
       .catch(error => {
-        console.log('TablePage_1 handleSave - request Error: ', error);
+        console.log('TablePage_1 handleSave - text_trad Error: ', error);
       });
-    })
-    .catch(error => {
-      console.log('TablePage_1 handleSave - text_trad Error: ', error);
     });
   };
 
   render() {
-    // let { addName, Employees, Pages, SelectedPage, ShowNotification } = this.state;
-    // const { data_id } = this.props;
-    // console.log('TablePage_1 - render - data_id: ', data_id);
+    let { previewing } = this.state;
     const Table_1Styles = {
       buttons: {
         marginTop: 5, //30
@@ -989,32 +1046,20 @@ class TablePage_1 extends React.Component {
         lastName: { width: '70%' },
         remove: { width: '10%' }
       },
-      pagination: { marginTop: '1em' }
-    };
-    /*
-    const handleAdd = _ => {
-      if (addName) {
-        this.dispatch({ Add: addName });
-        this.setState({ addName: '' });
+      pagination: { marginTop: '1em' },
+      campi: {
+        fontSize: 12,
+        // fontWeight: typography.fontWeightLight
       }
     };
     
-    const handleUpdate = employee => {
-      let newState = Employees.map(item => (item.Id === employee.Id ? Object.assign(item, employee) : item));
-      this.setState({ Employees: newState });
-      this.dispatch({ Update: employee });
-    };
-    */
-
-    const handleSelectPage = page => {
+    const handleSelectPage = (page) => {
       const newState = { SelectedPage: page };
       this.setState(newState);
       this.dispatch(newState);
     };
 
-    // const hideNotification = _ => this.setState({ ShowNotification: false });
-
-    const handleEditIta = event => {
+    const handleEditIta = (event) => {
       console.log('TablePage_1 - handleEditIta - event: ', event);
       // this.setState({ dirty: true });
       this.setState({ ita_edit: event.target.value });
@@ -1042,31 +1087,15 @@ class TablePage_1 extends React.Component {
       return false;
     };
 
-    /*
-    title="Dizionario / traduzione"
-              <Reqtrans />
-    this.state.Mode 
-    this.state.FirstName 
-    this.state.Reqtrans.Status 
-    tabItemContainerStyle={{background: 'yellow'}}* inkBarStyle={{background: 'red'}} 
-    <ChipExampleSimple /> 
-    this.state.Mode === 'traduzione' && this.state.videoUrl != '' 
-    && this.state.sign_selected 
-    && this.state.videoUrl != '' 
-    <Tab label="I miei video" value="video" disabled={this.state.Mode === 'video'}></Tab>
-    <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
-     && this.state.videoUrl != '' 
-    */
-
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <BasePage navigation="Applicazione / Video">
           <div>
             <Tabs style={{width: '100%', float: 'left'}} value={this.state.Mode} onChange={this.handleUpdateTab}>
               { this.state.Mode === 'dizionario' ? 
-              <Tab label="Dizionario" value="dizionario" disabled={this.state.Mode === 'dizionario'}></Tab>
+              <Tab style={{fontSize: 32, fontWeight: 'bold'}} label="Dizionario" value="dizionario" disabled={this.state.Mode === 'dizionario'}></Tab>
               :
-              <Tab label="Traduzione" value="traduzione" disabled={this.state.Mode === 'traduzione'}></Tab>
+              <Tab style={{fontSize: 32, fontWeight: 'bold'}} label="Traduzione" value="traduzione" disabled={this.state.Mode === 'traduzione'}></Tab>
               }
             </Tabs>
             <div className="row">
@@ -1120,7 +1149,6 @@ class TablePage_1 extends React.Component {
                 </div>  
               </div>
               
-              
               { this.state.Mode === 'dizionario' ? 
               <div className="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-b-15 ">
                 <div style={Table_1Styles.buttons}>
@@ -1132,40 +1160,47 @@ class TablePage_1 extends React.Component {
               { this.state.Mode === 'traduzione' ? 
               <div className="col-xs-12 col-sm-4 col-md-4 col-lg-4 m-b-15 ">
                 <React.Fragment>
-                  <div style={Table_1Styles.buttons}>
-                    <div style={{float: 'left'}}>{"Testo ITA" + (this.state.ita_id ? " (ID " + this.state.ita_id + ") : " : " : ") + (this.state.ita_edit_version ? " (versione " + this.state.ita_edit_version + ") : " : " : ") }</div>
-                    <div style={{float: 'right'}}>
-                      { /* <input id="lisField" /> */ }
-                      { /* <button onClick={this.handleDownloadItaTxtFile}>Download txt</button> */ }
-                      <RaisedButton label="Salva Testo ITA" onClick={this.handleDownloadItaTxtFile} style={Table_1Styles.saveButton} primary={true} />
-                      <input type="file" onChange={this.handleTxtFileChange}></input>
-                      <RaisedButton label="Carica Testo ITA"  onClick={this.handleUploadItaTxtFile} disabled={false} style={Table_1Styles.saveButton} primary={true} />
-                    </div>
+                  <div style={{float: 'left'}}>
+                    <span>{"Testo ITA" + (this.state.ita_id ? " (ID " + this.state.ita_id + ") : " : " : ") + (this.state.ita_edit_version ? " (versione " + this.state.ita_edit_version + ") : " : " : ") }</span>
+                    { /* <input id="lisField" /> */ }
+                    { /* onChange={handleEditIta} */ }
+                    { /* <button onClick={this.handleDownloadItaTxtFile}>Download txt</button> */ }
+                    <RaisedButton label="Salva Testo ITA" onClick={this.handleDownloadItaTxtFile} style={{float: 'right'}} primary={true} />
+                    <input type="file" onChange={this.handleItaTxtFileChange} id="my-file-ita"></input>
+                    <RaisedButton label="Carica Testo ITA"  onClick={this.handleUploadItaTxtFile} disabled={false} style={{float: 'right'}} primary={true} />
                     <TextareaAutosize
-                      cols={40}
+                      cols={36}
                       rows={20}
                       maxRows={25}
                       minRows={3}
-                      style={{overflowY: 'scroll'}}
+                      style={{fontSize: 18, fontWeight: 'bold', overflowY: 'scroll'}}
+                      inputRef={this.inputRef}
+                      ref={el=>this.input=el}
+                      className="form-control"
+                      id="itaField"
                       value={this.state.ita_edit}
-                      onChange={handleEditIta}
+                      onChange={(event) => {
+                          this.setState({
+                            ita_edit:       event.target.value,
+                            // selectionStart: selectionStart,
+                            // selectionEnd:   selectionEnd
+                          })
+                      }}
                     />
                   </div>
-                  <div style={Table_1Styles.buttons}>
-                    <div style={{float: 'left'}}>{"Testo LIS" + (this.state.lis_id ? " (ID " + this.state.lis_id + ") : " : " : ") + (this.state.lis_edit_version ? " (versione " + this.state.lis_edit_version + ") : " : " : ") }</div>
-                    <div style={{float: 'right'}}>
-                      { /* <input id="lisField" /> */ }
-                      { /* <button onClick={this.handleDownloadLisTxtFile}>Download txt</button> */ }
-                      <RaisedButton label="Salva Segni LIS" onClick={this.handleDownloadLisTxtFile} style={Table_1Styles.saveButton} primary={true} />
-                      <input type="file" onChange={this.handleTxtFileChange}></input>
-                      <RaisedButton label="Carica Segni LIS"  onClick={this.handleUploadLisTxtFile} disabled={false} style={Table_1Styles.saveButton} primary={true} />
-                    </div>
+                  <div style={{float: 'left'}}>
+                    <span>{"Testo LIS" + (this.state.lis_id ? " (ID " + this.state.lis_id + ") : " : " : ") + (this.state.lis_edit_version ? " (versione " + this.state.lis_edit_version + ") : " : " : ") }</span>
+                    { /* <input id="lisField" /> */ }
+                    { /* <button onClick={this.handleDownloadLisTxtFile}>Download txt</button> */ }
+                    <RaisedButton label="Salva Segni LIS" onClick={this.handleDownloadLisTxtFile} style={{float: 'right'}} primary={true} />
+                    <input type="file" onChange={this.handleLisTxtFileChange} id="my-file-lis"></input>
+                    <RaisedButton label="Carica Segni LIS"  onClick={this.handleUploadLisTxtFile} disabled={false} style={{float: 'right'}} primary={true} />
                     <TextareaAutosize
-                      cols={40}
+                      cols={36}
                       rows={20}
                       maxRows={25}
                       minRows={3}
-                      style={{overflowY: 'scroll'}}
+                      style={{fontSize: 18, fontWeight: 'bold', overflowY: 'scroll'}}
                       inputRef={this.inputRef}
                       ref={el=>this.input=el}
                       className="form-control"
@@ -1180,7 +1215,8 @@ class TablePage_1 extends React.Component {
                           this.setState({
                             lis_edit:       event.target.value,
                             selectionStart: selectionStart,
-                            selectionEnd:   selectionEnd
+                            selectionEnd:   selectionEnd,
+                            // allWordsFound:  false
                           }, this.handleChips(event))
                         }
                       }}
@@ -1196,7 +1232,8 @@ class TablePage_1 extends React.Component {
                           this.setState({
                             lis_edit:       event.target.value,
                             selectionStart: selectionStart,
-                            selectionEnd:   selectionEnd
+                            selectionEnd:   selectionEnd,
+                            // allWordsFound:  false
                           }, this.handleChips(event))
                         }
                       }}
@@ -1210,12 +1247,18 @@ class TablePage_1 extends React.Component {
                           this.setState({
                             lis_edit:       event.target.value,
                             selectionStart: selectionStart,
-                            selectionEnd:   selectionEnd
+                            selectionEnd:   selectionEnd,
+                            // allWordsFound:  false
                           }, this.handleChips(event))
                         }
                       }}
                     />
-                    <div className="mr-auto" style={{visibility: 'hidden'}}>Cursor at position: {this.state.selectionStart} (<input type='text' id="pos" />)</div>
+                    
+                    <div className="mr-auto" style={{visibility: 'show'}}>
+                      Cursor at position: {this.state.selectionStart} (<input type='text' id="pos" />)<br />
+                      this.state.allWordsFound: {this.state.allWordsFound.toString()}<br />
+                      this.state.previewing: {previewing.toString()}<br />
+                    </div>
                   </div>
                   <div style={Table_1Styles.buttons}>
                     <ChipExampleSimple1 chips={this.state.chips}/>
@@ -1226,7 +1269,7 @@ class TablePage_1 extends React.Component {
 
               { this.state.Mode === 'dizionario' && this.state.sign_selected ?
               <div className="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-b-15 ">
-                <div style={Table_1Styles.buttons}>
+                <div style={Table_1Styles.campi}>
                   <table>
                     <tbody>
                       <tr>
@@ -1320,7 +1363,7 @@ class TablePage_1 extends React.Component {
                 <div style={Table_1Styles.buttons}>
                   <video id="did_video" controls autoPlay={true} width="480" height="360" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
                   {/* onload="valutare la possibilita' di lancaire load() ricorsivamente per far girare il progress finche' non c'e' il video" */}
-                  <RaisedButton label="Anteprima" onClick={this.handlePreview} disabled={this.state.allWordsFound} style={{float: 'left'}} primary={true} />
+                  <RaisedButton label="Anteprima" onClick={this.handlePreview} disabled={previewing || !this.state.allWordsFound} style={{float: 'left'}} primary={true} />
                   <TextField
                     hintText="Nome video..."
                     style={{width: '95%'}}
@@ -1328,8 +1371,8 @@ class TablePage_1 extends React.Component {
                       this.setState({ videoName: event.target.value })
                     }
                   />
-                  <RaisedButton label="Salva" onClick={this.handleSave} disabled={this.state.allWordsFound} style={{float: 'left'}} primary={true} />
-                  <RaisedButton label="Salva come nuovo..." onClick={this.handleSave} disabled={this.state.allWordsFound || !this.state.videoUrl} style={{float: 'right'}} primary={true} />
+                  <RaisedButton label="Salva" onClick={() => this.handleSave('Salva')} disabled={!this.state.allWordsFound || !this.state.videoUrl} style={{float: 'left'}} primary={true} />
+                  <RaisedButton label="Salva come nuovo..." onClick={() => this.handleSave('SalvaNuovo')} disabled={!this.state.allWordsFound || !this.state.videoUrl} style={{float: 'right'}} primary={true} />
                 </div>
               </div>
               : null }

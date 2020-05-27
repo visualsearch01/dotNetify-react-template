@@ -7,31 +7,15 @@ import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
 import FlatButton from 'material-ui/FlatButton';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
-import { pink500, grey200, grey500 } from 'material-ui/styles/colors';
-/*
-<Typography variant="h6" className={classes.title}>
-      News1
-    </Typography>
-    <Typography variant="h6" className={classes.title}>
-      News2
-    </Typography>
-    <Typography variant="h6" className={classes.title}>
-      News3
-    </Typography>
-    <FlatButton style={styles.button} label={page} disabled={props.select == page} onClick={() => props.onSelect(page)} />
-    <FloatingActionButton onClick={handleAdd} style={styles.addButton} backgroundColor={pink500} mini={true}>
-  <ContentAdd />
-</FloatingActionButton>
-*/
-
+import { white, pink500, grey200, grey500 } from 'material-ui/styles/colors';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
-import { white } from 'material-ui/styles/colors';
+// import {  } from 'material-ui/styles/colors';
 import auth from '../auth';
 
 const Header = props => {
   const { styles, onSidebarToggle, onDeliverableToggle, deliv, servertime } = props;
   console.log('Header - props.deliv: ', deliv);
-  const style = {
+  const headerStyle = {
     appBar: {
       position: 'fixed', // prevent scrolling 'relative', //'fixed',
       top: 0,
@@ -46,6 +30,10 @@ const Header = props => {
       padding: '.5em 0'
     },
     button: { minWidth: '1em' },
+    servertime: {
+      fontSize: 18,
+      fontWeight: 'bold' // typography.fontWeightLight
+    }
     /*
     onSelect(id) {
       console.log('Header onSelect: ', id);
@@ -55,36 +43,27 @@ const Header = props => {
 
   const onSelect_test = id => {
     console.log('Header onSelect: ', id);
-  }
+  };
 
   const handleSignout = _ => auth.signOut();
   const handleClick = value => {
     onDeliverableToggle(value);
-  }
+  };
 
   return (
     <div>
       <AppBar
-        style={{ ...styles, ...style.appBar }}
+        style={{ ...styles, ...headerStyle.appBar }}
         iconElementLeft={
           <div>
-            <IconButton style={style.menuButton} onClick={onSidebarToggle}>
+            <IconButton style={headerStyle.menuButton} onClick={onSidebarToggle}>
               <Menu color={white} />
             </IconButton>
-            {/*
-            <label>Selezione deliverable</label>
-            <FlatButton style={styles.button} label={"Bottone di test"} disabled={false} onClick={() => onSelect_test(2)} />
-            <FlatButton style={styles.button} label={"1-Meteo"} disabled={deliv} primary={!deliv} value={1} onClick={onDeliverableToggle} />
-            <FlatButton style={styles.button} label={"2-Didattica"} disabled={!deliv} primary={deliv} value={2} onClick={onDeliverableToggle} />
-            <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={true}>Test2</FloatingActionButton>
-            <FloatingActionButton onClick={handleSignout} style={styles.addButton} backgroundColor={pink500} mini={false}>Test3</FloatingActionButton>
-            new Date().toString() /*.toLocaleString()*/  /*.getUTCDate()*/   /* toISOString().split('T')[0]
-            */}
           </div>
         }
         iconElementRight={
-          <div style={style.iconsRightContainer}>
-            <label>{servertime}</label>
+          <div style={headerStyle.iconsRightContainer}>
+            <label style={headerStyle.servertime}>{servertime}</label>
             <IconMenu
               color={white}
               iconButtonElement={

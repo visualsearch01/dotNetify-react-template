@@ -660,14 +660,15 @@ namespace dotnetify_react_template.server.Controllers
                         command.Parameters.Clear();
                         if (changes.IdTextIta == 0) {
                           command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ((SELECT MAX(id_text_ita)+1 FROM (select * from lis_text_ita) AS T1), ?id_user, ?version, ?text, ?notes);";
+                          command.Parameters.AddWithValue("?version", (changes.VersionIta + 1)); // 1); // La versione va sempre incrementata! da frontend si arriva con la vrsione corrente che da 0 passa a 1, poi 2 e cosi' via
                           // command.Parameters.AddWithValue("?id_text_ita", (changes.IdTextIta ? changes.IdTextIta : "(SELECT MAX(id_text_ita)+1 FROM (select * from lis_text_ita) AS T1)"));
                           // Cannot implicitly convert type 'Newtonsoft.Json.Linq.JValue' to 'bool'. An explicit conversion exists (are you missing a cast?)
                         } else {
                           command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES (?id_text_ita, ?id_user, ?version, ?text, ?notes);";
                           command.Parameters.AddWithValue("?id_text_ita", changes.IdTextIta);
+                          command.Parameters.AddWithValue("?version", (changes.VersionIta + 1)); // 1);
                         }
                         command.Parameters.AddWithValue("?id_user", changes.IdUserEdit);
-                        command.Parameters.AddWithValue("?version", (changes.VersionIta + 1)); // 1);
                         command.Parameters.AddWithValue("?text", changes.TextIta); // Gia' escapato .Replace("'", "''"));
                         command.Parameters.AddWithValue("?notes", changes.NotesIta); // .Replace("'", "''"));
                         command.ExecuteNonQuery();
@@ -682,6 +683,20 @@ namespace dotnetify_react_template.server.Controllers
                           lastItaId = reader.GetInt32("id_text_ita");
                         }
 
+                        command.Parameters.Clear();
+                        if (changes.IdTextLis == 0) {
+                          command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES ((SELECT MAX(id_text_lis)+1 FROM (select * from lis_text_lis) AS T2), ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
+                          command.Parameters.AddWithValue("?version", (changes.VersionLis + 1)); // 1);
+                        } else {
+                          command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES (?id_text_lis, ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
+                          command.Parameters.AddWithValue("?id_text_lis", changes.IdTextLis);
+                          command.Parameters.AddWithValue("?version", (changes.VersionLis + 1)); // 1);
+                        }
+                        command.Parameters.AddWithValue("?id_user", changes.IdUserEdit);
+                        command.Parameters.AddWithValue("?text", changes.TextLis); // .Replace("'", "''"));
+                        command.Parameters.AddWithValue("?notes", changes.NotesLis); //.Replace("'", "''"));
+                        command.ExecuteNonQuery();
+                        Console.WriteLine("ValuesController text_trad POST - INSERT LIS OK");
 
                         command.Parameters.Clear();
                         command.CommandText = "SELECT MAX(id_text_lis) AS id_text_lis FROM lis_text_lis;";
@@ -692,26 +707,22 @@ namespace dotnetify_react_template.server.Controllers
                         }
 
                         command.Parameters.Clear();
-                        if (changes.IdTextLis == 0) {
-                          command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES ((SELECT MAX(id_text_lis)+1 FROM (select * from lis_text_lis) AS T2), ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
-                        } else {
-                          command.CommandText = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES (?id_text_lis, ?id_user, ?version, ?text, '<xml>test</xml>', ?notes);";
-                          command.Parameters.AddWithValue("?id_text_lis", changes.IdTextLis);
-                        }
-                        command.Parameters.AddWithValue("?id_user", changes.IdUserEdit);
-                        command.Parameters.AddWithValue("?version", (changes.VersionLis + 1)); // 1);
-                        command.Parameters.AddWithValue("?text", changes.TextLis); // .Replace("'", "''"));
-                        command.Parameters.AddWithValue("?notes", changes.NotesLis); //.Replace("'", "''"));
-                        command.ExecuteNonQuery();
-                        Console.WriteLine("ValuesController text_trad POST - INSERT LIS OK");
-                        command.Parameters.Clear();
-                        command.CommandText = "INSERT INTO lis_text_trans (id_text_ita, id_text_lis) VALUES ((SELECT MAX(id_text_ita) FROM lis_text_ita AS T3), (SELECT MAX(id_text_lis) FROM lis_text_lis AS T4));";
+                        command.CommandText = "INSERT INTO lis_text_trans (id_text_ita, id_text_lis) VALUES (?id_text_ita, ?id_text_lis);";
+                        command.Parameters.AddWithValue("?id_text_ita", lastItaId);
+                        command.Parameters.AddWithValue("?id_text_lis", lastLisId);
                         command.ExecuteNonQuery();
                         Console.WriteLine("ValuesController text_trad POST - INSERT TRANS OK");
                         command.Parameters.Clear();
-                        command.CommandText = "INSERT INTO lis_text_trans2 (id_text_ita, version_ita, id_text_lis, version_lis) VALUES ((SELECT MAX(id_text_ita) FROM lis_text_ita AS T3), ?vita, (SELECT MAX(id_text_lis) FROM lis_text_lis AS T4), ?vlis);";
-                        command.Parameters.AddWithValue("?vita", (changes.VersionIta + 1)); // 1);
-                        command.Parameters.AddWithValue("?vlis", (changes.VersionLis + 1)); // 1);
+                        command.CommandText = "INSERT INTO lis_text_trans2 (id_text_ita, version_ita, id_text_lis, version_lis) VALUES (?id_text_ita, ?version_ita, ?id_text_lis, ?version_lis);";
+                        if (changes.IdTextIta == 0) {
+                          command.Parameters.AddWithValue("?version_ita", (changes.VersionIta + 1)); // 1);
+                          command.Parameters.AddWithValue("?version_lis", (changes.VersionLis + 1)); // 1);
+                        } else {
+                          command.Parameters.AddWithValue("?version_ita", (changes.VersionIta + 1)); // 1);
+                          command.Parameters.AddWithValue("?version_lis", (changes.VersionLis + 1)); // 1);
+                        }
+                        command.Parameters.AddWithValue("?id_text_ita", lastItaId);
+                        command.Parameters.AddWithValue("?id_text_lis", lastLisId);
                         // ValuesController - Error in [HttpPost"text_trad")]. Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '_binary '5'' at line 1
                         command.ExecuteNonQuery();
                         // dbcmd.ExecuteNonQuery();

@@ -53,3 +53,6 @@ input[type=file]::-webkit-file-upload-button {
   margin-top: 30;
   float: 'left';
 }
+
+#my-file-ita { visibility: hidden; }
+#my-file-lis { visibility: hidden; }
