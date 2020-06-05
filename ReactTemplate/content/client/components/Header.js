@@ -13,8 +13,8 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import auth from '../auth';
 
 const Header = props => {
-  const { styles, onSidebarToggle, onDeliverableToggle, deliv, servertime } = props;
-  console.log('Header - props.deliv: ', deliv);
+  const { styles, onSidebarToggle, onDeliverableToggle, deliverable, servertime } = props;
+  console.log('Header - props.deliverable: ', deliverable);
   const headerStyle = {
     appBar: {
       position: 'fixed', // prevent scrolling 'relative', //'fixed',
@@ -32,6 +32,7 @@ const Header = props => {
     button: { minWidth: '1em' },
     servertime: {
       fontSize: 18,
+      color: white,
       fontWeight: 'bold' // typography.fontWeightLight
     }
     /*

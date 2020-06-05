@@ -41,6 +41,7 @@ namespace dotnetify_react_template.server.Models
         public string TextITA { get; set; }
         public string TextLIS { get; set; }
         public string Status { get; set; }
+        public string User { get; set; }
         public LisRequest LisRequest { get; set; }
         public Route Route { get; set; }
     }
@@ -131,7 +132,8 @@ namespace dotnetify_react_template.server.Models
                             it.text_ita AS text_ita_edit,
                             it.id_text_ita AS id_text_ita_edit,
                             li.text_lis AS text_lis_edit,
-                            li.id_text_lis AS id_text_lis_edit
+                            li.id_text_lis AS id_text_lis_edit,
+                            us.name_user
                         FROM lis_request                lr 
                             JOIN lis_text_trans2        tr ON tr.id_text_trans = lr.id_translation 
                             LEFT JOIN lis_forecast_data fd ON fd.id_translation = tr.id_text_trans
@@ -140,12 +142,16 @@ namespace dotnetify_react_template.server.Models
                             LEFT JOIN lis_day           ld ON ld.id_day = lf.id_day
                             JOIN lis_text_ita           it ON it.id_text_ita = tr.id_text_ita AND it.version = tr.version_ita 
                             JOIN lis_text_lis           li ON li.id_text_lis = tr.id_text_lis AND li.version = tr.version_lis
+                            JOIN lis_user               us ON us.id_user = it.id_user_edit
                         WHERE
-                        it.id_user_edit LIKE '%'
+                        it.id_user_edit LIKE '" + (userid == 2 ? "%" : userid.ToString()) + @"'
                         AND
-                        li.id_user_edit LIKE '%'
+                        li.id_user_edit LIKE '" + (userid == 2 ? "%" : userid.ToString()) + @"'
+                        AND
+                        lr.notes <> 'Cancellata'
                         ORDER BY lr.id_request DESC
                     ;", conn);
+                    Console.WriteLine("Table - GetLisRequestsTrans - userid------------------: " + userid);
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -158,6 +164,7 @@ namespace dotnetify_react_template.server.Models
                                 TextITA = reader.GetString("text_ita_edit"),
                                 TextLIS = reader.GetString("text_lis_edit"),
                                 Status = "Ok",
+                                User = reader.GetString("name_user"),
                                 LisRequest = new LisRequest(){
                                     IdRequest = reader.GetInt32("id_request"),
                                     NameRequest = reader.GetString("name_request"),

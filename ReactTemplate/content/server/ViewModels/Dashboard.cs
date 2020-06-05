@@ -2,6 +2,8 @@ using DotNetify;
 using DotNetify.Routing;
 using DotNetify.Security;
 using dotnetify_react_template.server.Models;
+using Microsoft.AspNetCore.Http;
+
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Security.Claims;
 
 namespace dotnetify_react_template
 {
@@ -34,14 +37,20 @@ namespace dotnetify_react_template
     // public int VideoProgress => 0;
 
     // Prova per cercare di mandare al client un oggetto invece di dover mandare tutte le proprieta' come tipi primitivi
-    public class Person { public string Name { get; set; } }
+    public class Person { public int Id { get; set; } public string Name { get; set; } }
     public Person User1 { get; set; } = new Person(); // new{"fdfdf"});
-    
+    // private readonly IHttpContextAccessor _httpContextAccessor;
+
     public LisRequestTrans Reqtrans; // => new LisRequestTrans(){};
     public string TextITA;
     public string TextLIS;
     public int VersionITA;
     public int VersionLIS;
+
+
+
+
+    public int num1 { get; set; }
 
     public string Pick_date_b;
     public int Edition_b;
@@ -158,9 +167,49 @@ namespace dotnetify_react_template
       _subscription?.Dispose(); // = null;
     };
 
-    public Dashboard(ILiveDataService liveDataService) {
+
+    /*
+    public UserRepository(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public void LogCurrentUser()
+    {
+        var username = _httpContextAccessor.HttpContext.User.Identity.Name;
+        service.LogAccessRequest(username);
+    }
+    */
+
+    // public Dashboard(IHttpContextAccessor httpContextAccessor, ILiveDataService liveDataService) {
+    public Dashboard(ILiveDataService liveDataService, IUserRepository _userRepository) {
+    // public Dashboard(ILiveDataService liveDataService) {
+
+      // var _userRepository = new UserRepository();
+      // Console.WriteLine("Dashboard - Nameeeeee -------------------------: " + _userRepository.GetUserNetworkId());
+
+
+      // _httpContextAccessor = httpContextAccessor;
       // this.Dict = new Dictionary<string,string>();
-      User1.Name = "afsfsdfg"; //  = new Person("test_person");
+
+      // Console.WriteLine("Dashboard - Nameeeeee -------------------------: " + _httpContextAccessor.HttpContext.User.Identity);
+      // Console.WriteLine("Dashboard - Nameeeeee -------------------------: " + _httpContextAccessor.HttpContext.User.ToString());
+      /*
+      System.Security.Claims.ClaimsIdentity principal = _httpContextAccessor.HttpContext.User.Identity as System.Security.Claims.ClaimsIdentity;
+          if (null != principal)
+          {
+            Console.WriteLine("ValuesController     - userprincipal not null");
+            foreach (Claim claim in principal.Claims)
+            {
+              Console.WriteLine("ValuesController.cs ---------- CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            }
+          }
+
+
+      Console.WriteLine("Dashboard - User1.Name = " + User1.Name); // afsfsdfg"; //  = new Person("test_person");
+      */
+      // Console.WriteLine("Dashboard - User1.Name = " + this.User1.Name); // afsfsdfg"; //  = new Person("test_person");
+      // Console.WriteLine("Dashboard - num1 = " + this.num1); // afsfsdfg"; //  = new Person("test_person");
       // _connectionString
       _connectionString = liveDataService.getCs();
       AddProperty<string>("Download").SubscribeTo(liveDataService.Download);
@@ -238,8 +287,13 @@ namespace dotnetify_react_template
       // pauser.onNext(false);  // or source.pause();
       this.OnRouted((sender, e) =>
       {
+        Console.WriteLine("Dashboard - Nameeeeee -------------------------: " + _userRepository.GetUserNetworkId());
         Console.WriteLine("Dashboard - sender: " + sender);
         Console.WriteLine("Dashboard - e: " + e);
+        Console.WriteLine("Dashboard - User1.Id = " + this.User1.Id); // afsfsdfg"; //  = new Person("test_person");
+        Console.WriteLine("Dashboard - User1.Name = " + this.User1.Name); // afsfsdfg"; //  = new Person("test_person");
+        Console.WriteLine("Dashboard - num1 = " + this.num1); // afsfsdfg"; //  = new Person("test_person");
+
         // Dashboard - sender: DotNetify.Routing.RoutingState
         // Dashboard - e: DotNetify.Routing.RoutedEventArgs
         var param = e?.From?.Replace($"{AppLayout.DashboardPath}/", "");

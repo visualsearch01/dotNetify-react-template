@@ -11,17 +11,26 @@ class LoginPage extends React.Component {
   constructor(props) {
     super(props);
     // this.state = { user: 'guest', password: 'dotnetify' };
-    this.state = { user: 'rai', password: 'rai' };
+    this.state = {
+      user: 'rai',
+      password: 'rai'
+    };
+
+    console.log('LoginPage - this: ', this);
+    // console.log('LoginPage - dotnetify: ', dotnetify);
+    console.log('LoginPage - props: ', props);
   }
-  _isMounted = false;
-  abortController = new AbortController();
-  mySignal = this.abortController.signal;
+
+  // _isMounted = false;
+  // abortController = new AbortController();
+  // mySignal = this.abortController.signal;
+  /*
   componentWillUnmount() {
     // window.removeEventListener('beforeunload', this.handleLeavePage);
-    console.log('Form - componentWillUnmount');
+    console.log('Login - componentWillUnmount');
     this._isMounted = false;
     this.abortController.abort();
-    // this.vm.$destroy();
+    this.vm.$destroy();
   }
 
   componentDidMount() {
@@ -29,8 +38,7 @@ class LoginPage extends React.Component {
     console.log('Form - componentDidMount');
     // window.addEventListener('beforeunload', this.handleLeavePage);    
   };
-
-
+  */
   render() {
     let { user, password, error } = this.state;
     const { onAuthenticated } = this.props;
@@ -69,6 +77,7 @@ class LoginPage extends React.Component {
       },
       error: { color: 'red' }
     };
+    
     const onFormSubmit = e => {
       console.log('LoginPage.js - onFormSubmit - Dovrebbe funzionare sia su click sia su Invio - Event: ', e);
       e.preventDefault();
@@ -78,13 +87,16 @@ class LoginPage extends React.Component {
       // send to server with e.g. `window.fetch`
       handleLogin();
     };
+    
     const handleLogin = _ => {
       this.setState({ error: null });
       console.log('LoginPage.js - handleLogin - user: ', user);
       console.log('LoginPage.js - handleLogin - password: ', password);
-      auth.signIn(user, password).then(_ => onAuthenticated()).catch(error => {
-        if (error.message == '400') this.setState({ error: 'Invalid password' });
-        else this.setState({ error: error.message });
+      auth.signIn(user, password)
+        .then(_ => onAuthenticated())
+        .catch(error => {
+          if (error.message == '400') this.setState({ error: 'Invalid password' });
+          else this.setState({ error: error.message });
       });
     };
 

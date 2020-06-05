@@ -99,8 +99,9 @@ class AppLayout extends React.Component {
   }
   */
   componentDidMount() {
-    console.log('AppLayout - componentDidMount - this.state.Greetings: ', this.state.Greetings);
-    console.log('AppLayout - componentDidMount');
+    console.log('AppLayout.js - componentDidMount - this.state.Greetings: ', this.state.Greetings);
+    console.log('AppLayout.js - componentDidMount');
+    console.log('AppLayout.js - g_deliverable: ', g_deliverable);
     // window.addEventListener('beforeunload', this.handleLeavePage);
   };
 
@@ -134,14 +135,15 @@ class AppLayout extends React.Component {
   };
 
   handleDeliverableToggle2 = id => this.setState({ deliverable: id });
+  
   handleSidebarToggle1 = () => this.setState({ leftSidebarOpen: !this.state.leftSidebarOpen });
+  
   // const handleDeliverableToggle1 = id => this.handleDeliverableToggle2({ deliverable: id });
   handleDeliverableToggle1 = () => {
     // console.log('handleDeliverableToggle value: ', value);
-    console.log('AppLayout.js - deliver: ', deliver);
     this.setState({ deliverable: !this.state.deliverable });
-    deliver = !deliver;
-    console.log('AppLayout.js - deliver: ', deliver);
+    g_deliverable = !g_deliverable;
+    console.log('AppLayout.js - g_deliverable: ', g_deliverable);
   };
 
   handleRightSidebarToggle = () => this.setState({rightSidebarOpen: !this.state.rightSidebarOpen});
@@ -149,6 +151,10 @@ class AppLayout extends React.Component {
   render() {
     let { leftSidebarOpen, Menus_del1, Menus_del2, Menus_amm, UserAvatar, UserName, UserId, deliverable } = this.state;
     let userAvatarUrl = UserAvatar ? UserAvatar : null;
+
+    g_username = UserName;
+    g_userid = UserId;
+
     const paddingLeftSidebar = 236; // '10%'; //280; //300; // 236;
     const styles = {
       root: {
@@ -247,7 +253,13 @@ class AppLayout extends React.Component {
     return ( true ? // this.state.deliverable == 1 ? {"LIS_d_" + (+deliverable)} // {this.state.Greetings}
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <div>
-          <Header styles={styles.header} onSidebarToggle={this.handleSidebarToggle1} onDeliverableToggle={this.handleDeliverableToggle1} deliv={deliverable} servertime={this.state.ServerTime} />
+          <Header
+            styles={styles.header}
+            onSidebarToggle={this.handleSidebarToggle1}
+            onDeliverableToggle={this.handleDeliverableToggle1}
+            deliverable={deliverable}
+            servertime={this.state.ServerTime}
+          />
           <Sidebar
             vm={this.vm}
             logoTitle={"Virtual LIS"}
@@ -258,55 +270,9 @@ class AppLayout extends React.Component {
             menus_amm={Menus_amm}
             username={UserName}
             userid={UserId}
-            deliv={deliverable}
+            deliverable={deliverable}
           />
-          
-          <div id="Content" data_id={(+deliverable)} style={styles.container} />
-          { /*
-          <Content deliv_id={(+deliverable)} styles={styles.container} />
-          <div id="Content" data_id={(+deliverable)} style={styles.container} />
-          <div>
-            <RaisedButton
-              label="Toggle right Drawer"
-              primary={true}
-              onClick={this.handleRightSidebarToggle}
-            />
-          </div>
-          */}
-          {/* cambia deliverable al click su QUALUNQUE COSA nel div : onClick={handleDeliverableToggle} */ }
-          {/* non funziona : userid={UserId}
-          
-          A simple example of `BottomNavigation`, with three labels and icons
-          provided. The selected `BottomNavigationItem` is determined by application
-          state (for instance, by the URL).
-          
-          className={styles.stickToBottom}
-          <BottomNavigation style={styles.stickToBottom.root} selectedIndex={this.state.BottomNavigationSelectedIndex}>
-            <BottomNavigationItem
-              label="Recents"
-              icon={recentsIcon}
-              onClick={() => this.BottomNavigationSelect(0)}
-            />
-            <BottomNavigationItem
-              label="Favorites"
-              icon={favoritesIcon}
-              onClick={() => this.BottomNavigationSelect(1)}
-            />
-            <BottomNavigationItem
-              label="Nearby"
-              icon={nearbyIcon}
-              onClick={() => this.BottomNavigationSelect(2)}
-            />
-            <BottomNavigationItem
-              label="RAI - 2020"
-              icon={nearbyIcon}
-              style={styles.stickToBottomItem.root}
-            />
-          </BottomNavigation>
-          <Drawer width={200} openSecondary={true} open={this.state.rightSidebarOpen} >
-            <AppBar title="AppBar" />
-          </Drawer>
-          */}
+          <div id="Content" style={styles.container} />
         </div>
       </MuiThemeProvider>
       :

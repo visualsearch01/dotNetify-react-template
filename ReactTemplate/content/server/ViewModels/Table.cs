@@ -2,10 +2,12 @@ using DotNetify;
 using DotNetify.Routing;
 using DotNetify.Security;
 using MySql.Data.MySqlClient;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using dotnetify_react_template.server.Models;
 namespace dotnetify_react_template
 {
@@ -13,12 +15,16 @@ namespace dotnetify_react_template
   public class Table : BaseVM, IRoutable
   {
     private readonly IEmployeeService _employeeService;
-    private readonly int _recordsPerPage = 8;
+    private readonly int _recordsPerPage = 10; // 8;
     ILogger _logger;
     public RoutingState RoutingState { get; set; }
     private string _connectionString; // { get; set; }
     // private MySqlConnection connection;
     public string Mode = "didattica";
+
+    public class Person { public int Id { get; set; } public string Name { get; set; } }
+    public Person User1 { get; set; } = new Person(); // new{"fdfdf"});
+
     public class EmployeeInfo
     {
       public int Id { get; set; }
@@ -65,11 +71,16 @@ namespace dotnetify_react_template
         _logger.LogWarning("Table.cs Route Exception - " + ex.Message);
       }
       */
+
+      // _logger.LogWarning("TablePage - UserId da APPLAYOUT::::::::::::::::: " + AppLayout.getUserId());
       Mode = "didattica";
       this.OnRouted((sender, e) =>
       {
         _logger.LogWarning("TablePage - sender: " + sender);
         _logger.LogWarning("TablePage - e: " + e);
+        Console.WriteLine("TablePage - User1.Id = " + this.User1.Id); // afsfsdfg"; //  = new Person("test_person");
+        Console.WriteLine("TablePage - User1.Name = " + this.User1.Name); // afsfsdfg"; //  = new Person("test_person");
+        // Console.WriteLine("Dashboard - num1 = " + this.num1); // afsfsdfg"; //  = new Person("test_person");
         var param = e?.From?.Replace($"{AppLayout.TablePagePath}/", "");
         if (int.TryParse(param, out int id))
         {
@@ -99,7 +110,7 @@ namespace dotnetify_react_template
     public IEnumerable<LisRequestTrans> Requests => PaginateRequest(
       // try {
         new LisRequestDBContext(_connectionString)
-          .GetLisRequestsTrans(2)
+          .GetLisRequestsTrans(this.User1.Id) // 2)
           // _employeeService
           //     .GetLisRequestsTrans()
           // .GetAllReq()
@@ -118,6 +129,7 @@ namespace dotnetify_react_template
               TextITA = i.TextITA,
               TextLIS = i.TextLIS,
               Status = "OK",
+              User = i.User,
               // PathVideo = i.PathVideo, // Video,
               LisRequest = new LisRequest(){
                 IdRequest = i.LisRequest.IdRequest,
@@ -294,7 +306,7 @@ namespace dotnetify_react_template
     private LisRequestTrans Reqtrans; // => new LisRequestTrans(){};
     
     public RoutingState RoutingState { get; set; }
-    public string Mode = "dizionario";
+    public string Mode; // = "dizionario";
 
     // Gli id e le versioni dei testi vanno gestiti da backend
     // perche' quando si arriva da un video nella lista
@@ -314,11 +326,62 @@ namespace dotnetify_react_template
     public string TextITA;
     public string TextLIS;
     // {this.state.TextLIS}
-    public Table_1(IEmployeeService employeeService, ILogger<Table_1> logger)
+    // public Table_1(IEmployeeService employeeService, ILogger<Table_1> logger)
+    public Table_1(IHttpContextAccessor httpContextAccessor, IEmployeeService employeeService, ILogger<Table_1> logger)
     {
-      Mode = "dizionario";
+      // Mode = "dizionario";
       _employeeService = employeeService;
+      // _employeeService.LogCurrentUser();
+
       _logger = logger;
+
+      // User.FindFirst(ClaimTypes.NameIdentifier).Value
+      // EDIT for constructor
+      // Below code works:
+      // public Controller(IHttpContextAccessor httpContextAccessor)
+      // {
+      // var NameIdentifier = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      // }
+      try {
+        _logger.LogWarning("TablePage_1 - httpContextAccessor:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext);
+
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Connection);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Features);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Items);
+
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Items.First());
+
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Request);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.RequestAborted);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.RequestServices);
+
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Response.StatusCode);
+
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.Session);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.TraceIdentifier);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.WebSockets);
+        // HttpContext.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+        foreach (Claim claim in httpContextAccessor.HttpContext.User.Claims)
+        {
+          _logger.LogInformation("TablePage_1 - CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value);
+        }
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.get_Claims():::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User.Claims.Get("Name"));
+
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.Claims;::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User.Claims);
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.Claims.NameIdentifier;:::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User.Claims.FindFirst());
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;::::::::::::::: " + httpContextAccessor.HttpContext.User.Claims.FindFirst(ClaimTypes.NameIdentifier).Value);
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Uri).Value;::::::::::::::: " + httpContextAccessor.HttpContext.User.Claims.FindFirst(ClaimTypes.Uri).Value);
+
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Name).Value;::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Name).Value);
+        _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;::::::::::::::::: " + httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        // _logger.LogWarning("TablePage_1 - httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Uri).Value;:::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Uri).Value);
+      } catch(Exception ex) {
+        _logger.LogWarning("TablePage_1 - httpContextAccessor Exception - " + ex.Message);
+      }
+
       _connectionString = employeeService.getCs();
       this.OnRouted((sender, e) =>
       {
@@ -338,6 +401,8 @@ namespace dotnetify_react_template
         */
         if (string.Equals(param, "")){
           _logger.LogWarning("TablePage_1 - e.From param vuoto");
+          Mode = "dizionario";
+          _logger.LogWarning("TablePage_1 - Mode: " + Mode);
           Reqtrans = new LisRequestTrans(){};
           ita_edit = "";
           lis_edit = "";
@@ -346,6 +411,7 @@ namespace dotnetify_react_template
         {
             _logger.LogWarning("TablePage_1 - int.TryParse OK, id: " + id);
             Mode = "traduzione";
+            _logger.LogWarning("TablePage_1 - Mode: " + Mode);
             LoadRequest(id);
 
             // if(id == 1)
@@ -357,6 +423,7 @@ namespace dotnetify_react_template
         } else {
             _logger.LogWarning("TablePage_1 - e.From string OK, param: " + param);
             Mode = param;
+            _logger.LogWarning("TablePage_1 - Mode: " + Mode);
             Reqtrans = new LisRequestTrans(){};
             ita_edit = "";
             lis_edit = "";

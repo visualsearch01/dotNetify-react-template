@@ -413,6 +413,7 @@ const ListExampleSelectable = props => {
       {/*<Subheader>Segni presenti a dizionario</Subheader>*/}
       {props.children.map((item, idx1) => (
       <ListItem
+        style={{fontSize: 10}}
         key={idx1}
         value={item.Iniziale}
         primaryText={item.Iniziale}
@@ -421,6 +422,7 @@ const ListExampleSelectable = props => {
         nestedItems={
           item.Signs_object.map((item, idx2) => (
           <ListItem
+            style={{fontSize: 10}}
             key={idx2}
             value={item}
             primaryText={item.name}
@@ -513,6 +515,61 @@ const ListExampleSelectable1 = () => (
 */
 // export default ListExampleSelectable;
 
+
+var handleChips_b = function(event) {
+    console.log('TablePage_1 - handleChips event.key: ', event.key);
+    console.log('TablePage_1 - handleChips event.keyCode: ', event.keyCode);
+    console.log('TablePage_1 - handleChips event.Code: ', event.code);
+    // console.log('Dashboard - handleChips input: ', input)
+    // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+    /*        
+    <script>
+    window.addEventListener("keydown", function(event) {
+    let str = "KeyboardEvent: key='" + event.key + "' | code='" +
+      event.code + "'";
+    let el = document.createElement("span");
+    el.innerHTML = str + "<br/>";
+    document.getElementById("output").appendChild(el);
+    }, true);
+    */
+    let ret = {};
+    if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
+      // Do whatever when esc is pressed
+      console.log('TablePage_1 - handleChips keyCode 12 - Space pressed! ')
+      let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+      ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
+      ret.it = [];
+      ret.count = 0;
+      let ar = [];
+      // let tt = ['Test', 'Prova'];
+      list.forEach((item, i) => {
+        // if (i === idx) {
+        // console.log(Object.assign({}, {"key3": "value3"}, item));
+        // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
+        // if (!tt.includes(item)) this.setState({ allWordsFound: false });
+        ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
+        if (this.state.sign_names.includes(item)) {
+          ret.it.push(this.state.sign_array[item]);
+          ret.count += 1;
+        }
+      });
+      // Object.assign
+      // Object.keys(obj).some(function(k) {
+      // return obj[k] === "test1";
+      // });
+      // allWordsFound:  false
+      console.log('TablePage_1 - handleChips - Check array at least one false value: ', !ar.some(function(k) {return k.Found === false}));
+      console.log('TablePage_1 - handleChips - Tot JSON: ', ret);
+      this.setState({
+        allWordsFound: !ar.some(function(k) {return k.Found === false}),
+        sign_json: ret,
+        chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+      });
+    }
+    // this.setState({ lis_edit: event.target.value });
+  };
+
+
 InfoBox.propTypes = {
   Icon: PropTypes.any,
   Color: PropTypes.string,
@@ -529,6 +586,7 @@ CircularProgressExampleDeterminate.propTypes = {
 export {
   // export default 
   InfoBox, //;
+  handleChips_b,
   // export const 
   CircularProgressExampleDeterminate, //;
   ChipExampleSimple,

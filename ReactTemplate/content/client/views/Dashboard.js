@@ -19,7 +19,7 @@ import FontIcon from 'material-ui/FontIcon';
 import SvgIcon from 'material-ui/SvgIcon';
 */
 import { cyan600, pink600, purple600, orange600 } from 'material-ui/styles/colors';
-import { InfoBox, CircularProgressExampleDeterminate, ChipExampleSimple, ListExampleSelectable } from '../components/dashboard/InfoBox';
+import { InfoBox, CircularProgressExampleDeterminate, ChipExampleSimple, ListExampleSelectable, handleChips_b } from '../components/dashboard/InfoBox';
 import Traffic from '../components/dashboard/Traffic';
 import ServerUsage from '../components/dashboard/ServerUsage';
 import { Utilization , VideoPreview, CardExampleExpandable } from '../components/dashboard/Utilization';
@@ -110,7 +110,10 @@ function getTextByVersion(timeFrameJsonArray, edition_id, id_forecast_type, offs
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
-    var arg = { User: { Name: "Test" } }; // Visibile in: vm.$vmArg.User.Name
+    var arg = { User1: { Id: g_userid, Name: g_username }, num1: 9043835 };
+    // var arg = { num1: 9043835 }; // User1: { Name: "Test" } }; // Visibile in: vm.$vmArg.User.Name
+    // var arg = { Person: { Name: g_username } }; // Visibile in: vm.$vmArg.User.Name
+    
     // dotnetify.react.connect("HelloWorld", this, { vmArg: arg });
     dotnetify.debug= true;
     this.vm = dotnetify.react.connect('Dashboard', this, {
@@ -212,7 +215,7 @@ class Dashboard extends React.Component {
       // value_ed:           1, //'09:30',
       note_segno:         'Informazioni riguardo al segno selezionato',
       num1:               0, 
-      num2:               0,
+      num2:               300,
       sum :               0,
       toggle1:            false,
       toggle2:            false
@@ -240,7 +243,8 @@ class Dashboard extends React.Component {
     // this.setNum1 = this.setNum1.bind(this);
     // this.setNum2 = this.setNum2.bind(this);
     // console.log('Dashboard.js costruttore - props: ', props); // .userid qui non funziona
-    this.handleChips = this.handleChips.bind(this);
+    // this.handleChips = this.handleChips.bind(this);
+    this.handleChips = handleChips_b.bind(this);
   }
   abortController = new AbortController();
   mySignal = this.abortController.signal;
@@ -261,6 +265,8 @@ class Dashboard extends React.Component {
     this.handleGetSigns();
     this.handleChangePicker_dashboard(this.state.pickDate);
     console.log('Dashboard - componentDidMount this.state-------------------: ', this.state);
+    console.log('Dashboard - g_username: ', g_username);
+    console.log('Dashboard - g_userid: ', g_userid);
   };
 
   handleChangeEditionId = (event, index, value) => {
@@ -353,7 +359,7 @@ class Dashboard extends React.Component {
       });
   };
 
-  handleChips = (event) => {
+  handleChips_backup_dashboard = (event) => {
     if (event.target.value.indexOf('Nessun dato') !== -1) {
       console.log('Dashboard - handleChips - testo vuoto');
       this.setState({
@@ -1052,43 +1058,6 @@ class Dashboard extends React.Component {
         });
       });
     });
-    /*
-    fetch("/api/values/testpost_1/88", // 1/6",
-    {
-      signal: this.mySignal,
-      method: 'POST',
-      // body: '"ggegrergerg"',
-      body: JSON.stringify({value: 'bacon'}),
-      headers: {'Content-Type': 'application/json'}
-    })
-    .then(res => res.json())
-    // .then(console.log)
-    .then(p => {
-      this.setState({ lis_edit: 'Pubblicato!!!' }, this.handleCloseDialog);
-      this.setState({ snackbarMessage: 'Video pubblicato su ftp://test@test.com' }, this.handleOpenSnackbar)
-    });
-    */
-    // console.log('handlePreview');
-    /*
-    {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json"
-            },
-            // body: payload4
-            // body:  '"{value:\"test_setting_name\",b:\"dfdfref\"}"'
-            // body: JSON.stringify( payload1 )
-            // body: data // JSON.stringify( data )
-            body: data // JSON.stringify( data )
-        })
-        .then(function(res){ return res.json(); })        .catch(error => {
-              console.log('handlePublish - res Error: ', error);
-            })
-        .then(function(data){ alert( JSON.stringify( data ) ) })        .catch(error => {
-              console.log('handlePublish - data Error: ', error);
-            });
-    */
   };
 
   render() {
@@ -1179,14 +1148,12 @@ class Dashboard extends React.Component {
                   // height: 50, //'5%', // 57, //'5%', // 57,
                   // top: 20, // '5%', // maxHeight: '45%' // 57 // 56
                   // backgroundColor: cyan600,
-
                   backgroundColor: 'rgb(0, 188, 212)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'left',
                   justifyContent: 'center',
-                  height: '48px',
-                  
+                  height: '48px',                  
                   // width: '100%',
                   // display: 'flex',
                   paddingLeft: '60px',
@@ -1215,28 +1182,19 @@ class Dashboard extends React.Component {
                   <MenuItem value={6} primaryText="MARI" />
                   <MenuItem value={7} primaryText="TUTTA ITALIA" />
                 </DropDownMenu>
-  {
-    this.state.forecast_id == 7 ?
-                <React.Fragment>
-                <ToolbarSeparator />
-                <ToolbarTitle text="Giorno" style={{padding: 10}} />
-                <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay}>
-                  {this.state.offsets.map(item => <MenuItem key={item} value={item} primaryText={'+' + item} />)}
-                  {/*
-                  disabled={this.state.forecast_id != 7}
-                    <MenuItem value={1} primaryText="+1" disabled={this.state.forecast_id == 7}/>
-                    <MenuItem value={2} primaryText="+2" />
-                    <MenuItem value={3} primaryText="+3" />
-                    <MenuItem value={4} primaryText="+4" />
-                  */}
-                </DropDownMenu>
-                </React.Fragment>
-  : null}
-               
+                { this.state.forecast_id == 7 ?
+                <React.Fragment>
+                  <ToolbarSeparator />
+                  <ToolbarTitle text="Giorno" style={{padding: 10}} />
+                  <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay}>
+                    {this.state.offsets.map(item => <MenuItem key={item} value={item} primaryText={'+' + item} />)}
+                  </DropDownMenu>
+                </React.Fragment>
+                : null}
                 {/*<ToolbarSeparator />*/}
               </ToolbarGroup>
             </Toolbar>
-            <Tabs style={{width: '100%', float: 'left'}} value={this.state.forecast_id} onChange={this.handleChangeTabArea}>
+            <Tabs style={{width: '100%', float: 'left'}} value={this.state.forecast_id} onChange={this.handleChangeForecastId}>
               <Tab label="NORD" value={1} disabled={this.state.forecast_id === 1}></Tab>
               <Tab label="CENTRO E SARDEGNA" value={2} disabled={this.state.forecast_id === 2}></Tab>
               <Tab label="SUD E SICILIA" value={3} disabled={this.state.forecast_id === 3}></Tab>
@@ -1245,27 +1203,9 @@ class Dashboard extends React.Component {
               <Tab label="MARI" value={6} disabled={this.state.forecast_id === 6}></Tab>
               <Tab label="TUTTA ITALIA" value={7} disabled={this.state.forecast_id === 7}></Tab>
             </Tabs>
-            {/*
+
             <div className="row">
-              <div className="col-xs-12 col-sm-6 col-md-3 col-lg-3 m-b-15 ">
-                <InfoBox Icon={DownloadIcon} color={pink600} Title="Download" Value={this.state.Download} />
-              </div>
-
-              <div className="col-xs-12 col-sm-6 col-md-3 col-lg-3 m-b-15 ">
-                <InfoBox Icon={UploadIcon} color={cyan600} Title="Upload" Value={this.state.Upload} />
-              </div>
-
-              <div className="col-xs-12 col-sm-6 col-md-3 col-lg-3 m-b-15 ">
-                <InfoBox Icon={LatencyIcon} color={purple600} Title="Latency" Value={this.state.Latency} />
-              </div>
-
-              <div className="col-xs-12 col-sm-6 col-md-3 col-lg-3 m-b-15 ">
-                <InfoBox Icon={UserIcon} color={orange600} Title="Users" Value={this.state.Users} />
-              </div>
-            </div>
-            */}
-            <div className="row">
-              <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+              <div className="col-xs-12 col-sm-3 col-md-3 col-lg-3 m-b-15 ">
                 {/*
                 <div style={dashboardStyles.buttons}>
                   <div style={globalStyles.navigation}>Testo ITA originale{this.state.ita_edit_version ? ' (versione 1)' : '' }:</div>
@@ -1295,21 +1235,20 @@ class Dashboard extends React.Component {
                   {this.state.TextITA}<br />
                   {/*this.state.Reqtrans.ForecastDate*/}<br />
                 </div>
-  {showActions ?
+                { showActions ?
                 <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
-                  <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={justTranslated} />
-                </div>
-  : null}
+                  <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
+                  <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={justTranslated} />
+                </div>
+                : null}
               </div>
 
-              <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
+              <div className="col-xs-12 col-sm-3 col-md-3 col-lg-3 m-b-15 ">
                 {/*
                 <div style={dashboardStyles.buttons}>
                   <div style={globalStyles.navigation}>Testo LIS originale{this.state.lis_edit_version ? ' (versione 1)' : '' }:</div>
                 </div>
                 <label>{this.state.lis_orig}</label>
-
                 value={this.state.lis_edit}
                 onChange={handleEditLis1}
                 */}
@@ -1343,67 +1282,33 @@ class Dashboard extends React.Component {
                 <div style={dashboardStyles.buttons}>
                   <ChipExampleSimple1 chips={this.state.chips}/>
                 </div>
-
               </div>
-              <div className="col-xs-12 col-sm-6 col-md-4 col-lg-4 m-b-15 ">
-{/*
-  this.state.path_video != null ? 
-                <VideoPreview poster={this.state.Poster} source={this.state.path_video} onPublish={this.onVideoChildClicked} />
-  :
-  this.state.showVideoPreview ? 
-  !this.state.videoProgressCompleted ? 
-                <CircularProgressExampleDeterminate progress={this.state.Progress} onCompleted={this.onCircProgressCompleted} />
-  :
-                <VideoPreview poster={this.state.path_postergen} source={this.state.path_videogen} onPublish={this.onVideoChildClicked} />
-  : null
-  {
-this.state.path_videogen ? 
 
-  {showActions ?
+              <div className="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-b-15 ">
                 <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Salva"           onClick={this.handleSave}                style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
-                  <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
-                  {/*
-                  <br />
-                  <RaisedButton label="Pubblica"        onClick={this.handleOpenDialogPublish}   style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed} />
-                  */}
-                  {/*<VideoPreview poster={this.state.Poster} source={this.state.Src} onPublish={this.onVideoChildClicked} />* / }
-                </div>
-  : null}
-              </div>
-
-*/}
-
-                <video id="meteo_video" controls autoPlay={true} width="320" height="240" key={this.state.path_videogen}><source src={this.state.path_videogen} /></video>
-                <RaisedButton label="Anteprima"       onClick={this.handleOpenDialogPreview}   style={{float: 'left'}} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
-                <TextField
-                  hintText="Nome video..."
-                  style={{width: '95%'}}
-                  onChange={event => 
-                    this.setState({ videoName: event.target.value })
-                  }
-                />
-                <RaisedButton label="Salva"           onClick={this.handleOpenDialogSave}      style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
-
+                  <video id="meteo_video" controls autoPlay={true} width="560" height="440" key={this.state.path_videogen}><source src={this.state.path_videogen} /></video><br />
+                  <RaisedButton label="Anteprima" onClick={this.handleOpenDialogPreview} style={{float: 'left'}} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
+                  <RaisedButton label="Salva"     onClick={this.handleOpenDialogSave}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
+                </div>
               </div>
             </div>
-            <Dialog
-              title={this.state.dialogTitle}
-              modal={false}
-              titleStyle={dashboardStyles.dialogTitle}
-              contentStyle={dashboardStyles.dialogContent}
-              open={this.state.showDialog}
-              onRequestClose={this.handleCloseDialog}
-            >
-              {this.state.dialogContent}
-            </Dialog>
-            {/* this.state.showProgress ? <CircularProgress size={200} thickness={12} /> : null */}
-            <Snackbar 
-              open={this.state.showSnackbar}
-              autoHideDuration={this.state.snackbarAutoHideDuration}
-              onRequestClose={this.handleCloseSnackbar}
-              message={this.state.snackbarMessage}
-            />
+            <Dialog
+              title={this.state.dialogTitle}
+              modal={false}
+              titleStyle={dashboardStyles.dialogTitle}
+              contentStyle={dashboardStyles.dialogContent}
+              open={this.state.showDialog}
+              onRequestClose={this.handleCloseDialog}
+            >
+              {this.state.dialogContent}
+            </Dialog>
+            {/* this.state.showProgress ? <CircularProgress size={200} thickness={12} /> : null */}
+            <Snackbar 
+              open={this.state.showSnackbar}
+              autoHideDuration={this.state.snackbarAutoHideDuration}
+              onRequestClose={this.handleCloseSnackbar}
+              message={this.state.snackbarMessage}
+            />
           </div>
         </BasePage>
       </MuiThemeProvider>

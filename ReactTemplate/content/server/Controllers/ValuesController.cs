@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DotNetify.Security;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,9 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -42,15 +46,34 @@ namespace dotnetify_react_template.server.Controllers
     [Route("api/[controller]")]
     // [Route("api/[controller]/[target]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class ValuesController : Controller // Base
     {
+      /*
+        public Task<bool> Invoke(HttpContext context)
+        {
+          _logger.LogWarning("ValuesController     - " + context.User);
+          // Do something with the current HTTP context...
+          return new Task(true);
+        }
+      */
+        public IActionResult Error()
+        {
+            ViewData["RequestId"] = HttpContext.TraceIdentifier;
+            return View();
+        }
         private readonly ILogger _logger;
         private MySqlConnection _connection;
+        
         // private string _connectionStringcs = @"server=localhost;port=3306;database=lis2;user=root;password=root";
         private readonly string _connectionString;
         private readonly string _translatescript;
         private readonly string _udpscript;
         private readonly string _savePath;
+        
+        private IUserRepository hh;
+        private IHttpContextAccessor _hhh;
+        private IPrincipalAccessor _nn;
+
         public class PostInfo
         {
             public string value { get; set; }
@@ -72,24 +95,107 @@ namespace dotnetify_react_template.server.Controllers
             // public int Anno { get; set; }
         }
 
-        public ValuesController(IConfiguration configuration, ILogger<ValuesController> logger)
+
+        [HttpGet("user")]
+        public HttpResponseMessage GetUser()
         {
-            // _connectionString = configuration.GetConnectionString("ConnectionStrings:lis");
-            // Console.WriteLine("ValuesController.cs - costruttore, configurazione: " + configuration.ToString());
+          // this.Invoke();
+          return new HttpResponseMessage(HttpStatusCode.OK)
+          {
+              Content = new StringContent("I'm logged!")
+          };
+        }
 
-            _connectionString = configuration.GetConnectionString("lis"); //  _configuration.GetValue<string>("ConnectionStrings:lis");
-            Console.WriteLine("ValuesController.cs - costruttore, stringa connessione DB MySQL: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
+        // [HttpGet]
+        [HttpGet("logged")]
+        public async Task<bool> LoggedIn()
+        {
+          var myUser = HttpContext.User;
+          // _logger.LogWarning("ValuesController     - myUser:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + HttpContext.User.Name);
+          _logger.LogWarning("ValuesController     - myUser:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + myUser.Identity);
+          // _logger.LogWarning("ValuesController     - myUser.Nmae::::::::::::::::::::::::::::::::::::::::::::::::: " + myUser.Identities.FirstOrDefault().NameIdentifier);
+          
+          System.Security.Claims.ClaimsIdentity principal = myUser.Identities.FirstOrDefault() as System.Security.Claims.ClaimsIdentity;
+          if (null != principal)
+          {
+            _logger.LogWarning("ValuesController     - userprincipal not null");
+            foreach (Claim claim in principal.Claims)
+            {
+              Console.WriteLine("ValuesController.cs ---------- CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            }
+          }
+          return myUser.Identities.Any(x => x.IsAuthenticated);
+        }
 
-            _translatescript = configuration.GetValue<string>("Scripts:translate");
-            Console.WriteLine("ValuesController.cs - costruttore, script Powershell di translate: " + _translatescript); //_configuration["ConnectionStrings:lis"]);
+        // public ValuesController(IConfiguration configuration, ILogger<ValuesController> logger)
+        public ValuesController(IPrincipalAccessor principalAccessor, IHttpContextAccessor bb, ILiveDataService liveDataService, IUserRepository _userRepository, IConfiguration configuration, ILogger<ValuesController> logger) // {
+        // public ValuesController(IPrincipalAccessor principalAccessor, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger<ValuesController> logger)
+        // public ValuesController(IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger<ValuesController> logger)
+        {
+          hh = _userRepository;
+          _hhh = bb;
+          _nn = principalAccessor;
+          // IHttpContextAccessor httpContextAccessor, 
+          // User.FindFirst(ClaimTypes.NameIdentifier).Value
+          // EDIT for constructor
+          // Below code works:
+          // public Controller(IHttpContextAccessor httpContextAccessor)
+          // {
 
-            _udpscript  = configuration.GetValue<string>("Scripts:sentence_udp");
-            Console.WriteLine("ValuesController.cs - costruttore, script Powershell di udp: " + _udpscript); //_configuration["ConnectionStrings:lis"]);
+          // var user = await this.LoggedIn();
+          // var user = httpContextAccessor.HttpContext.User; //.FindFirst(ClaimTypes.NameIdentifier).Value;
+          // var email = httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
 
-            _savePath = configuration.GetValue<string>("Paths:sentences");
-            Console.WriteLine("ValuesController.cs - costruttore, path Powershell di save: " + _savePath); //_configuration["ConnectionStrings:lis"]);
+          _logger = logger;
+          // _logger.LogWarning("ValuesController     - userId:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + httpContextAccessor.HttpContext.User);
+          /*
+          _logger.LogWarning("ValuesController     - userId:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + HttpContext.User);
+          _logger.LogWarning("ValuesController     - email :::::::::::::::::::::::::::::::::::::::::::::::::::::: " + email);
+          Console.WriteLine("ValuesController.cs - httpContextAccessor.HttpContext.User.Identity.Name ----------- " + user.Identity.Name);
 
-            _logger = logger;
+          ClaimsPrincipal principal = user.Identity as ClaimsPrincipal;
+          if (null != principal)
+          {
+            _logger.LogWarning("ValuesController     - userprincipal not null");
+            foreach (Claim claim in principal.Claims)
+            {
+              Console.WriteLine("ValuesController.cs ---------- CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+            }
+          }
+          */
+          /*
+          var userIdentity = principalAccessor.Principal.Identity as ClaimsIdentity;
+          foreach (Claim claim in userIdentity.Claims)  
+          {  
+            _logger.LogInformation("ValuesController ::::::::::::::::::::::::::: CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value); //  + "</br>");
+          }
+          */
+
+          // }
+          // IConfiguration configuration, ILogger<ValuesController> logger)
+          // _connectionString = configuration.GetConnectionString("ConnectionStrings:lis");
+          // Console.WriteLine("ValuesController.cs - costruttore, configurazione: " + configuration.ToString());
+
+          var pathBase = HttpContext; // .Request.PathBase;
+          _logger.LogWarning("ValuesController.cs - costruttore, HttpContext: " + HttpContext); //_configuration["ConnectionStrings:lis"]);
+
+
+          // _logger.LogWarning("ValuesController.cs - costruttore, HttpContext.Trace: " + HttpContext.TraceIdentifier);
+
+          // _logger.LogWarning("ValuesController.cs - costruttore, this.Error: " + this.Error());
+
+          _connectionString = configuration.GetConnectionString("lis"); //  _configuration.GetValue<string>("ConnectionStrings:lis");
+          _logger.LogWarning("ValuesController.cs - costruttore, stringa connessione DB MySQL: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
+
+          _translatescript = configuration.GetValue<string>("Scripts:translate");
+          _logger.LogWarning("ValuesController.cs - costruttore, script Powershell di translate: " + _translatescript); //_configuration["ConnectionStrings:lis"]);
+
+          _udpscript  = configuration.GetValue<string>("Scripts:sentence_udp");
+          _logger.LogWarning("ValuesController.cs - costruttore, script Powershell di udp: " + _udpscript); //_configuration["ConnectionStrings:lis"]);
+
+          _savePath = configuration.GetValue<string>("Paths:sentences");
+          _logger.LogWarning("ValuesController.cs - costruttore, path Powershell di save: " + _savePath); //_configuration["ConnectionStrings:lis"]);
+
         }
 
         /**
@@ -161,6 +267,32 @@ namespace dotnetify_react_template.server.Controllers
         [HttpGet("meteo/{id}")]
         public ActionResult Get_meteo_id(string id)
         {
+          _logger.LogWarning("ValuesController - Nameeeeee -----------------------------------------------: " + this.hh.GetUserNetworkId());
+          // Console.WriteLine("ValuesControllerhboard - Nameeeeee -------------------------: " + this._hhh.HttpContext.User.Claims.Last(i => i.Type == ClaimTypes.NameIdentifier).Value);
+          _logger.LogWarning("ValuesController - Nameeeeee -----------------------------------------------: " + this._nn.Principal);
+
+          /*
+          var userIdentity = this._hhh.HttpContext.User.Identity as ClaimsIdentity;
+          foreach (Claim claim in userIdentity.Claims)
+          {
+            _logger.LogInformation("ValuesController.cs -------------- CLAIM TYPE: " + claim.Type);
+            _logger.LogInformation("ValuesController.cs -------------- CLAIM VALUE: " + claim.Value); //  + "</br>");
+          }
+
+          var userIdentity = this._nn.Principal.Identity as ClaimsIdentity;
+          foreach (Claim claim in userIdentity.Claims)
+          {
+            _logger.LogInformation("Applayout.cs -------------- CLAIM TYPE: " + claim.Type);
+            _logger.LogInformation("Applayout.cs -------------- CLAIM VALUE: " + claim.Value); //  + "</br>");
+          }
+          */
+          var user = HttpContext.User; //.FindFirst(ClaimTypes.NameIdentifier).Value;
+          var email = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Subject")?.Value;
+          // _logger = logger;
+          _logger.LogWarning("ValuesController     - user.Name:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + user.Identity);
+          _logger.LogWarning("ValuesController     - sub ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " + email);
+          _logger.LogWarning("ValuesController.cs  - httpContextAccessor.HttpContext.User.Identity.Name :::::::::::: " + user.Identity);
+
             string result = "[{'CENTRO E SARDEGNA':'Inizializzazione..'},{'NORD':'Inizializzazione..'}]";
             _logger.LogWarning("ValuesController - Chiamata Get_meteo_id");
             try
@@ -1047,7 +1179,7 @@ namespace dotnetify_react_template.server.Controllers
               try {
                   ProcessStartInfo startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
-                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' """;
+                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
                   startInfo.UseShellExecute = false;
@@ -1172,32 +1304,43 @@ namespace dotnetify_react_template.server.Controllers
         // PUT api/values/menu/5
         [HttpPut("menu/{id}")]
         // public void Put(int id, [FromBody] string value)
-        public void UpdateMenu(int id, [FromBody] string value)
+        // public void UpdateMenu(int id, [FromBody] string value)
+        public ActionResult UpdateMenu(int id, [FromBody] string value)
         {
-            _logger.LogWarning("ValuesController PUT - post_id: " + id);
-            _logger.LogWarning("ValuesController PUT - value: " + value);
-            dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
-            var idf = results.value;
-            try {
-                _connection = new MySqlConnection(this._connectionString);
-                _connection.Open();
-                using (_connection) {
-                    MySqlCommand command = new MySqlCommand();
-                    command.Connection = _connection;
-                    string SQL = "UPDATE lis_menu ( auth, name_menu, url_menu, notes ) SET auth = ?auth, name_menu = ?name_menu, url_menu = ?url_menu, notes = ?notes WHERE id_menu = ?id)";
-                    command.CommandText = SQL;
-                    command.Parameters.AddWithValue("?auth", true);
-                    command.Parameters.AddWithValue("?name_menu", "menu_name");
-                    command.Parameters.AddWithValue("?url_menu", "/path/to/menuvalue_new");
-                    command.Parameters.AddWithValue("?notes", "menu_notes_!_new");
-                    command.Parameters.AddWithValue("?id", id);
-                    command.ExecuteNonQuery();
-                }
-                _connection.Close();
-            } catch (MySqlException ex) {
-                // Log.Info("Error in adding mysql row. Error: " + ex.Message);
-                _logger.LogWarning("ValuesController - Error in [HttpPut(\"menu\")]. Error: " + ex.Message);
+          _logger.LogWarning("ValuesController PUT menu/{id} - querystring id: " + id);
+          _logger.LogWarning("ValuesController PUT menu/{id} - body value: " + value);
+          dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
+          var idf = results.value;
+          try {
+            _connection = new MySqlConnection(this._connectionString);
+            _connection.Open();
+            using (_connection) {
+              MySqlCommand command = new MySqlCommand();
+              command.Connection = _connection;
+              // string SQL = "UPDATE lis_menu ( auth, name_menu, url_menu, notes ) SET auth = ?auth, name_menu = ?name_menu, url_menu = ?url_menu, notes = ?notes WHERE id_menu = ?id)";
+              string SQL = "UPDATE lis_request SET notes = 'Cancellata' WHERE id_request = ?id;";
+              // menu/{id}
+              command.CommandText = SQL;
+              // command.Parameters.AddWithValue("?auth", true);
+              // command.Parameters.AddWithValue("?name_menu", "menu_name");
+              // command.Parameters.AddWithValue("?url_menu", "/path/to/menuvalue_new");
+              // command.Parameters.AddWithValue("?notes", "menu_notes_!_new");
+              command.Parameters.AddWithValue("?id", idf);
+              command.ExecuteNonQuery();
+              _connection.Close();
             }
+              // return Ok("{\"insertRequest\": \"Ok\"}");
+              return Ok("{\"ok_upd_request\": \"" + idf + "\"}");
+          } catch (MySqlException ex) {
+              // Log.Info("Error in adding mysql row. Error: " + ex.Message);
+              _logger.LogWarning("ValuesController - Error in PUT menu/{id}. Error: " + ex.Message);
+              Console.WriteLine("ValuesController - Error in PUT menu/{id}. Error: " + ex.Message);
+              return Ok("{\"upd_request\": \"Non Okei_mysqlex\"}");
+          } catch(Exception ex) {
+              Console.WriteLine(ex.Message);
+              return Ok("{\"upd_request\": \"Non Okei_ex\"}");
+          }
+          // return content;
         }
 
         // PUT api/values/setting/5

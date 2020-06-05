@@ -15,9 +15,20 @@ class App extends React.Component {
   }
 */
 
+// Variabili globali create per poter condividere dati, tipo
+// il deliverable (uso ipotizzato inizialmente, poi dismesso)
+// nome e id utente
 global.foo = 'foo';
 global.bar = 'bar';
-global.deliver = true;
+global.g_deliverable = true;
+global.g_username = '';
+global.g_userid = 0;
+
+global.g_did_ita = '';
+global.g_did_lis = '';
+global.g_did_videoname = '';
+global.g_did_output_preview = '';
+
 
 class App extends React.Component {
   constructor(props) {
@@ -39,12 +50,12 @@ class App extends React.Component {
     console.log('App.js - componentDidMount');
   };
 
-  handleAuthenticated_1 = _ => this.setState({ authenticated: true });
+  handleAuthenticated = _ => this.setState({ authenticated: true });
 
   render() {
     // const handleAuthenticated = _ => this.setState({ authenticated: true });
     return !this.state.authenticated ? 
-      <LoginPage onAuthenticated={this.handleAuthenticated_1} /> : 
+      <LoginPage onAuthenticated={this.handleAuthenticated} /> : 
       <AppLayout userid={this.state.userid} />;
   }
 }

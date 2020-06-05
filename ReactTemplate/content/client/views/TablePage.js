@@ -2,6 +2,8 @@ import React from 'react';
 import dotnetify from 'dotnetify';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import Snackbar from 'material-ui/Snackbar';
 import { Tabs, Tab } from 'material-ui/Tabs';
@@ -11,11 +13,12 @@ import TextField from 'material-ui/TextField';
 import IconClear from 'material-ui/svg-icons/content/clear';
 import IconAdd from 'material-ui/svg-icons/content/add';
 import IconAlarm from 'material-ui/svg-icons/action/alarm';
+import DownloadIcon from 'material-ui/svg-icons/file/cloud-download';
 
 import { pink500, grey200, grey500, blue600 } from 'material-ui/styles/colors';
 import ThemeDefault from '../styles/theme-default';
 import globalStyles from '../styles/styles';
-import { ChipExampleSimple, ListExampleSelectable } from '../components/dashboard/InfoBox';
+import { ChipExampleSimple, ListExampleSelectable, handleChips_b } from '../components/dashboard/InfoBox';
 import { ChipExampleSimple1 } from '../components/dashboard/RecentActivities';
 import { VideoPreview } from '../components/dashboard/Utilization';
 import BasePage from '../components/BasePage';
@@ -27,11 +30,27 @@ class TablePage extends React.Component {
   constructor(props) {
     super(props);
     dotnetify.debug = true;
-    this.vm = dotnetify.react.connect('Table', this);
+    // this.vm = dotnetify.react.connect('Table', this);
+    
+    
+    var arg = { User1: { Id: g_userid, Name: g_username }, num1: 9043835 };
+    // dotnetify.react.connect("HelloWorld", this, { vmArg: arg });
+    dotnetify.debug= true;
+    this.vm = dotnetify.react.connect('Table', this, {
+      exceptionHandler: ex => {
+        // alert(ex.message);
+        console.log('Table - exceptionHandler: ', ex);
+        auth.signOut();
+      },
+      vmArg: arg
+    });
+    
+    
     this.dispatch = state => this.vm.$dispatch(state);
     
     this.routeTo = route => this.vm.$routeTo(route);
     
+    console.log('TablePage - this: ', this);
     console.log('TablePage - dotnetify: ', dotnetify);
     console.log('TablePage - props: ', props);
 
@@ -40,10 +59,12 @@ class TablePage extends React.Component {
       // Employees: [],
       Requests: [],
       Pages: [],
+      deleteOpen: false,
+      deleteId: 0
       // Filter: ''
       // ShowNotification: false
     };
-  }
+  };
 
   _isMounted = false;
   abortController = new AbortController();
@@ -73,6 +94,46 @@ class TablePage extends React.Component {
   }
   */
 
+  handleDeleteOpen = (id) => {
+    this.setState({deleteId: id, deleteOpen: true});
+  };
+
+  handleDeleteClose = () => {
+    this.setState({deleteOpen: false});
+  };
+
+  handleDelete = () => {
+    console.log('TablePage - handleDelete this.state.deleteId: ', this.state.deleteId);
+
+    fetch("/api/values/menu/" + this.state.deleteId,    // request/delete",
+    {
+      signal: this.mySignal,
+      method: "PUT", // 'DELETE',
+      body: "'"+JSON.stringify({
+        value:      this.state.deleteId // ,
+        // notes:      'Cancellata'
+      })+"'",
+      headers: {'Content-Type': 'application/json'}
+    })
+    .then(res => res.json())
+    .then(p => {
+      console.log('TablePage_1 handleDelete - Risultato request PUT: ', p);
+      const newState = { deleteOpen: false, Filter: '' };
+      this.setState(newState);
+      this.dispatch(newState);
+      /*
+      this.setState({
+        deleteOpen: false
+      });
+      this.dispatch();
+      */
+    })
+    .catch(error => {
+      console.log('TablePage_1 handleDelete - PUT menu/request Error: ', error);
+    });
+    // this.setState({deleteOpen: false});
+  };
+
   render() {
     let { 
       // addName, 
@@ -80,9 +141,8 @@ class TablePage extends React.Component {
       Requests, Pages, SelectedPage, Filter
       // ShowNotification 
     } = this.state;
-    // const { data_id } = this.props;
-    // console.log('TablePage - data_id: ', data_id);
-    const styles = {
+
+    const TableStyles = {
       addButton: { margin: '1em' },
       removeIcon: { fill: grey500 },
       columns: {
@@ -93,6 +153,21 @@ class TablePage extends React.Component {
       },
       pagination: { marginTop: '1em' }
     };
+
+    const deleteActions = [
+      <FlatButton
+        label="OK"
+        primary={true}
+        onClick={this.handleDelete}
+      />,
+      <FlatButton
+        label="Annulla"
+        primary={true}
+        onClick={this.handleDeleteClose}
+      />,
+    ];
+
+
     /*
     const handleAdd = _ => {
       if (addName) {
@@ -124,7 +199,7 @@ class TablePage extends React.Component {
     };
 
     // const hideNotification = _ => this.setState({ ShowNotification: false });
-
+    /*
     const handleMenuClick = (idrequest, area) => { // route => {
       // Dashboard.handleFetch("2010-01-08");
       // console.log('Table - handleMenuClick - route: ', route);
@@ -137,14 +212,26 @@ class TablePage extends React.Component {
       else
         window.location = '/Meteo/'+idrequest; // /657';
     };
+    */
 
-    const handleMenuClick1 = (route) => { // route => {
+    const handleLoadFromDB = (route) => { // route => {
       // Dashboard.handleFetch("2010-01-08");
-      console.log('Table - handleMenuClick - route: ', route);
-      // console.log('Table - handleMenuClick - idrequest: ', idrequest);
-      // console.log('Table - handleMenuClick - area: ', area);
+      console.log('Table - handleLoadFromDB - route: ', route);
+      // console.log('Table - handleLoadFromDB - idrequest: ', idrequest);
+      // console.log('Table - handleLoadFromDB - area: ', area);
       this.vm.$routeTo(route); // {TemplateId: "FormPage", Path: "2", RedirectRoot: false}); // route);
       // window.location = '/Didattica/traduzione'; // /657';
+    };
+
+    const handleDownloadVideo = (path) => {
+      const element = document.createElement("a");
+      
+      // const file = new Blob([document.getElementById('itaField').value], {type: 'text/plain'});
+      // const file = new Blob([this.state.lis_edit], {type: 'text/plain'});
+      element.href = path; // '/video_gen/mp4/sentence_06_03_2020_10_27_05.mp4'; // URL.createObjectURL(path);
+      element.download = path.replace(/^.*[\\\/]/, ''); // "myFile.mp4";
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
     };
 
     const RenderConsoleLog = ({ children }) => {
@@ -163,7 +250,7 @@ class TablePage extends React.Component {
 
             {/*
               <div>
-                <FloatingActionButton onClick={handleAdd} style={styles.addButton} backgroundColor={pink500} mini={true}>
+                <FloatingActionButton onClick={handleAdd} style={TableStyles.addButton} backgroundColor={pink500} mini={true}>
                   <IconAdd />
                 </FloatingActionButton>
                 <TextField
@@ -176,89 +263,116 @@ class TablePage extends React.Component {
                   onChange={event => this.setState({ addName: event.target.value })}
                 />
               </div>
+               multiSelectable={false}
+               fixedHeader={false} style={{tableLayout: 'auto'}} 
             */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderColumn style={styles.columns.id}>Nome request<br />
+            <Table selectable={false}>
+              <TableHeader
+                displaySelectAll={false}
+                adjustForCheckbox={false}
+              >
+                <TableRow selectable={false}>
+                  <TableHeaderColumn style={TableStyles.columns.id}>Nome request<br />
                   <TextField
                     hintText="Filtra.."
                     style={{width: '95%'}}
                     onChange={(event) => handleFilter(event.target.value)}
                   />
                   </TableHeaderColumn>
-                  <TableHeaderColumn style={styles.columns.firstName}>Data request</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.firstName}>Data request</TableHeaderColumn>
                   { this.state.Mode != "didattica" ?
-                  <TableHeaderColumn style={styles.columns.remove}>Area forecast</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.remove}>Area forecast</TableHeaderColumn>
                   : null }
-                  <TableHeaderColumn style={styles.columns.remove}>Testo ITA</TableHeaderColumn>
-                  <TableHeaderColumn style={styles.columns.remove}>Testo LIS</TableHeaderColumn>
-                  <TableHeaderColumn style={styles.columns.lastName}>Stato</TableHeaderColumn>
-                  <TableHeaderColumn style={styles.columns.lastName}>Azioni</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.remove}>Testo ITA</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.remove}>Testo LIS</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.remove}>Versione</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.lastName}>Utente</TableHeaderColumn>
+                  { location.hostname === "localhost" ? 
+                  <TableHeaderColumn style={TableStyles.columns.firstName}>Path video</TableHeaderColumn>
+                  : null }
+                  <TableHeaderColumn style={TableStyles.columns.lastName}>Azioni</TableHeaderColumn>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody displayRowCheckbox={false}>
                 {Requests.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableRowColumn style={styles.columns.id}>{item.LisRequest.NameRequest}</TableRowColumn>
-                    <TableRowColumn style={styles.columns.firstName}>{item.LisRequest.TimeRequest}</TableRowColumn>
-                      {/*<InlineEdit onChange={value => handleUpdate({ Id: item.Id, FirstName: value })}>{item.FirstName}</InlineEdit>
-                    </TableRowColumn>*/}
-                    { this.state.Mode != "didattica" ?
-                    <TableRowColumn style={styles.columns.lastName}>{item.ForecastArea}</TableRowColumn>
-                    : null }
-                      {/*<InlineEdit onChange={value => handleUpdate({ Id: item.Id, LastName: value })}>{item.LastName}</InlineEdit>
-                    </TableRowColumn>*/}
-                    <TableRowColumn
-                      title={item.TextITA}
-                      style={styles.columns.remove}>{item.TextITA}
-                    </TableRowColumn>
-                    <TableRowColumn
-                      title={item.TextLIS}
-                      style={styles.columns.remove}>{item.TextLIS}
-                    </TableRowColumn>
-                    <TableRowColumn style={styles.columns.remove}>{item.Status}</TableRowColumn>
-                    <TableRowColumn style={styles.columns.remove}>
-                      {/* onClick={_ => handleMenuClick(item.Route)} */}
-                      {/* onClick={_ => this.dispatch({ Remove: item.Version })} */}
-                      {/*
-                      <FloatingActionButton
-                        onClick={_ => handleMenuClick(item.LisRequest.IdRequest, item.ForecastArea)}
-                        zDepth={0}
-                        mini={true}
-                        backgroundColor={pink500}
-                        iconStyle={styles.removeIcon}
-                      >
-                        <IconClear />
-                      </FloatingActionButton>
-                      */}
-                      <FloatingActionButton
-                        onClick={_ => handleMenuClick1(item.Route)}
-                        zDepth={0}
-                        mini={true}
-                        backgroundColor={grey200}
-                        iconStyle={styles.removeIcon}
-                      >
-                        <IconAdd />
-                      </FloatingActionButton>
-                      {/*
-                      <FloatingActionButton
-                        onClick={_ => this.dispatch({ Remove: item.Version })}
-                        zDepth={0}
-                        mini={true}
-                        backgroundColor={blue600}
-                        iconStyle={styles.removeIcon}
-                      >
-                        <IconAlarm />
-                      </FloatingActionButton>
-                      */}
-                    </TableRowColumn>
-                  </TableRow>
+                <TableRow key={index} selectable={false}>
+                  <TableRowColumn title={item.LisRequest.NameRequest} style={TableStyles.columns.id}>{item.LisRequest.NameRequest}</TableRowColumn>
+                  <TableRowColumn title={item.LisRequest.TimeRequest} style={TableStyles.columns.firstName}>{item.LisRequest.TimeRequest}</TableRowColumn>
+                    {/*<InlineEdit onChange={value => handleUpdate({ Id: item.Id, FirstName: value })}>{item.FirstName}</InlineEdit>
+                  </TableRowColumn>*/}
+                  { this.state.Mode != "didattica" ?
+                  <TableRowColumn title={item.ForecastArea} style={TableStyles.columns.lastName}>{item.ForecastArea}</TableRowColumn>
+                  : null }
+                  {/* <InlineEdit onChange={value => handleUpdate({ Id: item.Id, LastName: value })}>{item.LastName}</InlineEdit> </TableRowColumn> */}
+                  <TableRowColumn title={item.TextITA} style={TableStyles.columns.remove}>{item.TextITA}</TableRowColumn>
+                  <TableRowColumn title={item.TextLIS} style={TableStyles.columns.remove}>{item.TextLIS}</TableRowColumn>
+                  <TableRowColumn style={TableStyles.columns.remove}>{item.VersionITA}</TableRowColumn>
+                  <TableRowColumn style={TableStyles.columns.remove}>{item.User}</TableRowColumn>
+                  { location.hostname === "localhost" ? 
+                  <TableRowColumn title={item.LisRequest.PathVideo} style={TableStyles.columns.remove}>{item.LisRequest.PathVideo}</TableRowColumn>
+                  : null }
+                  <TableRowColumn style={TableStyles.columns.remove}>
+                    {/* onClick={_ => handleMenuClick(item.Route)} */}
+                    {/* onClick={_ => this.dispatch({ Remove: item.Version })} */}
+                    {/*
+                    <FloatingActionButton
+                      onClick={_ => handleMenuClick(item.LisRequest.IdRequest, item.ForecastArea)}
+                      zDepth={0}
+                      mini={true}
+                      backgroundColor={grey200}
+                      iconStyle={TableStyles.removeIcon}
+                    >
+                      <IconClear />
+                    </FloatingActionButton>
+                    */}
+                    <FloatingActionButton
+                      onClick={_ => handleLoadFromDB(item.Route)}
+                      zDepth={0}
+                      title='Carica da DB'
+                      mini={true}
+                      backgroundColor={blue600}
+                      iconStyle={TableStyles.removeIcon}
+                    >
+                      <IconAdd />
+                    </FloatingActionButton>
+                    &nbsp;
+                    <FloatingActionButton
+                      onClick={_ => this.handleDeleteOpen(item.LisRequest.IdRequest)}
+                      zDepth={0}
+                      title={'Elimina request ' + item.LisRequest.IdRequest}
+                      mini={true}
+                      backgroundColor={blue600}
+                      iconStyle={TableStyles.removeIcon}
+                    >
+                      <IconClear />
+                    </FloatingActionButton>
+                    &nbsp;
+                    <FloatingActionButton
+                      onClick={_ => handleDownloadVideo(item.LisRequest.PathVideo)}
+                      zDepth={0}
+                      title={'Scarica video ' + item.LisRequest.PathVideo}
+                      mini={true}
+                      backgroundColor={blue600}
+                      iconStyle={TableStyles.removeIcon}
+                    >
+                      <DownloadIcon />
+                    </FloatingActionButton>
+                    
+                  </TableRowColumn>
+                </TableRow>
                 ))}
               </TableBody>
             </Table>
-            <Pagination style={styles.pagination} pages={Pages} select={SelectedPage} onSelect={handleSelectPage} />
+            <Pagination style={TableStyles.pagination} pages={Pages} select={SelectedPage} onSelect={handleSelectPage} />
             {/* <Snackbar open={ShowNotification} message="Changes saved" autoHideDuration={1000} onRequestClose={hideNotification} /> */}
+            <Dialog
+              actions={deleteActions}
+              modal={false}
+              open={this.state.deleteOpen}
+              onRequestClose={this.handleDeleteClose}
+            >
+              Eliminare la request?
+            </Dialog>
           </div>
         </BasePage>
       </MuiThemeProvider>
@@ -269,10 +383,26 @@ class TablePage extends React.Component {
 class TablePage_1 extends React.Component {
   constructor(props) {
     super(props);
-    // console.log('TablePage_1 - props.data_id: ', props.data_id);
     dotnetify.debug = true;
-    this.vm = dotnetify.react.connect('Table_1', this);
+
+    // this.vm = dotnetify.react.connect('Table_1', this);
+    
+    // var arg = { User: { Name: "Test" } }; // Visibile in: vm.$vmArg.User.Name
+    var arg = { User1: { Id: g_userid, Name: g_username }, num1: 9043835 };
+    // dotnetify.react.connect("HelloWorld", this, { vmArg: arg });
+    dotnetify.debug= true;
+    this.vm = dotnetify.react.connect('Table_1', this, {
+      exceptionHandler: ex => {
+        // alert(ex.message);
+        console.log('Table_1 - exceptionHandler: ', ex);
+        auth.signOut();
+      },
+      vmArg: arg
+    });
+    
     this.dispatch = state => this.vm.$dispatch(state);
+
+
     console.log('TablePage_1 - dotnetify: ', dotnetify);
     console.log('TablePage_1 - props: ', props);
 
@@ -310,14 +440,15 @@ class TablePage_1 extends React.Component {
       */
 
 
-      Mode:               'dizionario', // switch del tab di selezione modo - Tab di default dizionario
+      // Mode:               'dizionario', // switch del tab di selezione modo - Tab di default dizionario
       videoPoster:        '', // '/video_gen/mp4/sentence_04_03_2020_11_01_54.jpg',
       // videoUrl:           '', // '/video_gen/mp4/amico.mp4' // 'http://www.silviaronchey.it/materiali/video/mp4/Intervista%20Vernant.mp4',
       videoName:          ''
     };
-    console.log('TablePage_1 - this.state.Mode: ', this.state.Mode);
+    // console.log('TablePage_1 - this.state.Mode: ', this.state.Mode);
     this.handleChangeSign = this.handleChangeSign.bind(this);
-    this.handleChips = this.handleChips.bind(this);
+    // this.handleChips = this.handleChips.bind(this);
+    this.handleChips = handleChips_b.bind(this);
   };
 
   _isMounted = false;
@@ -330,50 +461,91 @@ class TablePage_1 extends React.Component {
     console.log('TablePage_1 - componentWillUnmount');
     // window.removeEventListener('beforeunload', this.handleLeavePage);
     // document.removeEventListener("keydown", this.handleSpaceKeyDown, false); // Rimane agganciato a tutti i campi, non solo lis_edit
+    // if (this.state.Mode == 'traduzione') {
+    // Se sono in traduzione e non c'e' un ita_id (non ho salvato e non arrivo da una request della lista) salvo nelle globals i valori dei campi
+    // Per ricaricarli quando torno
+    if (this.state.Mode == 'traduzione' && this.state.ita_id == 0) {
+      console.log('TablePage_1 - componentWillUnmount - aggiornamento globals');
+      g_did_ita = this.state.ita_edit;
+      g_did_lis = this.state.lis_edit;
+      g_did_videoname = this.state.videoName;
+      g_did_output_preview = this.state.videoUrl;
+    }
+    /*
+    try {
+      await AsyncStorage.setItem('timeKey', this.state.ita_edit);
+    } catch (error) {
+      // Error saving data
+    }
+    */
     this._isMounted = false;
     this.abortController.abort();
+
     this.vm.$destroy();
   };
 
   componentDidMount() {
     console.log('TablePage_1 - componentDidMount');
+    console.log('TablePage_1 - g_did_ita: ', g_did_ita);
+    console.log('TablePage_1 - g_userid: ', g_userid);
     console.log('TablePage_1 - this.props.location: ', this.props.location);
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+      console.log("It's a local server!");
+
     this._isMounted = true;
     // window.addEventListener('beforeunload', this.handleLeavePage);
     // document.addEventListener("keydown", this.handleSpaceKeyDown, false);
     this.handleGetSigns();
-    this.setState({
-      sign_filtered: this.state.sign_iniz
-    }, () => {
-      console.log('TablePage_1 - componentDidMount - Caricamento segno di benvenuto');
-      this.handleChangeSign(
-        /*
-        {id: 911, 
-        animatore: "Francesca Sasso - 48HStudio ",
-        code: "",
-        contesto: "",
-        contributo: "",
-        inteprete: "Nadia Decarolis",
-        name: "amico",
-        name_editor: "04720-amico-",
-        name_player: "amico.lis",
-        progetto: "PPE",
-        validatore: ""}
-      */  
-        {id: 161,
-        animatore: "",
-        code: "",
-        contesto: "",
-        contributo: "",
-        inteprete: "",
-        name: "benvenuto",
-        name_editor: "08000-benvenuto-",
-        name_player: "benvenuto.lis",
-        progetto: "",
-        validatore: ""}
+
+    // && this.state.ita_id == 0
+    /*
+    if (true) { // this.state.Mode == 'traduzione') {
+      console.log('TablePage_1 - g_did_output_preview: ', g_did_output_preview);
+      this.setState({
+        ita_edit: g_did_ita,
+        lis_edit: g_did_lis,
+        videoName: g_did_videoname,
+        videoUrl: g_did_output_preview
+        },
+        this.handleChips({keyCode: 32, target: {value: g_did_lis}})
       );
-      // this.updateVideo('benvenuto');// {
-    });
+      document.getElementById('lisField').value = 'ghrhtrhrthrhtrhr';
+    }
+    */
+    if (this.state.Mode == 'dizionario') {
+      this.setState({
+        sign_filtered: this.state.sign_iniz
+      }, () => {
+        console.log('TablePage_1 - componentDidMount - Caricamento segno di benvenuto');
+        this.handleChangeSign(
+          /*
+          {id: 911, 
+          animatore: "Francesca Sasso - 48HStudio ",
+          code: "",
+          contesto: "",
+          contributo: "",
+          inteprete: "Nadia Decarolis",
+          name: "amico",
+          name_editor: "04720-amico-",
+          name_player: "amico.lis",
+          progetto: "PPE",
+          validatore: ""}
+        */  
+          {id: 161,
+          animatore: "",
+          code: "",
+          contesto: "",
+          contributo: "",
+          inteprete: "",
+          name: "benvenuto",
+          name_editor: "08000-benvenuto-",
+          name_player: "benvenuto.lis",
+          progetto: "",
+          validatore: ""}
+        );
+        // this.updateVideo('benvenuto');// {
+      });
+    }
   };
 
   handleLeavePage(e) {
@@ -430,6 +602,31 @@ class TablePage_1 extends React.Component {
             console.log('TablePage_1 - componentDidMount - Caricamento segno di benvenuto');
             this.updateVideo('benvenuto');// {
           }
+          console.log('TablePage_1 - this.state.Mode: ', this.state.Mode);
+          if (this.state.Mode == 'traduzione' && this.state.ita_id == 0) {
+            console.log('TablePage_1 - this.state.ita_id: ', this.state.ita_id);
+            console.log('TablePage_1 - g_did_ita: ', g_did_ita);
+            console.log('TablePage_1 - g_did_lis: ', g_did_lis);
+            try {
+              const value = 1; // await AsyncStorage.getItem('timeKey');
+              if (value !== null){
+                // We have data!!
+                console.log(value);
+                this.setState({
+                  ita_edit: g_did_ita,
+                  lis_edit: g_did_lis,
+                  videoName: g_did_videoname,
+                  videoUrl: g_did_output_preview
+                  }, () =>{
+                    this.handleChips({keyCode: 32, target: {value: g_did_lis}})
+                  }
+                );
+                // document.getElementById('lisField').value = 'ghrhtrhrthrhtrhr';
+              }
+            } catch (error) {
+              // Error retrieving data
+            }
+          }
         });
 
         // this.setState({ dirty: true });
@@ -446,10 +643,20 @@ class TablePage_1 extends React.Component {
     console.log('TablePage_1 - updateVideo(sign_name): ', sign_name);
     this.setState({
       // position: position,
-      videoPoster: '/video_gen/mp4/'+sign_name+'.gif',
-      videoUrl: '/video_gen/mp4/'+sign_name+'.mp4' // http://www.silviaronchey.it/materiali/video/mp4/Racconti%20di%20Corrado%20Augias.mp4'
+      videoPoster: '',
+      videoUrl: ''
       // items[Math.floor(Math.random()*items.length)]
       // Math.floor(Math.random()*2)
+    }, () =>{
+
+      this.setState({
+        // position: position,
+        videoPoster: '/video_gen/mp4/'+sign_name+'.gif',
+        videoUrl: '/video_gen/mp4/'+sign_name+'.mp4' // http://www.silviaronchey.it/materiali/video/mp4/Racconti%20di%20Corrado%20Augias.mp4'
+        // items[Math.floor(Math.random()*items.length)]
+        // Math.floor(Math.random()*2)
+      });
+
     });
   };
 
@@ -510,7 +717,7 @@ class TablePage_1 extends React.Component {
       // onChange={this.handleFetch} value={this.state.pickDate} 
   };
 
-  handleChips = (event) => {
+  handleChips_backup_tablepage1 = (event) => {
     console.log('TablePage_1 - handleChips event.key: ', event.key);
     console.log('TablePage_1 - handleChips event.keyCode: ', event.keyCode);
     console.log('TablePage_1 - handleChips event.Code: ', event.code);
@@ -860,7 +1067,6 @@ class TablePage_1 extends React.Component {
       showVideoPreview: true, // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
       previewing:       true,
     }, () => {
-
       fetch(
         "/api/values/preview",
         {
@@ -945,7 +1151,7 @@ class TablePage_1 extends React.Component {
           // Mantengo il conteggio della versione corrente incrementando
           // oppure se uso il comando Salva come nuovo.., riparto da 0 (che verra' portato a 1 in backend)
           body: "'"+JSON.stringify({
-            IdUserEdit: 4,
+            IdUserEdit: g_userid, // 4,
             IdTextIta:  this.state.ita_id, // 0,
             TextIta:    this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"), //"Provaaaa_manda_a_dashboard",
             VersionIta: this.state.ita_edit_version, 
@@ -1031,14 +1237,15 @@ class TablePage_1 extends React.Component {
   };
 
   render() {
-    let { previewing } = this.state;
+    // let { previewing } = this.state;
+    //  style={{border: '1px solid'}}
     const Table_1Styles = {
       buttons: {
         marginTop: 5, //30
         // float: 'right'
         float: 'left'
       },
-      addButton: { margin: '1em' },
+      addButton: { margin: '1em', padding: '1em' },
       removeIcon: { fill: grey500 },
       columns: {
         id: { width: '5%' },
@@ -1102,7 +1309,7 @@ class TablePage_1 extends React.Component {
               <div className="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-b-15 ">
                 <TextField
                   hintText="Cerca Segno"
-                  style={{width: '95%'}}
+                  style={{width: '90%'}}
                   onChange={event => 
                   this.setState({
                       sign_filtered: 
@@ -1152,28 +1359,31 @@ class TablePage_1 extends React.Component {
               { this.state.Mode === 'dizionario' ? 
               <div className="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-b-15 ">
                 <div style={Table_1Styles.buttons}>
-                  <video controls autoPlay={true} width="624" height="468" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
+                  <video controls autoPlay={true} width="800" height="600" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
                 </div>
               </div>
               : null }
             
               { this.state.Mode === 'traduzione' ? 
               <div className="col-xs-12 col-sm-4 col-md-4 col-lg-4 m-b-15 ">
-                <React.Fragment>
+                <React.Fragment>
                   <div style={{float: 'left'}}>
-                    <span>{"Testo ITA" + (this.state.ita_id ? " (ID " + this.state.ita_id + ") : " : " : ") + (this.state.ita_edit_version ? " (versione " + this.state.ita_edit_version + ") : " : " : ") }</span>
-                    { /* <input id="lisField" /> */ }
-                    { /* onChange={handleEditIta} */ }
-                    { /* <button onClick={this.handleDownloadItaTxtFile}>Download txt</button> */ }
-                    <RaisedButton label="Salva Testo ITA" onClick={this.handleDownloadItaTxtFile} style={{float: 'right'}} primary={true} />
-                    <input type="file" onChange={this.handleItaTxtFileChange} id="my-file-ita"></input>
-                    <RaisedButton label="Carica Testo ITA"  onClick={this.handleUploadItaTxtFile} disabled={false} style={{float: 'right'}} primary={true} />
+                    <div style={Table_1Styles.addButton}>
+                      <input type="file" onChange={this.handleItaTxtFileChange} id="my-file-ita"></input><br />
+                      <span style={{fontSize: 16, fontWeight: 'bold'}}>{"Testo ITA" + (location.hostname === "localhost" && this.state.ita_id ? " (ID " + this.state.ita_id + ") : " : "") + (location.hostname === "localhost" && this.state.ita_edit_version ? " (versione " + this.state.ita_edit_version + ") : " : "") }</span>
+                      { /* <input id="lisField" /> */ }
+                      { /* onChange={handleEditIta} */ }
+                      { /* <button onClick={this.handleDownloadItaTxtFile}>Download txt</button> */ }
+                      { /* fontSize: 18, fontWeight: 'bold', */ }
+                      <RaisedButton label="Salva" onClick={this.handleDownloadItaTxtFile} style={{float: 'right', padding: 1}} primary={true} />
+                      <RaisedButton label="Carica" onClick={this.handleUploadItaTxtFile} disabled={false} style={{float: 'right', padding: 1}} primary={true} />
+                    </div>
                     <TextareaAutosize
-                      cols={36}
+                      cols={48}
                       rows={20}
                       maxRows={25}
                       minRows={3}
-                      style={{fontSize: 18, fontWeight: 'bold', overflowY: 'scroll'}}
+                      style={{overflowY: 'scroll'}}
                       inputRef={this.inputRef}
                       ref={el=>this.input=el}
                       className="form-control"
@@ -1189,18 +1399,21 @@ class TablePage_1 extends React.Component {
                     />
                   </div>
                   <div style={{float: 'left'}}>
-                    <span>{"Testo LIS" + (this.state.lis_id ? " (ID " + this.state.lis_id + ") : " : " : ") + (this.state.lis_edit_version ? " (versione " + this.state.lis_edit_version + ") : " : " : ") }</span>
-                    { /* <input id="lisField" /> */ }
-                    { /* <button onClick={this.handleDownloadLisTxtFile}>Download txt</button> */ }
-                    <RaisedButton label="Salva Segni LIS" onClick={this.handleDownloadLisTxtFile} style={{float: 'right'}} primary={true} />
-                    <input type="file" onChange={this.handleLisTxtFileChange} id="my-file-lis"></input>
-                    <RaisedButton label="Carica Segni LIS"  onClick={this.handleUploadLisTxtFile} disabled={false} style={{float: 'right'}} primary={true} />
+                    <div style={Table_1Styles.addButton}>
+                      <input type="file" onChange={this.handleLisTxtFileChange} id="my-file-lis"></input><br />
+                      <span style={{fontSize: 16, fontWeight: 'bold'}}>{"Testo LIS" + (location.hostname === "localhost" && this.state.lis_id ? " (ID " + this.state.lis_id + ") : " : "") + (location.hostname === "localhost" && this.state.lis_edit_version ? " (versione " + this.state.lis_edit_version + ") : " : "") }</span>
+                      { /* <input id="lisField" /> */ }
+                      { /* <button onClick={this.handleDownloadLisTxtFile}>Download txt</button> */ }
+                      { /* fontSize: 18, fontWeight: 'bold', */ }
+                      <RaisedButton label="Salva" onClick={this.handleDownloadLisTxtFile} style={{float: 'right', padding: 1}} primary={true} />
+                      <RaisedButton label="Carica"  onClick={this.handleUploadLisTxtFile} disabled={false} style={{float: 'right', padding: 1}} primary={true} />
+                    </div>
                     <TextareaAutosize
-                      cols={36}
+                      cols={48}
                       rows={20}
                       maxRows={25}
                       minRows={3}
-                      style={{fontSize: 18, fontWeight: 'bold', overflowY: 'scroll'}}
+                      style={{overflowY: 'scroll'}}
                       inputRef={this.inputRef}
                       ref={el=>this.input=el}
                       className="form-control"
@@ -1254,16 +1467,16 @@ class TablePage_1 extends React.Component {
                       }}
                     />
                     
-                    <div className="mr-auto" style={{visibility: 'show'}}>
+                    <div className="mr-auto" style={{visibility: (location.hostname === "localhost" ? 'show' : 'hidden')}}>
                       Cursor at position: {this.state.selectionStart} (<input type='text' id="pos" />)<br />
                       this.state.allWordsFound: {this.state.allWordsFound.toString()}<br />
-                      this.state.previewing: {previewing.toString()}<br />
+                      this.state.previewing: {this.state.previewing.toString()}<br />
+                    </div>
+                    <div style={Table_1Styles.buttons}>
+                      <ChipExampleSimple1 chips={this.state.chips}/>
                     </div>
                   </div>
-                  <div style={Table_1Styles.buttons}>
-                    <ChipExampleSimple1 chips={this.state.chips}/>
-                  </div>
-                </React.Fragment>
+                </React.Fragment>
               </div>
               : null }
 
@@ -1359,20 +1572,21 @@ class TablePage_1 extends React.Component {
               : null }
               
               { this.state.Mode === 'traduzione'? 
-              <div className="col-xs-12 col-sm-4 col-md-4 col-lg-4 m-b-15 ">
+              <div className="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-b-15 ">
                 <div style={Table_1Styles.buttons}>
-                  <video id="did_video" controls autoPlay={true} width="480" height="360" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
+                  <video id="did_video" controls autoPlay={true} width="560" height="440" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video><br />
                   {/* onload="valutare la possibilita' di lancaire load() ricorsivamente per far girare il progress finche' non c'e' il video" */}
-                  <RaisedButton label="Anteprima" onClick={this.handlePreview} disabled={previewing || !this.state.allWordsFound} style={{float: 'left'}} primary={true} />
+                  <RaisedButton label="Genera video" onClick={this.handlePreview} disabled={!this.state.allWordsFound || this.state.previewing} style={{float: 'left'}} primary={true} /><br />
                   <TextField
                     hintText="Nome video..."
                     style={{width: '95%'}}
+                    value={this.state.videoName}
                     onChange={event => 
                       this.setState({ videoName: event.target.value })
                     }
-                  />
-                  <RaisedButton label="Salva" onClick={() => this.handleSave('Salva')} disabled={!this.state.allWordsFound || !this.state.videoUrl} style={{float: 'left'}} primary={true} />
-                  <RaisedButton label="Salva come nuovo..." onClick={() => this.handleSave('SalvaNuovo')} disabled={!this.state.allWordsFound || !this.state.videoUrl} style={{float: 'right'}} primary={true} />
+                  /><br />
+                  <RaisedButton label="Salva" onClick={() => this.handleSave('Salva')} disabled={!this.state.allWordsFound || this.state.previewing || !this.state.videoUrl || this.state.videoName == ''} style={{float: 'left'}} primary={true} />
+                  <RaisedButton label="Salva come nuovo..." onClick={() => this.handleSave('SalvaNuovo')} disabled={!this.state.allWordsFound || this.state.previewing || !this.state.videoUrl || this.state.videoName == ''} style={{float: 'right'}} primary={true} />
                 </div>
               </div>
               : null }

@@ -16,18 +16,18 @@ import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
 
 // Using url-loader, described here (SurviveJS - Loading Images), you can then use in your code :
 import LogoImg from "images/Rai _Logo RGB.png"; //'YOUR_PATH/logo.png';
-import UserImg from "images/rai_crits.png"; //'YOUR_PATH/logo.png';
+import UserImg from "images/rai_crits_1.png"; //'YOUR_PATH/logo.png';
 // and
 // <img src={LogoImg}/>
 
 const Sidebar = props => {
   let { vm, menus_del1, menus_del2, menus_amm } = props;
-  console.log('Sidebar - props.deliv: ', props.deliv);
+  console.log('Sidebar - props.deliverable: ', props.deliverable);
   console.log('Sidebar - props.userid: ', props.userid);
   // console.log('Sidebar - props.menus_del1: ', menus_del1);
   // console.log('Sidebar - props.menus_del2: ', menus_del2);
   // console.log('Sidebar - props.menus_amm: ', menus_amm);
-  const styles = {
+  const sidebarStyle = {
     logo: {
       cursor: 'pointer',
       fontSize: 22,
@@ -103,26 +103,27 @@ const Sidebar = props => {
     console.log('Sidebar RenderConsoleLog - children: ', children);
     return false;
   };
+  
   return (
     <Drawer docked={true} open={props.leftSidebarOpen}>
       <RenderConsoleLog>{props.menus_del1}</RenderConsoleLog>
-      <div style={styles.logo}>
+      <div style={sidebarStyle.logo}>
         <img heigth="57px" width="57px" src={LogoImg} />
-        {props.logoTitle}
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{props.logoTitle}
       </div>
-      <div style={styles.avatar.div}>
-        <Avatar src={UserImg} size={styles.avatar.size} style={styles.avatar.icon} />
-        <span style={styles.avatar.span}>{props.username}</span>
-        {/*<span style={styles.avatar.span}>ID utente: {props.userid}</span>*/}
+      <div style={sidebarStyle.avatar.div}>
+        <Avatar src={UserImg} size={sidebarStyle.avatar.size} style={sidebarStyle.avatar.icon} />
+        <span style={sidebarStyle.avatar.span}>{props.username}</span>
+        {/*<span style={sidebarStyle.avatar.span}>ID utente: {props.userid}</span>*/}
       </div>
-      <div style={styles.menudiv}>
+      <div style={sidebarStyle.menudiv}>
         <Menu>
           { [2,3].includes(props.userid) && ( typeof (menus_del1) !== "undefined" && Array.isArray(menus_del1) && menus_del1.length) ?
-          <React.Fragment>
+          <React.Fragment>
             <MenuItem
               primaryText="Meteo"
               checked={false}
-              style={styles.menuItem}
+              style={sidebarStyle.menuItem}
               rightIcon={<ArrowDropRight />}
               menuItems={
                 menus_del1.map((menu, index) => (
@@ -138,15 +139,15 @@ const Sidebar = props => {
               }
             />
             <Divider />
-          </React.Fragment>
+          </React.Fragment>
           :
           null }
-          { [2,4].includes(props.userid) && ( typeof (menus_del2) !== "undefined" && Array.isArray(menus_del2) && menus_del2.length) ?
-          <React.Fragment>
+          { ([2].includes(props.userid) || props.userid >= 4) && ( typeof (menus_del2) !== "undefined" && Array.isArray(menus_del2) && menus_del2.length) ?
+          <React.Fragment>
             <MenuItem
               primaryText="Didattica"
               checked={false}
-              style={styles.menuItem}
+              style={sidebarStyle.menuItem}
               rightIcon={<ArrowDropRight />}
               menuItems={
                 menus_del2.map((menu, index) => (
@@ -162,7 +163,7 @@ const Sidebar = props => {
               }
             />
             <Divider />
-          </React.Fragment>
+          </React.Fragment>
           :
           null }
           { [2].includes(props.userid) && ( typeof (menus_amm) !== "undefined" && Array.isArray(menus_amm) && menus_amm.length) ?
@@ -170,7 +171,7 @@ const Sidebar = props => {
             <MenuItem
               primaryText="Amministrazione"
               checked={false}
-              style={styles.menuItem}
+              style={sidebarStyle.menuItem}
               rightIcon={<ArrowDropRight />}
               menuItems={
                 menus_amm.map((menu, index) => (

@@ -13,17 +13,19 @@ using System.Xml.Linq;
 
 namespace dotnetify_react_template
 {
-   public class Program
-   {
-      public static void Main(string[] args)
-      {
-         BuildWebHost(args).Run();
-      }
+  public class Program
+  {
+    public static void Main(string[] args)
+    {
+      // Console.WriteLine("Program.cs - started: " + args[1]);
+      BuildWebHost(args).Run();
+    }
 
-      public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-               .UseStartup<Startup>()
-               .UseUrls("http://0.0.0.0:5000") // Url raggiungibile anche dall'esterno
-               .Build();
+    public static IWebHost BuildWebHost(string[] args) =>
+      WebHost
+        .CreateDefaultBuilder(args)
+        .UseStartup<Startup>()
+        .UseUrls("http://0.0.0.0:5000") // Url raggiungibile anche dall'esterno
+        .Build();
    }
 }
