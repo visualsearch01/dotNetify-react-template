@@ -837,13 +837,15 @@ namespace dotnetify_react_template.server.Controllers
                           reader.Read(); // )
                           lastLisId = reader.GetInt32("id_text_lis");
                         }
-
+                        
+                        // L'inserimento nella 
                         command.Parameters.Clear();
                         command.CommandText = "INSERT INTO lis_text_trans (id_text_ita, id_text_lis) VALUES (?id_text_ita, ?id_text_lis);";
                         command.Parameters.AddWithValue("?id_text_ita", lastItaId);
                         command.Parameters.AddWithValue("?id_text_lis", lastLisId);
                         command.ExecuteNonQuery();
                         Console.WriteLine("ValuesController text_trad POST - INSERT TRANS OK");
+                        
                         command.Parameters.Clear();
                         command.CommandText = "INSERT INTO lis_text_trans2 (id_text_ita, version_ita, id_text_lis, version_lis) VALUES (?id_text_ita, ?version_ita, ?id_text_lis, ?version_lis);";
                         if (changes.IdTextIta == 0) {
@@ -1180,6 +1182,7 @@ namespace dotnetify_react_template.server.Controllers
                   ProcessStartInfo startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
                   startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
+                  Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
                   startInfo.UseShellExecute = false;

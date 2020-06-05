@@ -123,7 +123,7 @@ namespace dotnetify_react_template
 
         });
       }
-      else if (UserId == 4 || UserId == 5 || UserIsAdmin) {
+      else if (UserId >= 4 || UserIsAdmin) {
         this.RegisterRoutes("/", new List<RouteTemplate>
         {
           new RouteTemplate { Id = "Home", UrlPattern = "", ViewUrl = nameof(_routes.TablePage_1) },
