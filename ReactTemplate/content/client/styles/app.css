@@ -56,3 +56,50 @@ input[type=file]::-webkit-file-upload-button {
 
 #my-file-ita { visibility: hidden; }
 #my-file-lis { visibility: hidden; }
+
+video {
+  width: 100%    !important;
+  height: auto   !important;
+}
+
+/*
+.react-date-picker react-date-picker--closed react-date-picker--enabled {
+  font-size: 18;
+  color: 'white';
+  font-weight: 'bold';
+}
+
+.react-date-picker__inputGroup {
+  font-size: 18;
+  color: 'white';
+  font-weight: 'bold';
+}
+
+.react-date-picker__wrapper {
+  font-size: 18;
+  color: 'white';
+  font-weight: 'bold';
+}
+
+
+.react-date-picker__inputGroup__input_1 {
+  min-width: 0.54em;
+  height: 100%;
+  position: relative;
+  padding: 0 1px;
+  border: 0;
+  background: none;
+  font-size: 82;
+  color: 'white';
+  font-weight: 'bold';
+  box-sizing: content-box;
+  -moz-appearance: textfield;
+}
+
+
+
+.react-date-picker__inputGroup__input react-date-picker__inputGroup__day {
+  color: 'blue';
+}
+
+*/

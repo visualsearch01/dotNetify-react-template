@@ -180,13 +180,13 @@ class Dashboard extends React.Component {
       
       ita_id:                   0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
       ita_orig:                 'Attendere..', //Testo di default
-      ita_edit:                 'Attendere..',
+      // ita_edit:                 'Attendere..',
       ita_edit_version:         0,
       ita_notes:                'Attendere..',
 
       lis_id:                   0,
       lis_orig:                 'Attendere..',
-      lis_edit:                 'Attendere..',
+      // lis_edit:                 'Attendere..',
       lis_edit_version:         0,
       lis_notes:                'Attendere..',
 
@@ -237,7 +237,7 @@ class Dashboard extends React.Component {
     // this.onClickp = this.onClickp.bind(this);
     // this.handleChangePicker_child = this.handleChangePicker_child.bind(this);
     this.handleUpdateTextAreas = this.handleUpdateTextAreas.bind(this);
-    this.handleChangeEditionId = this.handleChangeEditionId.bind(this);
+    // this.handleChangeEditionId = this.handleChangeEditionId.bind(this);
     // this.handleEditIta = this.handleEditIta.bind(this);
     // this.handleEditLis = this.handleEditLis.bind(this);
     // this.setNum1 = this.setNum1.bind(this);
@@ -263,13 +263,13 @@ class Dashboard extends React.Component {
     console.log('Dashboard - al mount del componente, caricamento dati meteo data corrente - area NORD di default');
     console.log('Dashboard - componentDidMount this.state.pickDate: ', this.state.pickDate);
     this.handleGetSigns();
-    this.handleChangePicker_dashboard(this.state.pickDate);
+    
     console.log('Dashboard - componentDidMount this.state-------------------: ', this.state);
     console.log('Dashboard - g_username: ', g_username);
     console.log('Dashboard - g_userid: ', g_userid);
   };
 
-  handleChangeEditionId = (event, index, value) => {
+  handleChangeEditionId_dropdown = (event, index, value) => {
     console.log('handleChangeEditionId - value: ', value);
     console.log('handleChangeEditionId - this.state.offsets_calc1[value]: ', this.state.offsets_calc1[value]);
     // this.setState({ value_ed: value});
@@ -280,13 +280,43 @@ class Dashboard extends React.Component {
     // this.handleUpdateTextAreas(value);
   };
 
-  handleChangeForecastId = (event, index, value) => {
+  handleChangeEditionId_tab = (value) => {
+    console.log('handleChangeEditionId - value: ', value);
+    console.log('handleChangeEditionId - this.state.offsets_calc1[value]: ', this.state.offsets_calc1[value]);
+    // this.setState({ value_ed: value});
+    this.setState({
+      offsets:    this.state.offsets_calc1[value],
+      edition_id: value
+      }, this.handleUpdateTextAreas);
+    // this.handleUpdateTextAreas(value);
+  };
+
+  // Per qualche motivo pare che l'onchange sul Dropdown passa dei dati diversi da quello sul tab..
+  handleChangeForecastId_dropdown = (event, index, value) => {
     console.log('handleChangeForecastId - value: ', value);
     console.log('handleChangeForecastId - this.state.offsets_calc1.shift(): ', this.state.offsets_calc1.shift());
     console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
     // this.setState({ value_area: value });
     this.setState({
       forecast_id: value,
+      offset_day: (value === 7 ? // 2 : 1
+        // this.state.offsets[0][0] : // 2 : 
+        // this.state.offsets[0][1]   // 1
+        this.state.offsets[1] :
+        this.state.offsets[0]
+    )}, this.handleUpdateTextAreas); //.id});
+    // this.handleUpdateTextAreas(7);
+  };
+
+  handleChangeForecastId_tab = (value) => { // (event, index, value) => {
+    console.log('handleChangeForecastId - value: ', value);
+    console.log('handleChangeForecastId - this.state.offsets_calc1: ', this.state.offsets_calc1);
+    console.log('handleChangeForecastId - this.state.offsets_calc1.shift(): ', this.state.offsets_calc1.shift());
+    console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
+    // this.setState({ value_area: value });
+    this.setState({
+      forecast_id: value,
+      // offsets: (value === 7 ? this.state.offsets_calc1.shift() : this.state.offsets_calc1),
       offset_day: (value === 7 ? // 2 : 1
         // this.state.offsets[0][0] : // 2 : 
         // this.state.offsets[0][1]   // 1
@@ -341,15 +371,26 @@ class Dashboard extends React.Component {
         console.log('Dashboard - handleGetSigns data: ',       data); // 0: {id: 60, name: "a"}
         console.log('Dashboard - handleGetSigns sign_group: ', sign_group);
         console.log('Dashboard - handleGetSigns sign_names: ', sign_names);
-        console.log('Dashboard - handleGetSigns sign_array: ',  sign_array);
+        console.log('Dashboard - handleGetSigns sign_array: ', sign_array);
 
         this.setState({
-          // sign_json:       data,
-          sign_names:     sign_names,
-          sign_array:      sign_array,
-          // sign_filtered:  sign_iniz
-        });
-
+            // sign_json:      data,
+            sign_names:        sign_names,
+            sign_array:        sign_array
+            // sign_filtered:  sign_iniz
+          }, () => {
+            // this.vm.$dispatch(this.state);
+            // console.log('handleGetSigns - this.state.Pick_date_b: ', this.state.Pick_date_b);
+            // console.log('handleGetSigns - this.props.location: ', this.props.location);
+            // console.log('handleGetSigns - this.props.match.params.redirectParam: ', this.props.match.params.redirectParam);
+            // if (this.state.TextITA != '')
+              this.handleChangePicker_dashboard(this.state.pickDate);
+            // this.handleChangePicker_dashboard((this.state.Pick_date_b != '' ? new Date(this.state.Pick_date_b) : this.state.pickDate));
+            // this.handleChangePicker_dashboard((this.state.Pick_date_b != '' ? new Date(this.state.Pick_date_b.split(' ')[0]) : this.state.pickDate));
+            // this.handleChangePicker_dashboard((this.state.Pick_date_b != '' ? new Date('05/05/2020') : this.state.pickDate));
+            // this.handleChangePicker_dashboard((this.state.pickDate)); // Caricando un video, bisognera' reimpostare i campi della taskbar come erano alla data del video, non solo popolare le due textarea
+          }
+        );
         // this.setState({ dirty: true });
         // this.setState({ justTranslated: true });
         // this.setState({ lis_edit:         data.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
@@ -451,8 +492,15 @@ class Dashboard extends React.Component {
         return response.json();
       })
       .then(data => {
-        console.log('handleChangePicker_dashboard - Data: ', data);
-        if (data.id_day == null) {
+        console.log('handleChangePicker_dashboard - fetch/then data: ', data);
+        console.log('handleChangePicker_dashboard - this.state.Pick_date_b: ', this.state.Pick_date_b);
+        if (this.state.Pick_date_b != '') {
+          this.setState({
+            pickDate:     this.state.Pick_date_b,
+            showActions:  true,
+          }, this.handleChips({keyCode: 32, target: {value: this.state.lis_edit}})); // this.handleCloseDialog);
+        }
+        else if (data.id_day == null) {
           this.setState({
             pickDate:         date1,
             showActions:      false,
@@ -525,7 +573,15 @@ class Dashboard extends React.Component {
             lis_id:           orig.id_text_lis, // });
             lis_edit_version: edit.it_version, // });
             lis_notes:        'Campo non ancora estratto'
-          }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
+
+          }, () => {
+            
+            this.setState({
+              showSnackbar:     false,
+              showDialog:       false
+            }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
+            console.log('handleChangePicker_dashboard - this.state: ', this.state);
+          })
           console.log('handleChangePicker_dashboard - this.state: ', this.state);
         }
       })
@@ -656,15 +712,24 @@ class Dashboard extends React.Component {
     });
   };
 
+  // Ogni metodo di handle decide se mostrare la dialog o la snackbar
   handleOpenDialogChangePicker = (date1) => {
-    this.setState({showDialog: true}, () => this.handleChangePicker_dashboard(date1));
+    this.setState({
+      dialogTitle:        'Attendere, caricamento...',
+      dialogContent:      'Attendere, caricamento data ' + date1,
+      showDialog: true,
+      snackbarMessage:    'Attendere..',
+      showSnackbar:       false
+    }, () => this.handleChangePicker_dashboard(date1));
   };
 
   handleOpenDialogPublish = () => {
     this.setState({
       dialogTitle:        "Attendere, pubblicazione...",
       dialogContent:      "Attendere, pubblicazione...",
-      showDialog: true
+      showDialog: true,
+      snackbarMessage:    'Attendere..',
+      showSnackbar:       false
     }, this.handlePublish);
   };
 
@@ -672,14 +737,17 @@ class Dashboard extends React.Component {
     this.setState({
       dialogTitle:        "Attendere, traduzione...",
       dialogContent:      "Attendere, traduzione...",
-      showDialog: true
+      showDialog: true,
+      snackbarMessage:    'Attendere..',
+      showSnackbar:       false
     }, this.handleTranslate);
   };
 
   handleOpenDialogSave = () => {
     this.setState({
-      // dialogTitle:        "Attendere, caricamento anteprima...",
-      // dialogContent:      "Attendere, caricamento anteprima...",
+      dialogTitle:        "Attendere, caricamento anteprima...",
+      dialogContent:      "Attendere, caricamento anteprima...",
+      showDialog: false,
       snackbarAutoHideDuration: 20000, // 20 secondi invece di 2
       snackbarMessage:  'Attendere, salvataggio in corso..',
       showSnackbar: true
@@ -693,9 +761,11 @@ class Dashboard extends React.Component {
     this.setState({
       // dialogTitle:        "Attendere, caricamento anteprima...",
       // dialogContent:      "Attendere, caricamento anteprima...",
+      
       snackbarAutoHideDuration: 20000, // 20 secondi invece di 2
-      snackbarMessage:  'Attendere, rendering in corso..',
+      snackbarMessage:  'Attendere, anteprima in corso..',
       showSnackbar: true
+      
       // Niente dialog per l'anteprima (preview) - c'e' gia' il progress (UPDATE - ci dovrebbe essere...vediamo)
       // showDialog: false
     }, this.handlePreview);
@@ -731,9 +801,12 @@ class Dashboard extends React.Component {
         this.state.forecast_id,
         this.state.offset_day,
         99);
-      this.setState({ ita_edit:         last_edit.text_ita });
-      this.setState({ lis_edit:         last_edit.text_lis });
-      this.setState({ dirty: false });
+      this.setState({
+        ita_edit:         last_edit.text_ita,
+        lis_edit:         last_edit.text_lis,
+        dirty:            false,
+        justTranslated:   false
+        }, this.handleChips({keyCode: 32, target: {value: last_edit.text_lis}})); // this.handleCloseDialog);
   };
 
   handleSave = _ => {
@@ -784,8 +857,8 @@ class Dashboard extends React.Component {
         method: 'POST',
         body: "'"+JSON.stringify({
           name_video: this.state.videoName,
-          id: p.id_text_trans, // this.state.id_text_trans,
-          path_video: this.state.path_videogen, // '/path/to/video_idtrans'+this.state.id_text_trans, // L'ultimo video generato
+          id: p.id_text_trans,                   // this.state.id_text_trans,
+          path_video: this.state.path_videogen,  // '/path/to/video_idtrans'+this.state.id_text_trans, // L'ultimo video generato // Passare solo il nome file con path.replace(/^.*[\\\/]/, '') se si vuole copiarlo o rinominarlo
           notes: "Note_request id_text_trans: " + p.id_text_trans + " - Attenzione, questo e' l'id sulla trans2"
         })+"'",
         headers: {'Content-Type': 'application/json'}
@@ -799,7 +872,7 @@ class Dashboard extends React.Component {
           id_text_trans:    p.id_text_trans,
           dirty:            false,
           justSaved:        true
-        }, this.handleOpenSnackbar);
+        }, this.handleCloseSnackbar);
       })
       .catch(error => {
         console.log('Dashboard handleSave - POST request Error: ', error);
@@ -811,6 +884,7 @@ class Dashboard extends React.Component {
     
   };
 
+  // Una prima versione di translate usava il metodo GET
   handleTranslate_get = _ => {
     // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
     // var url = "/api/values/translate/";
@@ -822,9 +896,11 @@ class Dashboard extends React.Component {
       })
       .then(data => {
         console.log('handleChangePicker_dashboard - Data: ', data);
-        this.setState({ dirty: true });
-        this.setState({ justTranslated: true });
-        this.setState({ lis_edit:         data.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+        this.setState({
+          dirty:            true,
+          justTranslated:   true,
+          lis_edit:         data.translation
+        }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
         /*          
         this.setState({ lis_orig:         orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
                   this.setState({ lis_edit:         edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
@@ -858,9 +934,15 @@ class Dashboard extends React.Component {
       .then(res => res.json())
       .then(p => {
         console.log('translate post: ' , p);
-        this.setState({ dirty: true });
-        this.setState({ justTranslated: true });
-        this.setState({ lis_edit:         p.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+        this.setState({
+          dirty:            false,
+          justTranslated:   true,
+          lis_edit:         p.translation },
+          () => {
+            this.handleChips({keyCode: 32, target: {value: p.translation}});
+            this.handleCloseDialog(); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+          }
+        )
       })
       .catch(error => {
         console.log('handleTranslate - Error: ', error);
@@ -913,14 +995,19 @@ class Dashboard extends React.Component {
     this.setState({
       showVideoPreview: true // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
     }, () => {
-
+      // var h = 
       fetch(
         "/api/values/preview",
         {
           signal: this.mySignal,
           method: 'POST',
           // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
-          body: "'"+JSON.stringify(this.state.sign_json)+"'",
+          body: "'"+JSON.stringify(
+            {
+              ...this.state.sign_json,
+              filename: this.state.pickDate + '_' + this.state.edition_id + '_' + this.state.forecast_id
+            }
+          )+"'",
           headers: {'Content-Type': 'application/json'}
       })
       .then(res => res.json())
@@ -982,83 +1069,35 @@ class Dashboard extends React.Component {
    */
   handlePublish = _ => {
     console.log('handlePublish');
-    var payload1 = {
-        a: "prova_1",
-        b: "prova_2"
-    };
-    var payload2 = {
-        value: "prova_1",
-        b: "prova_2"
-    };
-    var payload3 = '"{\"a\":\"test_setting_name\",\"b\":\"dfdfref\"}"';
-    var payload4 = '"{a:\"test_setting_name\",b:\"dfdfref\"}"';
-    var payload5 = { value: {value: "prova_1"}};
-    
-    var data = new FormData();
-    data.append( "value", "sdsdfsfds"); //JSON.stringify( payload1 ) );
-    this.setState({ lis_edit: 'Attendere, pubblicazione..' }); //, this.handleOpenDialogPublish)
-    
-    fetch("/api/values/testpost_2", // 1/6",
-    {
-      signal: this.mySignal,
-      method: 'POST',
-      body: "'"+JSON.stringify({value: 'bacon'})+"'",
-      headers: {'Content-Type': 'application/json'}
-    })
-    .then(res => res.json())
-    .then(p => {
-      console.log('testpost_2: ' , p);
-      fetch("/api/values/testpost_3", // 1/6",
+    fetch(
+      "/api/values/publish",
       {
         signal: this.mySignal,
         method: 'POST',
-        body: JSON.stringify({value: 'bacon'}),
+        body: "'"+JSON.stringify(
+          {
+            ita: this.state.ita_edit.replace("'", '_'),      // testo ita da salvare prima su txt
+            name: this.state.path_videogen.replace(/^.*[\\\/]/, '').split('.')[0] // nome del file - adesso e' la URL completa, va corretto..
+          }
+        )+"'",
         headers: {'Content-Type': 'application/json'}
       })
-      .then(res => res.json())
+      // .then(res => res.json())
+      .then(response => response.text()) 
       .then(p => {
-        console.log('testpost_3: ' , p);
-        this.setState({ lis_edit: 'Pubblicato!!!' }, this.handleCloseDialog);
-        this.setState({ snackbarMessage: 'Video pubblicato su ftp://test@test.com' }, this.handleOpenSnackbar)
-        fetch("/api/values/testpost_1/88", // 1/6",
-        {
-          signal: this.mySignal,
-          method: 'POST',
-          body: "'"+JSON.stringify({value: 'bacon'})+"'",
-          headers: {'Content-Type': 'application/json'}
-        })
-        .then(res => res.json())
-        .then(p => {
-          console.log('testpost_1: ' , p);
-          fetch(
-            "/api/values/translate",
-            {
-              signal: this.mySignal,
-              method: 'POST',
-              body: "'"+JSON.stringify({value: 'UkVTSURVRSBQSU9HR0UgTkVMTEUgUFJJTUUgT1JFIERFTCBNQVRUSU5PIFNVTExFIEFSRUUgQVBQRU5OSU5JQ0hFIEVNSUxJQU5FIEUgTFVOR08gTEUgWk9ORSBDT1NUSUVSRSBBRFJJQVRJQ0hFLCBNQSBJTiBTVUNDRVNTSVZPIFJBUElETyBNSUdMSU9SQU1FTlRPIENPTiBDSUVMTyBURVJTTy5CRUwgVEVNUE8gU1VMIFJFU1RBTlRFIFNFVFRFTlRSSU9ORSwgQSBQQVJURSBVTiBQTycgREkgTlVCSSBDT01QQVRURSBBVFRFU0UgTkVMTEEgUFJJTUEgUEFSVEUgREVMTEEgTUFUVElOQVRBIFNVTExFIEFSRUUgQUxQSU5FIENPTiBERUJPTEkgTkVWSUNBVEUgQSBBU1NPQ0lBVEUgQSBQQVJUSVJFIERBSSAxMjAwIEEgTUVUUkkuQUwgUFJJTU8gTUFUVElOTyBFIERPUE8gSUwgVFJBTU9OVE8gRk9STUFaSU9ORSBESSBGT1NDSElFIERFTlNFIEUgQkFOQ0hJIERJIE5FQkJJQSBFIFNVTExBIFBJQU5VUkEgRSBQQURBTkE='})+"'",
-              headers: {'Content-Type': 'application/json'}
-            })
-            .then(res => res.json())
-            .then(p => {
-              console.log('translate post: ' , p);
-                  this.dispatch({
-                Stop: { // Il metodo Start ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
-                  IdUserEdit: 2,
-                  IdTextIta: this.state.ita_id,
-                  VersionIta: this.state.ita_edit_version,
-                  TextIta: this.state.ita_edit,
-                  NotesIta: "Provaaa_note_ita",
-                  IdTextLis: this.state.lis_id,
-                  VersionLis: this.state.lis_edit_version,
-                  TextLis: this.state.lis_edit,
-                  NotesLis: "Provaaa_note_lis"
-                }
-              });
-          });
-        });
+        console.log('Dashboard handlePublish - Risultato request POST: ', p);
+        this.setState({
+          // ita_edit_version: this.state.ita_edit_version + 1,
+          // lis_edit_version: this.state.lis_edit_version + 1,
+          // id_text_trans:    p.id_text_trans,
+          dirty:            false,
+          justSaved:        true
+        }, this.handleCloseDialog);
+      })
+      .catch(error => {
+        console.log('Dashboard handlePublish - POST Error: ', error);
       });
-    });
-  };
+  }
 
   render() {
     let { dirty, showActions, justTranslated, justSaved, justPreviewed } = this.state;
@@ -1117,8 +1156,8 @@ class Dashboard extends React.Component {
 
     const handleEditIta1 = event => {
       console.log('handleEditIta - event: ', event);
-      this.setState({ dirty: true });
-      this.setState({ ita_edit: event.target.value });
+      // this.setState({ dirty: true });
+      this.setState({ dirty: true, ita_edit: event.target.value });
       // let textVal = 
       // const input = document.getElementById('myTextarea');  
       // input.focus();
@@ -1129,8 +1168,10 @@ class Dashboard extends React.Component {
 
     const handleEditLis1 = event => {
       console.log('handleEditLis - event: ', event);
-      this.setState({ dirty: true });
-      this.setState({ lis_edit: event.target.value });
+      this.setState({
+        dirty: true,
+        lis_edit: event.target.value
+      });
     };
 
     const RenderConsoleLog = ({ children }) => {
@@ -1160,20 +1201,31 @@ class Dashboard extends React.Component {
                   // title: {
                   //  padding: '40px' //,
                   // }
+                  // calendarClassName={globalStyles.datepicker}
                 }}>
-              <ToolbarGroup firstChild={true}>
-                <ToolbarTitle text="Data" style={{paddingLeft: 10, padding: 10}} />
+              <ToolbarGroup firstChild={true} style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}}>
+                <ToolbarTitle text="Data" style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}} />
                 <DatePicker value={this.state.pickDate} onChange={this.handleOpenDialogChangePicker} />
                 <ToolbarSeparator />
+
+                {/*
                 <ToolbarTitle text="Edizione" style={{padding: 10}} />
-                <DropDownMenu value={this.state.edition_id} onChange={this.handleChangeEditionId}>
+                <DropDownMenu value={this.state.edition_id} onChange={this.handleChangeEditionId_dropdown}>
                   <MenuItem value={1} primaryText="09:30" />
-                  {/* <MenuItem value={2} primaryText="17:30" disabled={true}/> */}
+                  {/* <MenuItem value={2} primaryText="17:30" disabled={true}/> * /}
                   <MenuItem value={3} primaryText="18:30" />
                 </DropDownMenu>
+                */}
+
+                <Tabs style={{width: '60%', float: 'left'}} value={this.state.edition_id} onChange={this.handleChangeEditionId_tab}>
+                  <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="09:30" value={1} disabled={this.state.edition_id === 1}></Tab>
+                  <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="17:30" value={3} disabled={this.state.edition_id === 3}></Tab>
+                </Tabs>
+
+                {/*
                 <ToolbarSeparator />
                 <ToolbarTitle text="Area" style={{padding: 10}} />
-                <DropDownMenu value={this.state.forecast_id} onChange={this.handleChangeForecastId}>
+                <DropDownMenu value={this.state.forecast_id} onChange={this.handleChangeForecastId_dropdown}>
                   <MenuItem value={1} primaryText="NORD" />
                   <MenuItem value={2} primaryText="CENTRO E SARDEGNA" />
                   <MenuItem value={3} primaryText="SUD E SICILIA" />
@@ -1182,11 +1234,12 @@ class Dashboard extends React.Component {
                   <MenuItem value={6} primaryText="MARI" />
                   <MenuItem value={7} primaryText="TUTTA ITALIA" />
                 </DropDownMenu>
+                */}
                 { this.state.forecast_id == 7 ?
                 <React.Fragment>
                   <ToolbarSeparator />
                   <ToolbarTitle text="Giorno" style={{padding: 10}} />
-                  <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay}>
+                  <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay} labelStyle={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>
                     {this.state.offsets.map(item => <MenuItem key={item} value={item} primaryText={'+' + item} />)}
                   </DropDownMenu>
                 </React.Fragment>
@@ -1194,14 +1247,14 @@ class Dashboard extends React.Component {
                 {/*<ToolbarSeparator />*/}
               </ToolbarGroup>
             </Toolbar>
-            <Tabs style={{width: '100%', float: 'left'}} value={this.state.forecast_id} onChange={this.handleChangeForecastId}>
-              <Tab label="NORD" value={1} disabled={this.state.forecast_id === 1}></Tab>
-              <Tab label="CENTRO E SARDEGNA" value={2} disabled={this.state.forecast_id === 2}></Tab>
-              <Tab label="SUD E SICILIA" value={3} disabled={this.state.forecast_id === 3}></Tab>
-              <Tab label="TEMPERATURE" value={4} disabled={this.state.forecast_id === 4}></Tab>
-              <Tab label="VENTI" value={5} disabled={this.state.forecast_id === 5}></Tab>
-              <Tab label="MARI" value={6} disabled={this.state.forecast_id === 6}></Tab>
-              <Tab label="TUTTA ITALIA" value={7} disabled={this.state.forecast_id === 7}></Tab>
+            <Tabs style={{width: '100%', float: 'left'}} value={this.state.forecast_id} onChange={this.handleChangeForecastId_tab}>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="NORD" value={1} disabled={this.state.forecast_id === 1}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="CENTRO E SARDEGNA" value={2} disabled={this.state.forecast_id === 2}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="SUD E SICILIA" value={3} disabled={this.state.forecast_id === 3}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="TEMPERATURE" value={4} disabled={this.state.forecast_id === 4}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="VENTI" value={5} disabled={this.state.forecast_id === 5}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="MARI" value={6} disabled={this.state.forecast_id === 6}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="TUTTA ITALIA" value={7} disabled={this.state.forecast_id === 7}></Tab>
             </Tabs>
 
             <div className="row">
@@ -1214,14 +1267,10 @@ class Dashboard extends React.Component {
                 */}
                 <div style={dashboardStyles.buttons}>
                   <CardExampleExpandable title={"Testo ITA originale" + (this.state.lis_edit_version ? " (versione 1)" : "") } subtitle="Cliccare per espandere" text={this.state.ita_orig} />
-                </div>
-                <div style={dashboardStyles.buttons}>
                   <div style={globalStyles.navigation}>Testo ITA editato{this.state.ita_edit_version ? ' (versione ' + this.state.ita_edit_version + ')' : '' }:</div>
-                </div>
-                <div style={dashboardStyles.buttons}>
                   <TextareaAutosize
-                    cols={42}
-                    rows={20}
+                    cols={34}
+                    rows={26}
                     maxRows={25}
                     minRows={3}
                     id='myTextarea' 
@@ -1232,15 +1281,18 @@ class Dashboard extends React.Component {
                   {/*this.state.User1.Name}<br />
                   {this.state.VersionITA}<br />
                   {this.state.Color.Red*/}<br />
-                  {this.state.TextITA}<br />
-                  {/*this.state.Reqtrans.ForecastDate*/}<br />
+                  {/*this.state.TextITA*/}<br />
+                  {/*this.state.Reqtrans.ForecastDate justTranslated 
+                  disabled={!dirty || justTranslated}
+                  */}
+                  <br />
+                  { showActions ?
+                  <React.Fragment>
+                    <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty && !justTranslated} />
+                    <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} />
+                  </React.Fragment>
+                  : null}
                 </div>
-                { showActions ?
-                <div style={dashboardStyles.buttons}>
-                  <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={false} disabled={!dirty} />
-                  <RaisedButton label="Traduci"         onClick={this.handleOpenDialogTranslate} style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={justTranslated} />
-                </div>
-                : null}
               </div>
 
               <div className="col-xs-12 col-sm-3 col-md-3 col-lg-3 m-b-15 ">
@@ -1254,14 +1306,10 @@ class Dashboard extends React.Component {
                 */}
                 <div style={dashboardStyles.buttons}>
                   <CardExampleExpandable title={"Testo LIS originale" + (this.state.lis_edit_version ? " (versione 1)" : "") } subtitle="Cliccare per espandere" text={this.state.lis_orig} />
-                </div>
-                <div style={dashboardStyles.buttons}>
                   <div style={globalStyles.navigation}>Testo LIS editato{this.state.lis_edit_version ? ' (versione ' + this.state.lis_edit_version + ')' : '' }:</div>
-                </div>
-                <div style={dashboardStyles.buttons}>
                   <TextareaAutosize
-                    cols={42}
-                    rows={20}
+                    cols={34}
+                    rows={26}
                     maxRows={25}
                     minRows={3}
                     style={{overflowY: 'scroll'}}
@@ -1269,6 +1317,7 @@ class Dashboard extends React.Component {
                     onChange={(event) => {
                         this.setState({
                           lis_edit:       event.target.value,
+                          dirty: true
                         }, this.handleChips(event))
                     }}
                     onKeyDown={(event) => {
@@ -1277,18 +1326,17 @@ class Dashboard extends React.Component {
                         }, this.handleChips(event))
                     }}
                   />
-                  {this.state.TextLIS}
-                </div>
-                <div style={dashboardStyles.buttons}>
+                  {/*this.state.TextLIS*/}
                   <ChipExampleSimple1 chips={this.state.chips}/>
                 </div>
               </div>
 
               <div className="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-b-15 ">
-                <div style={dashboardStyles.buttons}>
-                  <video id="meteo_video" controls autoPlay={true} width="560" height="440" key={this.state.path_videogen}><source src={this.state.path_videogen} /></video><br />
-                  <RaisedButton label="Anteprima" onClick={this.handleOpenDialogPreview} style={{float: 'left'}} labelStyle={dashboardStyles.buttonLabel} primary={true}  disabled={justPreviewed && !this.state.allWordsFound} />
-                  <RaisedButton label="Salva"     onClick={this.handleOpenDialogSave}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty} />
+                <div style={dashboardStyles.buttonLabel}> {/* width="560" height="440" style={dashboardStyles.buttonLabel}> */}
+                  <video id="meteo_video" controls autoPlay={true} key={this.state.path_videogen}><source src={this.state.path_videogen} /></video><br />
+                  <RaisedButton label="Anteprima" onClick={this.handleOpenDialogPreview} style={{float: 'left'}}  labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={justPreviewed || !this.state.allWordsFound} />
+                  {/* <RaisedButton label="Pubblica"  onClick={this.handleOpenDialogSave}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!justPreviewed} /> */}
+                  <RaisedButton label="Pubblica"  onClick={this.handleOpenDialogPublish}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!justPreviewed} />
                 </div>
               </div>
             </div>
@@ -1313,7 +1361,7 @@ class Dashboard extends React.Component {
         </BasePage>
       </MuiThemeProvider>
     );
-  }
+  };
 }
 
 export default Dashboard;

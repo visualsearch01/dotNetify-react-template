@@ -118,7 +118,7 @@ class TablePage extends React.Component {
     .then(res => res.json())
     .then(p => {
       console.log('TablePage_1 handleDelete - Risultato request PUT: ', p);
-      const newState = { deleteOpen: false, Filter: '' };
+      const newState = { deleteOpen: false, deleteId: p.ok_upd_request}; // Filter: '' };
       this.setState(newState);
       this.dispatch(newState);
       /*
@@ -288,7 +288,7 @@ class TablePage extends React.Component {
                   <TableHeaderColumn style={TableStyles.columns.remove}>Versione</TableHeaderColumn>
                   <TableHeaderColumn style={TableStyles.columns.lastName}>Utente</TableHeaderColumn>
                   { location.hostname === "localhost" ? 
-                  <TableHeaderColumn style={TableStyles.columns.firstName}>Path video</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.firstName}>URL video</TableHeaderColumn>
                   : null }
                   <TableHeaderColumn style={TableStyles.columns.lastName}>Azioni</TableHeaderColumn>
                 </TableRow>
@@ -1073,10 +1073,18 @@ class TablePage_1 extends React.Component {
           signal: this.mySignal,
           method: 'POST',
           // body: "'"+JSON.stringify({value: btoa('mostra perfetto bambino alto tutti_e_due ciascuno spiegare accordo esperienza suo avere')})+"'",
-          body: "'"+JSON.stringify(this.state.sign_json)+"'",
+          body: "'"+JSON.stringify(
+            {
+              ...this.state.sign_json,
+              filename: this.state.videoName
+            }
+          )+"'",
           headers: {'Content-Type': 'application/json'}
       })
-      .then(res => res.json())
+      .then(res => res.json()) // {
+        // console.log('TablePage_1 handlePreview - Risultato preview POST: ' , res);
+        // res.json()
+      // })
       .then(p => {
         console.log('TablePage_1 handlePreview - Risultato preview POST: ' , p);
         clearInterval(keepVideoLoading);
@@ -1257,6 +1265,10 @@ class TablePage_1 extends React.Component {
       campi: {
         fontSize: 12,
         // fontWeight: typography.fontWeightLight
+      },
+      buttonLabel: {
+        fontSize: 8, // '6px'
+        padding: '.5em 0'
       }
     };
     
@@ -1358,7 +1370,7 @@ class TablePage_1 extends React.Component {
               
               { this.state.Mode === 'dizionario' ? 
               <div className="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-b-15 ">
-                <div style={Table_1Styles.buttons}>
+                <div>
                   <video controls autoPlay={true} width="800" height="600" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
                 </div>
               </div>
@@ -1573,8 +1585,9 @@ class TablePage_1 extends React.Component {
               
               { this.state.Mode === 'traduzione'? 
               <div className="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-b-15 ">
-                <div style={Table_1Styles.buttons}>
-                  <video id="did_video" controls autoPlay={true} width="560" height="440" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video><br />
+                <div style={Table_1Styles.buttonLabel}>
+                  <video id="did_video" controls autoPlay={true} key={this.state.videoUrl}><source src={this.state.videoUrl} /></video><br />
+                  {/* width="560" height="440" style={{ objectFit: 'contain'}}*/}
                   {/* onload="valutare la possibilita' di lancaire load() ricorsivamente per far girare il progress finche' non c'e' il video" */}
                   <RaisedButton label="Genera video" onClick={this.handlePreview} disabled={!this.state.allWordsFound || this.state.previewing} style={{float: 'left'}} primary={true} /><br />
                   <TextField

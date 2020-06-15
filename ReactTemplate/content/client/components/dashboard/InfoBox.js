@@ -533,38 +533,59 @@ var handleChips_b = function(event) {
     }, true);
     */
     let ret = {};
-    if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
-      // Do whatever when esc is pressed
-      console.log('TablePage_1 - handleChips keyCode 12 - Space pressed! ')
-      let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
-      ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
-      ret.it = [];
-      ret.count = 0;
-      let ar = [];
-      // let tt = ['Test', 'Prova'];
-      list.forEach((item, i) => {
-        // if (i === idx) {
-        // console.log(Object.assign({}, {"key3": "value3"}, item));
-        // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
-        // if (!tt.includes(item)) this.setState({ allWordsFound: false });
-        ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
-        if (this.state.sign_names.includes(item)) {
-          ret.it.push(this.state.sign_array[item]);
-          ret.count += 1;
-        }
-      });
-      // Object.assign
-      // Object.keys(obj).some(function(k) {
-      // return obj[k] === "test1";
-      // });
-      // allWordsFound:  false
-      console.log('TablePage_1 - handleChips - Check array at least one false value: ', !ar.some(function(k) {return k.Found === false}));
-      console.log('TablePage_1 - handleChips - Tot JSON: ', ret);
-      this.setState({
-        allWordsFound: !ar.some(function(k) {return k.Found === false}),
-        sign_json: ret,
-        chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
-      });
+    try {
+      if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
+        // Do whatever when esc is pressed
+        console.log('TablePage_1 - handleChips keyCode 12 - Space pressed! ')
+        let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+        
+        ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
+        ret.tot_id = '';
+        ret.it = [];
+        ret.count = 0;
+        
+        let ar = [];
+        let ar1 = [];
+        // let tt = ['Test', 'Prova'];
+        list.forEach((item, i) => {
+          // if (i === idx) {
+          // console.log(Object.assign({}, {"key3": "value3"}, item));
+          // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
+          // if (!tt.includes(item)) this.setState({ allWordsFound: false });
+          ar[i] = {Word: item, Found: this.state.sign_names.includes(item.toLowerCase())};
+          if (this.state.sign_names.includes(item)) {
+            ret.it.push(this.state.sign_array[item]);
+            ret.count += 1;
+            ar1.push(this.state.sign_array[item].id);
+          }
+        });
+
+        ret.tot_id = ar1.join(',');
+
+        // var arr = Object.keys(obj).reduce(function(res, v) {
+        //    return res.concat(obj[v]);
+        // }, []);
+
+        // Object.assign
+        // Object.keys(obj).some(function(k) {
+        // return obj[k] === "test1";
+        // });
+        // allWordsFound:  false
+        console.log('TablePage_1 - handleChips - Check array at least one false value: ', !ar.some(function(k) {return k.Found === false}));
+        console.log('TablePage_1 - handleChips - Tot JSON: ', ret);
+        this.setState({
+          allWordsFound: !ar.some(function(k) {return k.Found === false}),
+          sign_json: ret,
+          chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+        });
+      }
+      else {
+        console.log('TablePage_1 - handleChips - else');
+      }
+    } catch (error) {
+      console.log('TablePage_1 - handleChips - catch - Error: ', error);
+      // console.log('handleUpdateTextAreas catch - this.state.edition_id: ', this.state.edition_id);
+      // console.log('handleUpdateTextAreas catch - this.state.forecast_id: ', this.state.forecast_id);
     }
     // this.setState({ lis_edit: event.target.value });
   };

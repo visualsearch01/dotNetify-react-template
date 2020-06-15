@@ -78,8 +78,8 @@ namespace dotnetify_react_template
       {
         _logger.LogWarning("TablePage - sender: " + sender);
         _logger.LogWarning("TablePage - e: " + e);
-        Console.WriteLine("TablePage - User1.Id = " + this.User1.Id); // afsfsdfg"; //  = new Person("test_person");
-        Console.WriteLine("TablePage - User1.Name = " + this.User1.Name); // afsfsdfg"; //  = new Person("test_person");
+        _logger.LogWarning("TablePage - User1.Id = " + this.User1.Id); // afsfsdfg"; //  = new Person("test_person");
+        _logger.LogWarning("TablePage - User1.Name = " + this.User1.Name); // afsfsdfg"; //  = new Person("test_person");
         // Console.WriteLine("Dashboard - num1 = " + this.num1); // afsfsdfg"; //  = new Person("test_person");
         var param = e?.From?.Replace($"{AppLayout.TablePagePath}/", "");
         if (int.TryParse(param, out int id))
@@ -240,6 +240,16 @@ namespace dotnetify_react_template
     }
 
     public int SelectedPage
+    {
+      get => Get<int>();
+      set
+      {
+        Set(value);
+        Changed(nameof(Requests));
+      }
+    }
+
+    public int deleteId
     {
       get => Get<int>();
       set
