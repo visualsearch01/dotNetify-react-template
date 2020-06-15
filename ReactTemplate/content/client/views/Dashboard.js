@@ -139,12 +139,14 @@ class Dashboard extends React.Component {
       snackbarAutoHideDuration: 2000,
       showProgress:             false, // Mostra circular progress, inizialmente pensato per dare evidenza di caricamento - sostituito dalla dialog
       showDialog:               false, // Mostra la dialog
-      showVideoPreview:         false, // Mostra anteprima video
+      // showVideoPreview:         false, // Mostra anteprima video o meno - non piu' usato
       showActions:              false, // Mostra bottoni solo se c'e' un testo ita/lis presente
       videoProgressCompleted:   false, // flag true/false di selezione vista progress/video - il componente restituisce un valore false mentre sta caricando, true quando ha finito
       justTranslated:           false, // Subito dopo una traduzione, disabilita il bottone relativo per evitare ritraduzione dello stesso testo
       justSaved:                false, // Subito dopo un salvataggio, abilita la preview video
       justPreviewed:            false, // Subito dopo una preview, abilita il publish che e' l'ultima fase
+      justPublished:            false, // Subito dopo una publish, impedisci di rifarla con lo stesso file
+      previewing:               false, // Durante la preview, disabilita sia anteprima che publish
       dialogTitle:              "Attendere, caricamento...",
       dialogContent:            "Attendere, caricamento...",
       
@@ -630,7 +632,10 @@ class Dashboard extends React.Component {
             ita_notes:        'Campo non estratto, da correggere', // })
             lis_id:           orig.id_text_lis, // });
             lis_edit_version: edit.it_version, // });
-            lis_notes:        'Campo non ancora estratto'
+            lis_notes:        'Campo non ancora estratto',
+            justPreviewed:    false,
+            justPublished:    false,
+            path_videogen:    null
         },
         this.handleChips({keyCode: 32, target: {value: edit.text_lis}})
         );
@@ -937,6 +942,7 @@ class Dashboard extends React.Component {
         this.setState({
           dirty:            false,
           justTranslated:   true,
+          justPreviewed:    false,
           lis_edit:         p.translation },
           () => {
             this.handleChips({keyCode: 32, target: {value: p.translation}});
@@ -993,7 +999,9 @@ class Dashboard extends React.Component {
       }
     });
     this.setState({
-      showVideoPreview: true // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
+      previewing:       true,
+      justPreviewed:    false,
+      // showVideoPreview: true // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
     }, () => {
       // var h = 
       fetch(
@@ -1034,6 +1042,7 @@ class Dashboard extends React.Component {
           path_videogen: p.output_preview + '.mp4',
           // showVideoPreview: true,
           justPreviewed:    true,
+          previewing:    false,
           snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
         }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
       }).catch(error => {
@@ -1091,7 +1100,8 @@ class Dashboard extends React.Component {
           // lis_edit_version: this.state.lis_edit_version + 1,
           // id_text_trans:    p.id_text_trans,
           dirty:            false,
-          justSaved:        true
+          justSaved:        true,
+          justPublished:    true
         }, this.handleCloseDialog);
       })
       .catch(error => {
@@ -1100,7 +1110,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    let { dirty, showActions, justTranslated, justSaved, justPreviewed } = this.state;
+    let { dirty, showActions, justTranslated, justSaved, justPreviewed, justPublished } = this.state;
 
     const dashboardStyles = {
       dialogTitle: {
@@ -1334,9 +1344,9 @@ class Dashboard extends React.Component {
               <div className="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-b-15 ">
                 <div style={dashboardStyles.buttonLabel}> {/* width="560" height="440" style={dashboardStyles.buttonLabel}> */}
                   <video id="meteo_video" controls autoPlay={true} key={this.state.path_videogen}><source src={this.state.path_videogen} /></video><br />
-                  <RaisedButton label="Anteprima" onClick={this.handleOpenDialogPreview} style={{float: 'left'}}  labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={justPreviewed || !this.state.allWordsFound} />
+                  <RaisedButton label="Anteprima" onClick={this.handleOpenDialogPreview} style={{float: 'left'}}  labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!this.state.allWordsFound || this.state.previewing} />
                   {/* <RaisedButton label="Pubblica"  onClick={this.handleOpenDialogSave}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!justPreviewed} /> */}
-                  <RaisedButton label="Pubblica"  onClick={this.handleOpenDialogPublish}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!justPreviewed} />
+                  <RaisedButton label="Pubblica"  onClick={this.handleOpenDialogPublish}    style={{float: 'right'}} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!this.state.allWordsFound || this.state.previewing || !justPreviewed || justPublished} />
                 </div>
               </div>
             </div>

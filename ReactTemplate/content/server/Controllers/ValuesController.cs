@@ -1187,7 +1187,7 @@ namespace dotnetify_react_template.server.Controllers
                   startInfo.ArgumentList.Add(" -Param4 '" + name + "'");
                   startInfo.ArgumentList.Add(" -Param5 'C:\\Users\\admin\\Videos\\" + name + "'");
                   startInfo.ArgumentList.Add(" -Param6 'C:\\Users\\admin\\Videos\\" + name + "'" + '"' + '"' + '"');
-                  */
+                  
                   startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + 
                     _zipscript + 
                     @" -Param1 '" + @"C:\\Users\\admin\\Videos\\" + name + "'"  + 
@@ -1196,6 +1196,15 @@ namespace dotnetify_react_template.server.Controllers
                     @" -Param4 '" + name + "'"  +
                     @" -Param5 '" + @"C:\\Users\\admin\\Videos\\" + name + "'"  + 
                     @" -Param6 '" + @"C:\\Users\\admin\\Videos\\" + name + @"'  """;     // results.tot
+                  */
+                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + 
+                    _zipscript + 
+                    @" -Param1 '" + _savePath + @"\\" + name + "'"  + 
+                    @" -Param2 '" + ita + "'"  +
+                    @" -Param3 '" + _savePath + @"\\" + "'"  + 
+                    @" -Param4 '" + name + "'"  +
+                    @" -Param5 '" + _savePath + @"\\" + name + "'"  + 
+                    @" -Param6 '" + _savePath + @"\\" + name + @"'  """;     // results.tot
                   
                   Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   // Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " +  String.Join(" ", startInfo.ArgumentList));
