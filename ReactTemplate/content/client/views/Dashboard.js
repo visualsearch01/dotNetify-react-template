@@ -169,7 +169,7 @@ class Dashboard extends React.Component {
       chips:                    [],    // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
       allWordsFound:            false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
       
-      pickDate:                 new Date(), // '2020-04-21'), 
+      pickDate:                 new Date(), // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
       // .toISOString().split('T')[0], // Data iniziale (oggi)
       // Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
       // La data va forzata se si arriva da un link di una request
@@ -433,8 +433,9 @@ class Dashboard extends React.Component {
       if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
         // Do whatever when esc is pressed
         console.log('Dashboard - handleChips keyCode 12 - Space pressed! ')
-        let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
+        // let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
         ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
+        let list = ret.tot.split(' ');
         ret.it = [];
         ret.count = 0;
         let ar = [];
@@ -485,8 +486,17 @@ class Dashboard extends React.Component {
    * Questa versione e' quella pilotata dal picker qui nella dashboard stessa - ce n'e' anche una vesione che passa il bind a un eventuale componente child
    */
   handleChangePicker_dashboard = date1 => {
-    var datestring = ("0" + date1.getDate()).slice(-2) + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" +
-    date1.getFullYear() + " " + ("0" + date1.getHours()).slice(-2) + ":" + ("0" + date1.getMinutes()).slice(-2);
+    var datestring = (
+      "0" + 
+      date1.getDate()).slice(-2) + 
+      "-" + 
+      ("0"+(date1.getMonth()+1)).slice(-2) + 
+      "-" +
+      date1.getFullYear() + 
+      " " + 
+      ("0" + date1.getHours()).slice(-2) + 
+      ":" + 
+      ("0" + date1.getMinutes()).slice(-2);
     var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
     fetch("/api/values/meteo/" + datestring1,
       { signal: this.mySignal }
@@ -864,7 +874,7 @@ class Dashboard extends React.Component {
           name_video: this.state.videoName,
           id: p.id_text_trans,                   // this.state.id_text_trans,
           path_video: this.state.path_videogen,  // '/path/to/video_idtrans'+this.state.id_text_trans, // L'ultimo video generato // Passare solo il nome file con path.replace(/^.*[\\\/]/, '') se si vuole copiarlo o rinominarlo
-          notes: "Note_request id_text_trans: " + p.id_text_trans + " - Attenzione, questo e' l'id sulla trans2"
+          notes: "Note_request id_text_trans: " + p.id_text_trans + " - Attenzione, questo e l id sulla trans2"
         })+"'",
         headers: {'Content-Type': 'application/json'}
       })
@@ -960,8 +970,9 @@ class Dashboard extends React.Component {
    * Bisogna creare una request e aspettare il rendering
    */
   handlePreview = _ => {
-    console.log('Dashboard handlePreview - creazione anteprima - non salva nulla su DB');
-
+    console.log('Dashboard handlePreview - creazione anteprima');
+    console.log('Dashboard handlePreview - non salva nulla su DB');
+    console.log('Dashboard handlePreview - parte un setInterval che fa vedere la rotella nel video');
     // Attiva il progress sul player a intervalli di 1 secondo
     var keepVideoLoading = setInterval(function() {
       document.getElementById("meteo_video").load();
@@ -984,7 +995,6 @@ class Dashboard extends React.Component {
     .then(p => {
       console.log('handlePreview - Risultato request POST: ', p);
     */
-
     this.dispatch({
       StartObserve: { // I metodi Start e Stop hanno gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
         IdUserEdit: 2,
@@ -1013,7 +1023,21 @@ class Dashboard extends React.Component {
           body: "'"+JSON.stringify(
             {
               ...this.state.sign_json,
-              filename: this.state.pickDate + '_' + this.state.edition_id + '_' + this.state.forecast_id
+              filename: 
+                ("0" + 
+                this.state.pickDate.getDate()).slice(-2) + 
+                "-" + 
+                ("0"+(this.state.pickDate.getMonth()+1)).slice(-2) + 
+                "-" +
+                this.state.pickDate.getFullYear() + 
+                " " + 
+                ("0" + this.state.pickDate.getHours()).slice(-2) + 
+                "_" + 
+                ("0" + this.state.pickDate.getMinutes()).slice(-2) +
+                '_edizione_' + 
+                this.state.edition_id + 
+                '_forecast_id_' + 
+                this.state.forecast_id
             }
           )+"'",
           headers: {'Content-Type': 'application/json'}
@@ -1077,36 +1101,111 @@ class Dashboard extends React.Component {
    * e girarlo a un comando di copia da locale a FTP
    */
   handlePublish = _ => {
-    console.log('handlePublish');
+    console.log('Dashboard handlePublish - creazione text_trad');
+    console.log('Dashboard handlePublish - pulizia text_ita: ', this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"));
     fetch(
-      "/api/values/publish",
+      "/api/values/text_trad", // La chiamata text_trad salva la coppia di testi e l'aggancio nella text_trans e text_trans2
       {
         signal: this.mySignal,
         method: 'POST',
-        body: "'"+JSON.stringify(
-          {
-            ita: this.state.ita_edit.replace("'", '_'),      // testo ita da salvare prima su txt
-            name: this.state.path_videogen.replace(/^.*[\\\/]/, '').split('.')[0] // nome del file - adesso e' la URL completa, va corretto..
-          }
-        )+"'",
+        body: "'"+JSON.stringify({
+          IdUserEdit: 3,
+          IdTextIta: this.state.ita_id,
+          TextIta: this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"), //"Provaaaa_manda_a_dashboard",
+          VersionIta: this.state.ita_edit_version,
+          NotesIta: "Provaaa_note_ita dashboard ", // + this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"),
+          IdTextLis: this.state.lis_id,
+          TextLis: this.state.lis_edit,
+          VersionLis: this.state.lis_edit_version,
+          NotesLis: "Provaaa_note_lis dashboard " + this.state.lis_edit
+        })+"'",
         headers: {'Content-Type': 'application/json'}
       })
-      // .then(res => res.json())
-      .then(response => response.text()) 
+      .then(res => res.json())
       .then(p => {
-        console.log('Dashboard handlePublish - Risultato request POST: ', p);
-        this.setState({
-          // ita_edit_version: this.state.ita_edit_version + 1,
-          // lis_edit_version: this.state.lis_edit_version + 1,
-          // id_text_trans:    p.id_text_trans,
-          dirty:            false,
-          justSaved:        true,
-          justPublished:    true
-        }, this.handleCloseDialog);
+        console.log('Dasboard handlePublish - Risultato text_trad POST: ', p);
+        console.log('Dashboard handlePublish - creazione request - bisogna passare l\'id_text_trans nella trans2');
+        // return Ok("{\"id_text_trans\": \"" + lastId + "\"}");
+        fetch(
+          "/api/values/request",
+          {
+            signal: this.mySignal,
+            method: 'POST',
+            body: "'"+JSON.stringify({
+              name_video: // this.state.videoName,
+                ("0" + 
+                this.state.pickDate.getDate()).slice(-2) + 
+                "-" + 
+                ("0"+(this.state.pickDate.getMonth()+1)).slice(-2) + 
+                "-" +
+                this.state.pickDate.getFullYear() + 
+                " " + 
+                ("0" + this.state.pickDate.getHours()).slice(-2) + 
+                "_" + 
+                ("0" + this.state.pickDate.getMinutes()).slice(-2) +
+                '_edizione_' + 
+                this.state.edition_id + 
+                '_forecast_id_' + 
+                this.state.forecast_id,
+              id:         p.id_text_trans,                   // this.state.id_text_trans, // e' sulla trans2
+              path_video: this.state.path_videogen,  // '/path/to/video_idtrans'+this.state.id_text_trans,
+              // L'ultimo video generato
+              // Passare solo il nome file con path.replace(/^.*[\\\/]/, '') se si vuole copiarlo o rinominarlo
+              notes:    "Note_request handlePublish id_text_trans: " + p.id_text_trans + " - Attenzione, questo e l id sulla trans2"
+          })+"'",
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(res => res.json())
+        .then(p => {
+          console.log('Dashboard handlePublish - Risultato request POST: ', p);
+          console.log('Dashboard handlePublish - publish');
+          fetch(
+            "/api/values/publish",
+            {
+              signal: this.mySignal,
+              method: 'POST',
+              body: "'"+JSON.stringify(
+              {
+                ita:  this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"), //"Provaaaa_manda_a_dashboard",      // testo ita da salvare prima su txt
+                name: this.state.path_videogen.replace(/^.*[\\\/]/, '').split('.')[0] // nome del file - adesso e' la URL completa, va corretto..
+              }
+            )+"'",
+            headers: {'Content-Type': 'application/json'}
+          })
+          // .then(res => res.json())
+          .then(response => response.text()) 
+          .then(p => {
+            console.log('Dashboard handlePublish - Risultato request POST: ', p);
+            /*
+            this.setState({
+              // ita_edit_version: this.state.ita_edit_version + 1,
+              // lis_edit_version: this.state.lis_edit_version + 1,
+              // id_text_trans:    p.id_text_trans,
+              dirty:            false,
+              justSaved:        true,
+              justPublished:    true
+            }, this.handleCloseDialog);
+            */
+            this.setState({
+              ita_edit_version: this.state.ita_edit_version + 1,
+              lis_edit_version: this.state.lis_edit_version + 1,
+              id_text_trans:    p.id_text_trans,
+              dirty:            false,
+              justSaved:        true,
+              justPublished:    true
+            }, this.handleCloseDialog); // }, this.handleCloseSnackbar);
+          })
+          .catch(error => {
+            console.log('Dashboard handlePublish - POST publish Error: ', error);
+          });
       })
       .catch(error => {
-        console.log('Dashboard handlePublish - POST Error: ', error);
+        console.log('Dashboard handlePublish - POST request Error: ', error);
       });
+    })
+    .catch(error => {
+      console.log('Dashboard handlePublish - POST text_trad Error: ', error);
+    });
   }
 
   render() {

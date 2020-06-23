@@ -532,6 +532,8 @@ var handleChips_b = function(event) {
     document.getElementById("output").appendChild(el);
     }, true);
     */
+    // if(event.keyCode === undefined)
+    //   event = {target: {value: ''}};
     let ret = {};
     try {
       if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space

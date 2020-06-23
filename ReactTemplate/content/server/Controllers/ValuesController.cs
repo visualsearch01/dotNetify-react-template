@@ -48,14 +48,14 @@ namespace dotnetify_react_template.server.Controllers
     [ApiController]
     public class ValuesController : Controller // Base
     {
-      /*
+        /*
         public Task<bool> Invoke(HttpContext context)
         {
           _logger.LogWarning("ValuesController     - " + context.User);
           // Do something with the current HTTP context...
           return new Task(true);
         }
-      */
+        */
         public IActionResult Error()
         {
             ViewData["RequestId"] = HttpContext.TraceIdentifier;
@@ -132,7 +132,7 @@ namespace dotnetify_react_template.server.Controllers
           _logger.LogWarning("ValuesController.cs - costruttore, path Powershell di save: " + _savePath); //_configuration["ConnectionStrings:lis"]);
 
         }
-
+        /*
         [HttpGet("user")]
         public HttpResponseMessage GetUser()
         {
@@ -147,7 +147,7 @@ namespace dotnetify_react_template.server.Controllers
         [HttpGet("logged")]
         public async Task<bool> LoggedIn()
         {
-          var myUser = HttpContext.User;
+          var myUser = await HttpContext.User;
           // _logger.LogWarning("ValuesController     - myUser:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + HttpContext.User.Name);
           _logger.LogWarning("ValuesController     - myUser:::::::::::::::::::::::::::::::::::::::::::::::::::::: " + myUser.Identity);
           // _logger.LogWarning("ValuesController     - myUser.Nmae::::::::::::::::::::::::::::::::::::::::::::::::: " + myUser.Identities.FirstOrDefault().NameIdentifier);
@@ -158,12 +158,12 @@ namespace dotnetify_react_template.server.Controllers
             _logger.LogWarning("ValuesController     - userprincipal not null");
             foreach (Claim claim in principal.Claims)
             {
-              Console.WriteLine("ValuesController.cs ---------- CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
+              _logger.LogWarning("ValuesController.cs ---------- CLAIM TYPE: " + claim.Type + "; CLAIM VALUE: " + claim.Value + "</br>");
             }
           }
           return myUser.Identities.Any(x => x.IsAuthenticated);
         }
-
+        */
         /**
          * Endpoint GET meteo di prova - data cablata
          * Tanto per provare
@@ -218,10 +218,10 @@ namespace dotnetify_react_template.server.Controllers
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
                 _logger.LogWarning("ValuesController - Error in [HttpGet(\"meteo\")]. Error: " + ex.Message);
-                Console.WriteLine("ValuesController - Error in [HttpGet(\"meteo\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpGet(\"meteo\")]. Error: " + ex.Message);
                 return Ok("{\"meteo\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"meteo\": \"Non Okei_ex\"}");
             }
         }
@@ -234,7 +234,7 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult Get_meteo_id(string id)
         {
           _logger.LogWarning("ValuesController - Nameeeeee -----------------------------------------------: " + this.hh.GetUserNetworkId());
-          // Console.WriteLine("ValuesControllerhboard - Nameeeeee -------------------------: " + this._hhh.HttpContext.User.Claims.Last(i => i.Type == ClaimTypes.NameIdentifier).Value);
+          // _logger.LogWarning("ValuesControllerhboard - Nameeeeee -------------------------: " + this._hhh.HttpContext.User.Claims.Last(i => i.Type == ClaimTypes.NameIdentifier).Value);
           _logger.LogWarning("ValuesController - Nameeeeee -----------------------------------------------: " + this._nn.Principal);
 
           /*
@@ -375,10 +375,10 @@ namespace dotnetify_react_template.server.Controllers
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
                 _logger.LogWarning("ValuesController - Error in [HttpGet(\"meteo/id\")]. Error: " + ex.Message);
-                Console.WriteLine("ValuesController - Error in [HttpGet(\"meteo/id\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpGet(\"meteo/id\")]. Error: " + ex.Message);
                 return Ok("{\"meteo_id\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"meteo_id\": \"Non Okei_ex\"}");
             }
             /*
@@ -396,7 +396,7 @@ namespace dotnetify_react_template.server.Controllers
             process.Start();
 
             string output = process.StandardOutput.ReadToEnd();
-            Console.WriteLine("ValuesController.cs - process powershell output: " + output);
+            _logger.LogWarning("ValuesController.cs - process powershell output: " + output);
             */
         }
 
@@ -426,18 +426,18 @@ namespace dotnetify_react_template.server.Controllers
                 process.Start();
 
                 output = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                Console.WriteLine("ValuesController.cs - translate1 - process powershell output: " + output);
+                _logger.LogWarning("ValuesController.cs - translate1 - process powershell output: " + output);
 
                 process.Dispose();
                 GC.Collect(); // Just for the diagnostics....
                 return Ok("{\"translation\": \"" + output + "\"}");
             }
             catch(InvalidOperationException ex){
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
             }
             catch(Exception ex) {
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
             }
 
@@ -548,10 +548,10 @@ namespace dotnetify_react_template.server.Controllers
                 // return new OkObjectResult(new Item { Id = 123, Name = "Hero" });
             } catch (MySqlException ex) {
                 _logger.LogWarning("ValuesController - Error in [HttpGet(\"Get_sign\")]. Error: " + ex.Message);
-                Console.WriteLine("ValuesController - Error in [HttpGet(\"Get_sign\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpGet(\"Get_sign\")]. Error: " + ex.Message);
                 return Ok("{\"sign\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"sign\": \"Non Okei_ex\"}");
             }
         }
@@ -732,16 +732,24 @@ namespace dotnetify_react_template.server.Controllers
          * L'inserimento testi dal deliverable 2 (meteo) viene fatta dal controller del viewmodel relativeo (Dashboard)
          * con una coppia di query quasi identiche - la differenza e' che per il meteo i testi partono gia' da una versione 1 generata dallo scraper,
          * invece qui bisogna creare la versione 1 da zero
+         * UPDATE
+         * Le query sono state spostate quasi tutte qui nell controller API
+         * Questo metodo si occupa sia di inserire i record necessari in caso di inserimento nuovo
+         * sia per una nuova versione di testo preesistente (quindi nel meteo, ma anche una nuova versione di testo didattica gia' presente)
+         * Se il campo IdTextIta e' 0 e' un nuovo inserimento
          */
         [HttpPost("text_trad")]
         // public string JsonStringBody([FromBody] string value)
         public ActionResult InsertText([FromBody] string value)
         {
-            long lastId;
+            // long lastId;
+            long lastTransId;
+            long lastTrans2Id;
             long lastItaId;
             long lastLisId;
             _logger.LogWarning("ValuesController text_trad POST - value: " + value);
             dynamic changes = JsonConvert.DeserializeObject<dynamic>(value);
+            
             try
             {
                 using (_connection = new MySqlConnection(this._connectionString))
@@ -749,13 +757,19 @@ namespace dotnetify_react_template.server.Controllers
                     _connection.Open();
                     using(MySqlCommand command = new MySqlCommand()) {
                         command.Connection = _connection;
-                        Console.WriteLine("ValuesController text_trad - changes.IdTextIta: " + changes.IdTextIta);
-                        Console.WriteLine("ValuesController text_trad - changes.IdTextLis: " + changes.IdTextLis);
                         // int.TryParse(changes.IdTextIta, out int itaId);
                         // int.TryParse(changes.IdTextLis, out int lisId);
                         // int itaId = changes.IdTextIta;
                         // int lisId = changes.IdTextLis;
                         command.Parameters.Clear();
+
+                        _logger.LogWarning("ValuesController text_trad - changes.IdTextIta: " + (int)changes.IdTextIta);
+                        // Console.WriteLine(changes.IdTextIta);
+                        // _logger.LogWarning("ValuesController text_trad - changes.IdTextLis:");
+                        // Console.WriteLine(changes.IdTextLis);
+                        // _logger.LogWarning("ValuesController text_trad - changes.TextIta:");
+                        // Console.WriteLine(changes.TextIta);
+
                         if (changes.IdTextIta == 0) {
                           command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ((SELECT MAX(id_text_ita)+1 FROM (select * from lis_text_ita) AS T1), ?id_user, ?version, ?text, ?notes);";
                           command.Parameters.AddWithValue("?version", (changes.VersionIta + 1)); // 1); // La versione va sempre incrementata! da frontend si arriva con la vrsione corrente che da 0 passa a 1, poi 2 e cosi' via
@@ -771,14 +785,18 @@ namespace dotnetify_react_template.server.Controllers
                         command.Parameters.AddWithValue("?notes", changes.NotesIta); // .Replace("'", "''"));
                         command.ExecuteNonQuery();
                         // lastItaId = 0;
-                        Console.WriteLine("ValuesController text_trad POST - INSERT ITA OK");
+                        _logger.LogWarning("ValuesController text_trad POST - INSERT ITA OK");
 
-                        command.Parameters.Clear();
-                        command.CommandText = "SELECT MAX(id_text_ita) AS id_text_ita FROM lis_text_ita;";
-                        using (MySqlDataReader reader = command.ExecuteReader())
-                        {
-                          reader.Read(); // )
-                          lastItaId = reader.GetInt32("id_text_ita");
+                        if (changes.IdTextIta == 0) {
+                          command.Parameters.Clear();
+                          command.CommandText = "SELECT MAX(id_text_ita) AS id_text_ita FROM lis_text_ita;";
+                          using (MySqlDataReader reader = command.ExecuteReader())
+                          {
+                            reader.Read(); // )
+                            lastItaId = reader.GetInt32("id_text_ita");
+                          }
+                        } else {
+                          lastItaId = changes.IdTextIta;
                         }
 
                         command.Parameters.Clear();
@@ -794,14 +812,19 @@ namespace dotnetify_react_template.server.Controllers
                         command.Parameters.AddWithValue("?text", changes.TextLis); // .Replace("'", "''"));
                         command.Parameters.AddWithValue("?notes", changes.NotesLis); //.Replace("'", "''"));
                         command.ExecuteNonQuery();
-                        Console.WriteLine("ValuesController text_trad POST - INSERT LIS OK");
+                        _logger.LogWarning("ValuesController text_trad POST - INSERT LIS OK");
 
-                        command.Parameters.Clear();
-                        command.CommandText = "SELECT MAX(id_text_lis) AS id_text_lis FROM lis_text_lis;";
-                        using (MySqlDataReader reader = command.ExecuteReader())
-                        {
-                          reader.Read(); // )
-                          lastLisId = reader.GetInt32("id_text_lis");
+                        if (changes.IdTextIta == 0) {
+
+                          command.Parameters.Clear();
+                          command.CommandText = "SELECT MAX(id_text_lis) AS id_text_lis FROM lis_text_lis;";
+                          using (MySqlDataReader reader = command.ExecuteReader())
+                          {
+                            reader.Read(); // )
+                            lastLisId = reader.GetInt32("id_text_lis");
+                          }
+                        } else {
+                          lastLisId = changes.IdTextLis;
                         }
                         
                         // L'inserimento nella 
@@ -810,7 +833,8 @@ namespace dotnetify_react_template.server.Controllers
                         command.Parameters.AddWithValue("?id_text_ita", lastItaId);
                         command.Parameters.AddWithValue("?id_text_lis", lastLisId);
                         command.ExecuteNonQuery();
-                        Console.WriteLine("ValuesController text_trad POST - INSERT TRANS OK");
+                        lastTransId = command.LastInsertedId;
+                        _logger.LogWarning("ValuesController text_trad POST - INSERT TRANS OK, lastTransId:" + lastTransId);
                         
                         command.Parameters.Clear();
                         command.CommandText = "INSERT INTO lis_text_trans2 (id_text_ita, version_ita, id_text_lis, version_lis) VALUES (?id_text_ita, ?version_ita, ?id_text_lis, ?version_lis);";
@@ -826,19 +850,19 @@ namespace dotnetify_react_template.server.Controllers
                         // ValuesController - Error in [HttpPost"text_trad")]. Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '_binary '5'' at line 1
                         command.ExecuteNonQuery();
                         // dbcmd.ExecuteNonQuery();
-                        lastId = command.LastInsertedId;
-                        Console.WriteLine("ValuesController text_trad POST - INSERT TRANS2 OK, lastId: " + lastId);
+                        lastTrans2Id = command.LastInsertedId;
+                        _logger.LogWarning("ValuesController text_trad POST - INSERT TRANS2 OK, lastTrans2Id: " + lastTrans2Id);
                     }
                     _connection.Close();
                 }
-                return Ok("{\"id_text_trans\": \"" + lastId + "\",\"id_text_ita\": \"" + lastItaId + "\",\"id_text_lis\": \"" + lastLisId + "\"}");
+                return Ok("{\"id_text_trans\": \"" + lastTrans2Id + "\",\"id_text_ita\": \"" + lastItaId + "\",\"id_text_lis\": \"" + lastLisId + "\"}");
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
                 _logger.LogWarning("ValuesController - MySQL Error in [HttpPost\"text_trad\")]. Error: " + ex.Message);
-                Console.WriteLine("ValuesController - MySQL Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - MySQL Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
                 return Ok("{\"id_text_trans\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
-                Console.WriteLine("ValuesController - Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"text_trad\")]. Error: " + ex.Message);
                 return Ok("{\"id_text_trans\": \"Non Okei_ex\"}");
             }
             // return content;
@@ -873,7 +897,7 @@ namespace dotnetify_react_template.server.Controllers
                         command.Parameters.AddWithValue("?notes", changes.notes);
                         command.ExecuteNonQuery();
                         lastId = command.LastInsertedId;
-                        Console.WriteLine("ValuesController request POST - INSERT REQUEST OK");
+                        _logger.LogWarning("ValuesController request POST - INSERT REQUEST OK");
                         // SQL = "INSERT INTO lis_text_lis (id_text_lis, id_user_edit, version, text_lis, xml_lis, notes) VALUES ((select MAX(id_text_lis)+1 from (select * from lis_text_lis) AS T2),2, ?version, 'texttt_lis', '<xml>test</xml>', 'note_lis_HttpPost')";
                         // command.CommandText = SQL;
                         // command.Parameters.AddWithValue("?version", idf); // Gia' specificato sopra - anche se poi magari le versioni potranno essere diverse tra ita e lis
@@ -889,10 +913,10 @@ namespace dotnetify_react_template.server.Controllers
             } catch (MySqlException ex) {
                 // Log.Info("Error in adding mysql row. Error: " + ex.Message);
                 _logger.LogWarning("ValuesController - Error in [HttpPost\"request\")]. Error: " + ex.Message);
-                Console.WriteLine("ValuesController - Error in [HttpPost(\"request\")]. Error: " + ex.Message);
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"request\")]. Error: " + ex.Message);
                 return Ok("{\"request\": \"Non Okei_mysqlex\"}");
             } catch(Exception ex) {
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"request\": \"Non Okei_ex\"}");
             }
             // return content;
@@ -908,7 +932,8 @@ namespace dotnetify_react_template.server.Controllers
             _logger.LogWarning("ValuesController.cs - POST translate - value: " + json);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
             var translateText = results.value;
-            Console.WriteLine("ValuesController.cs - POST translate - translateText: " + translateText);
+            _logger.LogWarning("ValuesController.cs - POST translate - translateText:");
+            Console.WriteLine(translateText);
             try {
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = @"powershell.exe";
@@ -928,7 +953,7 @@ namespace dotnetify_react_template.server.Controllers
                     StringSplitOptions.None
                 );
                 // var output = process.StandardOutput.ReadToEnd().Split; // .Replace(System.Environment.NewLine, "");
-                Console.WriteLine("ValuesController.cs - POST translate powershell output: " + output[0]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output: " + output[0]);
                 
                 process.Dispose();
                 GC.Collect(); // Just for the diagnostics....
@@ -938,12 +963,12 @@ namespace dotnetify_react_template.server.Controllers
                 // return Ok(ff); // new string[] { "value1", "value2_" + product };
             } catch(InvalidOperationException ex){
                 _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
             }
             catch(Exception ex) {
                 _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
             }
         }
@@ -954,24 +979,24 @@ namespace dotnetify_react_template.server.Controllers
         {
             try {
                 //_logger.LogWarning("ValuesController POST preview - value: " + value);
-                Console.WriteLine("ValuesController.cs - POST preview - value: " + value);
+                _logger.LogWarning("ValuesController.cs - POST preview - value: " + value);
                 dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
                 // string sentenceText = results.value; // .Replace("=","");
                 // _logger.LogWarning("ValuesController POST publish - value: ");
                 // _logger.LogWarning(idf);
-                Console.WriteLine("ValuesController.cs - POST preview - deserialize result: " + results);
+                // _logger.LogWarning("ValuesController.cs - POST preview - deserialize result: " + results);
 
                 // return Ok("{\"output_preview\": \"" + sentenceText + "_//video_gen/mp4/output_2sec.mp4\"}");
                 return Ok("{\"output_preview\": \"/video_gen/mp4/" + results.tot + "\"}");
                 // return Ok("{\"output_preview\": \"/video_gen/mp4/output_5.333sec.mp4\"}");
             } catch(InvalidOperationException ex){
                 // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
             }
             catch(Exception ex) {
                 // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                Console.WriteLine(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
             }
         }
@@ -981,7 +1006,7 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult Preview_bak([FromBody] string value) //  [FromBody] string b)
         {
             //_logger.LogWarning("ValuesController POST preview - value: " + value);
-            Console.WriteLine("ValuesController.cs - POST preview - value: " + value);
+            _logger.LogWarning("ValuesController.cs - POST preview - value: " + value);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             ChipElement[] chips = JsonConvert.DeserializeObject<ChipElement[]>(JsonConvert.SerializeObject(results.it));
 
@@ -1013,11 +1038,11 @@ namespace dotnetify_react_template.server.Controllers
               }
               root.Add(sentence);
               sentenceDocument.Add(root);
-              Console.WriteLine("ValuesController.cs - xml2:");
+              _logger.LogWarning("ValuesController.cs - xml2:");
               var sw1 = new StringWriter();
               root.Save(sw1);
               string result1 = sw1.GetStringBuilder().ToString();
-              Console.WriteLine("ValuesController.cs - result1:" + result1);
+              _logger.LogWarning("ValuesController.cs - result1:" + result1);
 
               string path = Path.Combine(_savePath, fileName + "_ok.xml");
               sentenceDocument.Save(path);
@@ -1026,7 +1051,7 @@ namespace dotnetify_react_template.server.Controllers
                   ProcessStartInfo startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
                   startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
-                  Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
+                  _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
                   startInfo.UseShellExecute = false;
@@ -1037,10 +1062,10 @@ namespace dotnetify_react_template.server.Controllers
                   process.Start();
 
                   string standardOutput = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput);
+                  _logger.LogWarning("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput);
 
                   string standardError = process.StandardError.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardError: " + standardError);
+                  _logger.LogWarning("ValuesController.cs - POST preview powershell StandardError: " + standardError);
 
                   process.WaitForExit();
 
@@ -1051,22 +1076,22 @@ namespace dotnetify_react_template.server.Controllers
 
               } catch(InvalidOperationException ex){
                   // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                  Console.WriteLine(ex.Message);
+                  _logger.LogWarning(ex.Message);
                   return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
               } catch(Exception ex) {
                   // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                  Console.WriteLine(ex.Message);
+                  _logger.LogWarning(ex.Message);
                   return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
               }
 
           } catch(InvalidOperationException ex){
               // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
           }
           catch(Exception ex) {
               // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
           }
         }
@@ -1075,7 +1100,7 @@ namespace dotnetify_react_template.server.Controllers
         public ActionResult Preview([FromBody] string value) //  [FromBody] string b)
         {
             //_logger.LogWarning("ValuesController POST preview - value: " + value);
-            Console.WriteLine("ValuesController.cs - POST preview - value: " + value);
+            _logger.LogWarning("ValuesController.cs - POST preview - value: " + value);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
             ChipElement[] chips = JsonConvert.DeserializeObject<ChipElement[]>(JsonConvert.SerializeObject(results.it));
 
@@ -1092,7 +1117,7 @@ namespace dotnetify_react_template.server.Controllers
                   ProcessStartInfo startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
                   startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _xmlscript + @" -Param1 '" + _savePath + @"' -Param2 '" + fileName + @"' -Param3 '" + results.tot + @"' -Param4 '" + results.tot_id + @"'  """;     // results.tot
-                  Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
+                  _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
                   startInfo.UseShellExecute = false;
@@ -1103,10 +1128,10 @@ namespace dotnetify_react_template.server.Controllers
                   process.Start();
 
                   string standardOutput_1 = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput_1);
+                  _logger.LogWarning("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput_1);
 
                   string standardError_1 = process.StandardError.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardError: " + standardError_1);
+                  _logger.LogWarning("ValuesController.cs - POST preview powershell StandardError: " + standardError_1);
 
                   process.WaitForExit();
                   process.Dispose();
@@ -1116,7 +1141,7 @@ namespace dotnetify_react_template.server.Controllers
                   startInfo.FileName = @"powershell.exe";
                   // @"C:\\Users\\admin\\Videos"
                   startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + standardOutput_1 + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
-                  Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
+                  _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
                   startInfo.UseShellExecute = false;
@@ -1127,10 +1152,10 @@ namespace dotnetify_react_template.server.Controllers
                   process.Start();
 
                   string standardOutput = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput);
+                  _logger.LogWarning("ValuesController.cs - POST preview powershell StandardOutput: " + standardOutput);
 
                   string standardError = process.StandardError.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST preview powershell StandardError: " + standardError);
+                  _logger.LogWarning("ValuesController.cs - POST preview powershell StandardError: " + standardError);
 
                   process.WaitForExit();
 
@@ -1140,22 +1165,22 @@ namespace dotnetify_react_template.server.Controllers
 
               } catch(InvalidOperationException ex){
                   // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                  Console.WriteLine(ex.Message);
+                  _logger.LogWarning(ex.Message);
                   return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
               } catch(Exception ex) {
                   // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                  Console.WriteLine(ex.Message);
+                  _logger.LogWarning(ex.Message);
                   return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
               }
 
           } catch(InvalidOperationException ex){
               // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
           }
           catch(Exception ex) {
               // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"output_preview\": \"" + ex.Message + "\"}");
           }
         }
@@ -1164,7 +1189,7 @@ namespace dotnetify_react_template.server.Controllers
         [HttpPost("publish")]
         public ActionResult Publish([FromBody] string value)
         {
-            Console.WriteLine("ValuesController.cs - POST publish - value: " + value);
+            _logger.LogWarning("ValuesController.cs - POST publish - value: " + value);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(value);
 
             try {
@@ -1206,8 +1231,8 @@ namespace dotnetify_react_template.server.Controllers
                     @" -Param5 '" + _savePath + @"\\" + name + "'"  + 
                     @" -Param6 '" + _savePath + @"\\" + name + @"'  """;     // results.tot
                   
-                  Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
-                  // Console.WriteLine("ValuesController.cs - POST preview startInfo.Arguments: " +  String.Join(" ", startInfo.ArgumentList));
+                  _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
+                  // _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " +  String.Join(" ", startInfo.ArgumentList));
                   // ValuesController.cs - POST preview startInfo.Arguments: -NoLogo -ExecutionPolicy Bypass -Command "D:\sentence_zip.ps1 -Param1 ''C:\\Users\\admin\\Videos\\ceeeeee' -Param2 'dcdvv_ gn555grfrfr' -Param3 ''C:\\Users\\admin\\Videos\\' -Param4 'dcdvv_ gn555grfrfr' -Param5 ''C:\\Users\\admin\\Videos\\ceeeeee' -Param6 ''C:\\Users\\admin\\Videos\\ceeeeee'  "
 
                   startInfo.RedirectStandardOutput = true;
@@ -1223,10 +1248,10 @@ namespace dotnetify_react_template.server.Controllers
                   process.WaitForExit(1000 * 60 * 1);    // Wait up to five minutes
 
                   string standardOutput = process.StandardOutput.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST publish powershell StandardOutput: " + standardOutput);
+                  _logger.LogWarning("ValuesController.cs - POST publish powershell StandardOutput: " + standardOutput);
 
                   string standardError = process.StandardError.ReadToEnd().Replace(System.Environment.NewLine, "");
-                  Console.WriteLine("ValuesController.cs - POST publish powershell StandardError: " + standardError);
+                  _logger.LogWarning("ValuesController.cs - POST publish powershell StandardError: " + standardError);
 
                   process.Dispose();
                   GC.Collect(); // Just for the diagnostics....
@@ -1234,22 +1259,22 @@ namespace dotnetify_react_template.server.Controllers
 
               } catch(InvalidOperationException ex){
                   // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                  Console.WriteLine(ex.Message);
+                  _logger.LogWarning(ex.Message);
                   return Ok("{\"output_publish\": \"" + ex.Message + "\"}");
               } catch(Exception ex) {
                   // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-                  Console.WriteLine(ex.Message);
+                  _logger.LogWarning(ex.Message);
                   return Ok("{\"output_publish\": \"" + ex.Message + "\"}");
               }
 
           } catch(InvalidOperationException ex){
               // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"output_publish\": \"" + ex.Message + "\"}");
           }
           catch(Exception ex) {
               // _logger.LogWarning("ValuesController - Error in [HttpPost(\"output_preview\")]. Error: " + ex.Message);
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"output_publish\": \"" + ex.Message + "\"}");
           }
         }
@@ -1282,14 +1307,14 @@ namespace dotnetify_react_template.server.Controllers
         public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files)
         {
             long uploadFileSize = files.Sum(f => f.Length);
-            Console.WriteLine("ValuesController - upload uploadFileSize:" + uploadFileSize);
+            _logger.LogWarning("ValuesController - upload uploadFileSize:" + uploadFileSize);
             string uploadFilePath = "";
             foreach (var formFile in files)
             {
                 if (formFile.Length > 0)
                 {
                     _logger.LogWarning("ValuesController - upload: " + formFile);
-                    Console.WriteLine("ValuesController - upload: " + formFile);
+                    _logger.LogWarning("ValuesController - upload: " + formFile);
                     uploadFilePath = Path.Combine(
                         Directory.GetCurrentDirectory(),
                         "wwwroot", "dist/rules/glossario.csv");
@@ -1301,7 +1326,7 @@ namespace dotnetify_react_template.server.Controllers
                     }
                 } else {
                     _logger.LogWarning("ValuesController - upload: no files");
-                    Console.WriteLine("ValuesController - upload KO:");
+                    _logger.LogWarning("ValuesController - upload KO:");
                     return Ok(new { count = 0, uploadFileSize = 0, uploadFilePath = "no files" });
                 }
             }
@@ -1343,10 +1368,10 @@ namespace dotnetify_react_template.server.Controllers
           } catch (MySqlException ex) {
               // Log.Info("Error in adding mysql row. Error: " + ex.Message);
               _logger.LogWarning("ValuesController - Error in PUT menu/{id}. Error: " + ex.Message);
-              Console.WriteLine("ValuesController - Error in PUT menu/{id}. Error: " + ex.Message);
+              _logger.LogWarning("ValuesController - Error in PUT menu/{id}. Error: " + ex.Message);
               return Ok("{\"upd_request\": \"Non Okei_mysqlex\"}");
           } catch(Exception ex) {
-              Console.WriteLine(ex.Message);
+              _logger.LogWarning(ex.Message);
               return Ok("{\"upd_request\": \"Non Okei_ex\"}");
           }
           // return content;
