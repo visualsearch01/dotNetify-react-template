@@ -16,16 +16,12 @@ import SvgIconFace from 'material-ui/svg-icons/action/face';
 import { List, ListItem, makeSelectable } from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 
-const PopoverStyle = {
-	top: '50px'
-};
-
 class InfoBox extends React.Component {
   constructor(props) {
     super(props);
     
     this.state = {
-      pickDate: new Date(), // .toISOString().split('T')[0],
+      pickDate: new Date(),
       name: '',
       pop_open: false,
       anchorEl: '',
@@ -38,7 +34,7 @@ class InfoBox extends React.Component {
     console.log('onChangeDate1 - date1.toISOString(): ', date1.toISOString());
     // this.handleFetch(date1);
     // onChange={this.handleFetch} value={this.state.pickDate} 
-  }
+  };
 
   handleProfileDropDown(e) {
 		e.preventDefault();
@@ -46,7 +42,7 @@ class InfoBox extends React.Component {
 			pop_open: !this.state.pop_open,
 			anchorEl: e.currentTarget,
 		});
-	}
+	};
 
   handleRequestClose() {
     this.setState({
@@ -90,8 +86,6 @@ class InfoBox extends React.Component {
       }
     };
 
-    // <DatePicker onChange={this.onChangeDate1} value={this.state.pickDate} />
-
     return (
       <Paper>
         <span style={styles.iconSpan}>
@@ -100,28 +94,6 @@ class InfoBox extends React.Component {
         <div style={styles.content}>
           <span style={styles.text}>{Title}</span>
           <span style={styles.number}>{Value}</span>
-          { /*
-          <DatePicker onChange={onChangeDate} value={this.state.pickDate} />
-
-          <button type="submit" name={this.state.name} onClick={this.handleProfileDropDown.bind(this)}>Scegli area</button>
-            <Popover
-			          open={this.state.pop_open}
-			          anchorEl={this.state.anchorEl}
-			          className="popover_class"
-			          style={PopoverStyle}
-			          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-			          targetOrigin={{horizontal: 'left', vertical: 'top'}}
-			          onRequestClose={this.handleRequestClose.bind(this)}
-			          animation={PopoverAnimationVertical}
-			        >
-			          <Menu>
-			            <MenuItem primaryText="Content" onClick={this.handleRequestClose.bind(this)} />
-			            <MenuItem primaryText="My Profile" />
-			            <MenuItem primaryText="Settings" />
-			            <MenuItem primaryText="Logout" />
-			          </Menu>
-            </Popover>
-            */ }
         </div>
       </Paper>
     );
@@ -149,16 +121,6 @@ class CircularProgressExampleDeterminate extends React.Component {
     // If it's from a dismounted component, you must add vm.$destroy to componentWillUnmount().
   };
   
-  
-  /*
-  componentDidMount() {}
-  componentWillUnmount() {}
-  componentWillUnmount() {
-    clearTimeout(this.timer);
-    window.removeEventListener('beforeunload', this.handleLeavePage);
-    // this.vm.$destroy();
-  }
-  */
   componentDidMount() {
     console.log('CircularProgressExampleDeterminate - componentDidMount');
     window.addEventListener('beforeunload', this.handleLeavePage);
@@ -167,7 +129,7 @@ class CircularProgressExampleDeterminate extends React.Component {
 
   handleLeavePage(e) {
     this.vm.$destroy();
-  }
+  };
 
   // Rendere il progress piu' veloce
   // - aumentare il valore fisso per cui vine emoltiplicato Math.Random
@@ -186,32 +148,13 @@ class CircularProgressExampleDeterminate extends React.Component {
       // }, 200);
       }, 1000);
     }
-  }
+  };
 
   render() {
     // const { tess, onCompleted, completed } = this.props;
     return (
       <div>
       {this.props.progress}
-        {/*
-        <CircularProgress
-          mode="determinate"
-          value={this.state.completed}
-        />
-        <CircularProgress
-          mode="determinate"
-          value={this.state.completed}
-          size={60}
-          thickness={7}
-        />
-        
-        <CircularProgress
-          mode="determinate"
-          value={this.state.completed}
-          size={80}
-          thickness={5}
-        />
-        */}
         <CircularProgress
           mode="determinate"
           value={this.state.completed}
@@ -221,7 +164,7 @@ class CircularProgressExampleDeterminate extends React.Component {
         {this.state.tess}
       </div>
     );
-  }
+  };
 }
 
 
@@ -385,35 +328,13 @@ function wrapState(ComposedComponent) {
 
 SelectableList = wrapState(SelectableList);
 
-/*
-const Child = (props) => {
-  return (
-    <div style={{backgroundColor: props.eyeColor}} />
-  )
-}
-onChangeSign
-onClick={(e) => handleListSelect1(item)}
-
-// leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-// leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-
-item.Signs.map((item, idx2) => (
-          <ListItem
-            key={idx2}
-            value={item}
-            primaryText={item}
-            onClick={(e) => props.onChangeSign(item)}
-          />
-          ))}
-open={props.filtered}
-*/
 const ListExampleSelectable = props => {
   return (
     <SelectableList defaultValue={3}>
       {/*<Subheader>Segni presenti a dizionario</Subheader>*/}
       {props.children.map((item, idx1) => (
       <ListItem
-        style={{fontSize: 10}}
+        style={{fontSize: 16}}
         key={idx1}
         value={item.Iniziale}
         primaryText={item.Iniziale}
@@ -422,7 +343,7 @@ const ListExampleSelectable = props => {
         nestedItems={
           item.Signs_object.map((item, idx2) => (
           <ListItem
-            style={{fontSize: 10}}
+            style={{fontSize: 16}}
             key={idx2}
             value={item}
             primaryText={item.name}
@@ -434,110 +355,24 @@ const ListExampleSelectable = props => {
     </SelectableList>
   )
 };
-/*
-onClick={handleListSelect}
-const ListExampleSelectable1 = () => (
-    <SelectableList defaultValue={3}>
-      <Subheader>Segni presenti a dizionario</Subheader>
-      <ListItem
-        value={1}
-        primaryText="Categoria 1"
-        leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-        nestedItems={[
-          <ListItem
-            value={2}
-            primaryText="Segno1.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-<ListItem
-            value={2}
-            primaryText="Segno2.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-<ListItem
-            value={2}
-            primaryText="Segno3.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-        ]}
-      />
-      <ListItem
-        value={3}
-        primaryText="Categoria 2"
-        leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-      nestedItems={[
-          <ListItem
-            value={2}
-            primaryText="Segno4.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-<ListItem
-            value={2}
-            primaryText="Segno5.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-<ListItem
-            value={2}
-            primaryText="Segno6.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-        ]}
-      />
-      <ListItem
-        value={4}
-        primaryText="Categoria 3"
-        leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-      />
-      <ListItem
-        value={5}
-        primaryText="Categoria 5"
-        leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-      nestedItems={[
-          <ListItem
-            value={2}
-            primaryText="Segno7.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-<ListItem
-            value={2}
-            primaryText="Segno8.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-<ListItem
-            value={2}
-            primaryText="Segno9.lis"
-            leftAvatar={<Avatar src={require( "../../../../../../../../source/Workspaces/coreui-free-react-admin-template/node_modules/serve-index/public/icons/application_xp_terminal.png")} />}
-          />,
-        ]}
-      />
-    </SelectableList>
-);
-*/
-// export default ListExampleSelectable;
-
 
 var handleChips_b = function(event) {
+  if (event.target.value.indexOf('Nessun dato') !== -1) {
+    console.log('Dashboard - handleChips - testo vuoto');
+    // console.log('TablePage_1 - handleChips - else - testo pari a "Nessun dato.."');
+
+    this.setState({
+      allWordsFound: false,
+      sign_json: {},
+      chips: []
+    },this.handleCloseDialog());
+  } else {
     console.log('TablePage_1 - handleChips event.key: ', event.key);
     console.log('TablePage_1 - handleChips event.keyCode: ', event.keyCode);
     console.log('TablePage_1 - handleChips event.Code: ', event.code);
-    // console.log('Dashboard - handleChips input: ', input)
-    // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-    /*        
-    <script>
-    window.addEventListener("keydown", function(event) {
-    let str = "KeyboardEvent: key='" + event.key + "' | code='" +
-      event.code + "'";
-    let el = document.createElement("span");
-    el.innerHTML = str + "<br/>";
-    document.getElementById("output").appendChild(el);
-    }, true);
-    */
-    // if(event.keyCode === undefined)
-    //   event = {target: {value: ''}};
     let ret = {};
     try {
       if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
-        // Do whatever when esc is pressed
         console.log('TablePage_1 - handleChips keyCode 12 - Space pressed! ')
         let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
         
@@ -550,10 +385,6 @@ var handleChips_b = function(event) {
         let ar1 = [];
         // let tt = ['Test', 'Prova'];
         list.forEach((item, i) => {
-          // if (i === idx) {
-          // console.log(Object.assign({}, {"key3": "value3"}, item));
-          // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
-          // if (!tt.includes(item)) this.setState({ allWordsFound: false });
           ar[i] = {Word: item, Found: this.state.sign_names.includes(item.toLowerCase())};
           if (this.state.sign_names.includes(item)) {
             ret.it.push(this.state.sign_array[item]);
@@ -561,37 +392,23 @@ var handleChips_b = function(event) {
             ar1.push(this.state.sign_array[item].id);
           }
         });
-
         ret.tot_id = ar1.join(',');
-
-        // var arr = Object.keys(obj).reduce(function(res, v) {
-        //    return res.concat(obj[v]);
-        // }, []);
-
-        // Object.assign
-        // Object.keys(obj).some(function(k) {
-        // return obj[k] === "test1";
-        // });
-        // allWordsFound:  false
         console.log('TablePage_1 - handleChips - Check array at least one false value: ', !ar.some(function(k) {return k.Found === false}));
         console.log('TablePage_1 - handleChips - Tot JSON: ', ret);
         this.setState({
           allWordsFound: !ar.some(function(k) {return k.Found === false}),
           sign_json: ret,
-          chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
+          chips: ar
         });
       }
       else {
-        console.log('TablePage_1 - handleChips - else');
+        console.log('TablePage_1 - handleChips - else - tasto premuto non impostato per aggiornare i chips');
       }
     } catch (error) {
       console.log('TablePage_1 - handleChips - catch - Error: ', error);
-      // console.log('handleUpdateTextAreas catch - this.state.edition_id: ', this.state.edition_id);
-      // console.log('handleUpdateTextAreas catch - this.state.forecast_id: ', this.state.forecast_id);
     }
-    // this.setState({ lis_edit: event.target.value });
-  };
-
+  }
+};
 
 InfoBox.propTypes = {
   Icon: PropTypes.any,
@@ -605,7 +422,9 @@ CircularProgressExampleDeterminate.propTypes = {
   progress: PropTypes.number,
   onCompleted: PropTypes.func //.required
 };
+
 // export default InfoBox;
+
 export {
   // export default 
   InfoBox, //;

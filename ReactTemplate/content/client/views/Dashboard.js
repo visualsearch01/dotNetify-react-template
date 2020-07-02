@@ -1,29 +1,10 @@
 import React from 'react';
 import dotnetify from 'dotnetify';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-/*
-import DownloadIcon from 'material-ui/svg-icons/file/cloud-download';
-import UploadIcon from 'material-ui/svg-icons/file/cloud-upload';
-import LatencyIcon from 'material-ui/svg-icons/notification/network-check';
-import UserIcon from 'material-ui/svg-icons/action/face';
-import DateIcon from 'material-ui/svg-icons/action/alarm';
-import NavigationExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
-import FolderIcon from 'material-ui/svg-icons/file/folder-open';
-import NotificationsIcon from 'material-ui/svg-icons/social/notifications';
-// import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
-// import UploadIcon from 'material-ui/svg-icons/file/cloud-upload';
-
-import IconMenu from 'material-ui/IconMenu';
-import IconButton from 'material-ui/IconButton';
-import FontIcon from 'material-ui/FontIcon';
-import SvgIcon from 'material-ui/SvgIcon';
-*/
 import { cyan600, pink600, purple600, orange600 } from 'material-ui/styles/colors';
 import { InfoBox, CircularProgressExampleDeterminate, ChipExampleSimple, ListExampleSelectable, handleChips_b } from '../components/dashboard/InfoBox';
-import Traffic from '../components/dashboard/Traffic';
 import ServerUsage from '../components/dashboard/ServerUsage';
 import { Utilization , VideoPreview, CardExampleExpandable } from '../components/dashboard/Utilization';
-// import RecentActivities from '../components/dashboard/RecentActivities';
 import { ChipExampleSimple1 , RecentActivities} from '../components/dashboard/RecentActivities';
 import BasePage from '../components/BasePage';
 import globalStyles from '../styles/styles';
@@ -32,36 +13,28 @@ import RaisedButton from 'material-ui/RaisedButton';
 import auth from '../auth';
 import DatePicker from 'react-date-picker';
 import TextareaAutosize from 'react-textarea-autosize';
-// import { Player } from 'video-react';
-// import AppBar from 'material-ui/AppBar';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
-
-// import MenuItem from 'material-ui/MenuItem';
 import DropDownMenu from 'material-ui/DropDownMenu';
-// import RaisedButton from 'material-ui/RaisedButton';
 import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle } from 'material-ui/Toolbar';
 import TextField from 'material-ui/TextField'
 import {Tabs, Tab} from 'material-ui/Tabs';
 import FlatButton from 'material-ui/FlatButton';
-// import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
-
 import Toggle from 'material-ui/Toggle';
-// import {Snackbar, SnackbarBody } from 'material-ui/Snackbar';
 import Snackbar from 'material-ui/Snackbar';
 import CircularProgress from 'material-ui/CircularProgress';
 import Dialog from 'material-ui/Dialog';
 import Badge from 'material-ui/Badge';
 
-function getTextByVersion(timeFrameJsonArray, edition_id, id_forecast_type, offset_days, version) {
-  console.log('getTextByVersion - edition_id: ', edition_id);
+function getTextByVersion(timeFrameJsonArray, id_edition, id_forecast_type, offset_days, version) {
+  console.log('getTextByVersion - id_edition:       ', id_edition);
   console.log('getTextByVersion - id_forecast_type: ', id_forecast_type);
-  console.log('getTextByVersion - offset_days: ', offset_days);
-  console.log('getTextByVersion - version: ', version);
+  console.log('getTextByVersion - offset_days:      ', offset_days);
+  console.log('getTextByVersion - version:          ', version);
 
   let res = timeFrameJsonArray
-    .filter(data => {return data.edition == edition_id})
+    .filter(data => {return data.edition == id_edition})
     .filter(data => {return data.id_forecast_type == id_forecast_type})
     .filter(data => {return data.offset_days == offset_days})
     .sort(function(a, b) {
@@ -111,10 +84,6 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     var arg = { User1: { Id: g_userid, Name: g_username }, num1: 9043835 };
-    // var arg = { num1: 9043835 }; // User1: { Name: "Test" } }; // Visibile in: vm.$vmArg.User.Name
-    // var arg = { Person: { Name: g_username } }; // Visibile in: vm.$vmArg.User.Name
-    
-    // dotnetify.react.connect("HelloWorld", this, { vmArg: arg });
     dotnetify.debug= true;
     this.vm = dotnetify.react.connect('Dashboard', this, {
       exceptionHandler: ex => {
@@ -125,21 +94,16 @@ class Dashboard extends React.Component {
       vmArg: arg
     });
     this.dispatch = state => this.vm.$dispatch(state);
-    // this.abortController = new AbortController();
-    // mySignal = abortController.signal;
     console.log('Dashboard - dotnetify: ', dotnetify);
     console.log('Dashboard - props: ', props);
     
     this.state = {
       dirty:                    false, // flag di abilitazione bottone di salvataggio (se e' stata effettuata una modifica in un campo TextArea)
-      // success1:              true, // Non usato
-      // popOverOpen:              false, // Usato dal popover, ma il popover al momento non e' implementato - quindi niente
       showSnackbar:             false, // Mostra snackbar di salvataggio avvenuto
       snackbarMessage:          "Nuova versione di testo salvata!!",
       snackbarAutoHideDuration: 2000,
       showProgress:             false, // Mostra circular progress, inizialmente pensato per dare evidenza di caricamento - sostituito dalla dialog
       showDialog:               false, // Mostra la dialog
-      // showVideoPreview:         false, // Mostra anteprima video o meno - non piu' usato
       showActions:              false, // Mostra bottoni solo se c'e' un testo ita/lis presente
       videoProgressCompleted:   false, // flag true/false di selezione vista progress/video - il componente restituisce un valore false mentre sta caricando, true quando ha finito
       justTranslated:           false, // Subito dopo una traduzione, disabilita il bottone relativo per evitare ritraduzione dello stesso testo
@@ -149,39 +113,19 @@ class Dashboard extends React.Component {
       previewing:               false, // Durante la preview, disabilita sia anteprima che publish
       dialogTitle:              "Attendere, caricamento...",
       dialogContent:            "Attendere, caricamento...",
-      
-      Traffic:                  [],
-      RequestData:              {},
-      /*
-      ServerUsage:              [],
-      ServerUsageLabel:         [],
-      Utilization:              [],
-      UtilizationLabel:         [],
-      UtilizationLabel1:        "Testo ITA originale",
-      UtilizationLabel2:        "Testo LIS originale",
-      RecentActivities:         [],
-      */
-      sign_json:                {},    // Oggetto "finale" da passare all'endpoint preview
-      sign_names:               [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
-      sign_array:               [],    // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
-      // sign_filtered:         [],    // Array usato effettivamente nella lista - uguale alla lista completa se non c'e' filtro, altrimenti diminuito in accordo con la parola cercata
-      // sign_selected:         null,  // Oggetto che rappresenta l'eventuale segno cliccato nella lista
-      chips:                    [],    // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
-      allWordsFound:            false, // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
-      
-      pickDate:                 new Date(), // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
-      // .toISOString().split('T')[0], // Data iniziale (oggi)
-      // Se il datepicker viene spostato in un componente diverso, questo valore va ricreato nel componente che contiene il datepicker
-      // La data va forzata se si arriva da un link di una request
-      edition_id:               1, // ID dell'edizione di default da visualizzare (ID 1, cioe' 9:00)
-      forecast_id:              1, // ID del tipo di forecast di default (NORD)
-      offset_day:               1, // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
-      offsets:                  [],// Possibili valori di offset nella lista di valori per la data selezionata
+      sign_json:                {},            // Oggetto "finale" da passare all'endpoint preview
+      sign_names:               [],            // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
+      sign_array:               [],            // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
+      chips:                    [],            // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
+      allWordsFound:            false,         // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
+      pickDate:                 new Date(),    // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
+      offset_day:               1,             // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
+      offsets:                  [],            // Possibili valori di offset nella lista di valori per la data selezionata
       offsets_calc1:            [],
-      testi:                    null, // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
+      testi:                    null,          // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
       
-      ita_id:                   0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
-      ita_orig:                 'Attendere..', //Testo di default
+      ita_id:                   0,             // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
+      ita_orig:                 'Attendere..', // Testo di default
       // ita_edit:                 'Attendere..',
       ita_edit_version:         0,
       ita_notes:                'Attendere..',
@@ -191,63 +135,30 @@ class Dashboard extends React.Component {
       // lis_edit:                 'Attendere..',
       lis_edit_version:         0,
       lis_notes:                'Attendere..',
-
-      id_text_trans:            0,
-
+      
+      id_edition:               1,             // ID dell'edizione visualizzata, di default ID 1, cioe' 9:30
+      id_text_trans:            0,             // ID della traduzione del testo corrente
+      id_forecast_type:         1,             // ID del tipo di forecast di default (1, cioe' NORD)
+      id_forecast:              0,             // ID del forecast corrente (dipende dal giorno di offset)
+      id_forecast_data:         0,             // ID del forecast_data corrente (dipende dal giorno di offset) - da passare alla funzione di publish, che fa anche un save prima
+      
       path_video:               null, // Eventuale path video di un testo gia' renderizzato
-
       path_postergen:           null, // Path poster generato in anteprima
       path_videogen:            null, // Path video generato in anteprima
-      videoName:          '',
-      /*
-      centro_ita_orig:    '',
-      centro_ita_edit:    '',
-      centro_lis_orig:    '',
-      centro_lis_edit:    '',
-
-      sud_ita_orig:       '',
-      sud_ita_edit:       '',
-      sud_lis_orig:       '',
-      sud_lis_edit:       '',
-      */
-      // value:             1, 
-      tab_mode_dash:      'dizionario', // Tab di default (UPDATE - i tab usati qui in dashboard servivano per gestire la prima versione "appoggiata" di deliverable 2 - ora tutto spostato in TablePage_1)
-      // tab_mode_dash1:         3, 
-      // value_area:         1,
-      // value_ed:           1, //'09:30',
-      note_segno:         'Informazioni riguardo al segno selezionato',
-      num1:               0, 
-      num2:               300,
-      sum :               0,
-      toggle1:            false,
-      toggle2:            false
-      // BottomNavigationSelectedIndex: 0
+      videoName:                '',
+      tab_mode_dash:            'dizionario', // Tab di default (UPDATE - i tab usati qui in dashboard servivano per gestire la prima versione "appoggiata" di deliverable 2 - ora tutto spostato in TablePage_1)
+      note_segno:               'Informazioni riguardo al segno selezionato',
+      num1:                     0, 
+      num2:                     300,
+      sum :                     0,
+      toggle1:                  false,
+      toggle2:                  false
     };
-    // console.log('Dashboard.js constructor - this: ', this);
-    /*
-    function handleChangeEd(e) {
-              console.log(e.target.value);
-              this.setState({edition_id: e.target.value});
-              this.handleSubmitEd(e.target.value);
-          };
-    function handleSubmitEd(edition_id) {
-        this.props.onChange(edition_id);
-      };
-    */
     this.onVideoChildClicked = this.onVideoChildClicked.bind(this);
     this.onCircProgressCompleted = this.onCircProgressCompleted.bind(this);
-    // this.onClickp = this.onClickp.bind(this);
-    // this.handleChangePicker_child = this.handleChangePicker_child.bind(this);
     this.handleUpdateTextAreas = this.handleUpdateTextAreas.bind(this);
-    // this.handleChangeEditionId = this.handleChangeEditionId.bind(this);
-    // this.handleEditIta = this.handleEditIta.bind(this);
-    // this.handleEditLis = this.handleEditLis.bind(this);
-    // this.setNum1 = this.setNum1.bind(this);
-    // this.setNum2 = this.setNum2.bind(this);
-    // console.log('Dashboard.js costruttore - props: ', props); // .userid qui non funziona
-    // this.handleChips = this.handleChips.bind(this);
     this.handleChips = handleChips_b.bind(this);
-  }
+  };
   abortController = new AbortController();
   mySignal = this.abortController.signal;
 
@@ -271,24 +182,13 @@ class Dashboard extends React.Component {
     console.log('Dashboard - g_userid: ', g_userid);
   };
 
-  handleChangeEditionId_dropdown = (event, index, value) => {
-    console.log('handleChangeEditionId - value: ', value);
-    console.log('handleChangeEditionId - this.state.offsets_calc1[value]: ', this.state.offsets_calc1[value]);
-    // this.setState({ value_ed: value});
-    this.setState({
-      offsets:    this.state.offsets_calc1[value],
-      edition_id: value
-      }, this.handleUpdateTextAreas);
-    // this.handleUpdateTextAreas(value);
-  };
-
   handleChangeEditionId_tab = (value) => {
     console.log('handleChangeEditionId - value: ', value);
     console.log('handleChangeEditionId - this.state.offsets_calc1[value]: ', this.state.offsets_calc1[value]);
     // this.setState({ value_ed: value});
     this.setState({
       offsets:    this.state.offsets_calc1[value],
-      edition_id: value
+      id_edition: value
       }, this.handleUpdateTextAreas);
     // this.handleUpdateTextAreas(value);
   };
@@ -300,7 +200,7 @@ class Dashboard extends React.Component {
     console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
     // this.setState({ value_area: value });
     this.setState({
-      forecast_id: value,
+      id_forecast_type: value,
       offset_day: (value === 7 ? // 2 : 1
         // this.state.offsets[0][0] : // 2 : 
         // this.state.offsets[0][1]   // 1
@@ -317,7 +217,7 @@ class Dashboard extends React.Component {
     console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
     // this.setState({ value_area: value });
     this.setState({
-      forecast_id: value,
+      id_forecast_type: value,
       // offsets: (value === 7 ? this.state.offsets_calc1.shift() : this.state.offsets_calc1),
       offset_day: (value === 7 ? // 2 : 1
         // this.state.offsets[0][0] : // 2 : 
@@ -468,17 +368,6 @@ class Dashboard extends React.Component {
       // this.setState({ lis_edit: event.target.value });
     }
   };
-
-  /*
-  // Versione di handleChangePicker prevista se il picker dovesse essere inserito in un componente child (InfoBox)
-  handleChangePicker_child = date1 => {
-    this.setState({ pickDate: date1 });
-    console.log('handleChangePicker_child - date1: ', date1);
-    console.log('handleChangePicker_child - date1.toISOString(): ', date1.toISOString());
-      this.handleChangePicker_dashboard(date1);
-      // onChange={this.handleChangePicker_dashboard} value={this.state.pickDate} 
-    }
-  */
   
   /**
    * Metodo di aggiornamento data
@@ -543,14 +432,14 @@ class Dashboard extends React.Component {
 
           let orig = getTextByVersion(
             data.timeframe.editions[0].forecast_data, 
-            this.state.edition_id, 
-            this.state.forecast_id, 
+            this.state.id_edition, 
+            this.state.id_forecast_type, 
             offsets_calc1[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day,
             1);
           let edit = getTextByVersion(
             data.timeframe.editions[0].forecast_data, 
-            this.state.edition_id, 
-            this.state.forecast_id, 
+            this.state.id_edition, 
+            this.state.id_forecast_type, 
             offsets_calc1[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day, 
             99);
 
@@ -578,7 +467,11 @@ class Dashboard extends React.Component {
             ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            
+            // Ogni volta che le textare cambiano, cambia l'id di traduzione e l'id di forecast_data
             id_text_trans:    edit.id_text_trans,
+            id_forecast:      edit.id_forecast,
+            id_forecast_data: edit.id_forecast_data,
             ita_id:           orig.id_text_ita, // });
             ita_edit_version: edit.it_version, // });
             ita_notes:        'Campo non estratto, da correggere', // })
@@ -608,26 +501,26 @@ class Dashboard extends React.Component {
    * il caricamento di nuovi testi nei due campi, se disponibili
    */
   handleUpdateTextAreas = (i) => {
-    console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-    console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
+    console.log('handleUpdateTextAreas - this.state.id_edition: ', this.state.id_edition);
+    console.log('handleUpdateTextAreas - this.state.id_forecast_type: ', this.state.id_forecast_type);
     console.log('handleUpdateTextAreas - this.state.offset_day: ', this.state.offset_day);
     try {
       // this.setState({
-        // offset_day:       this.state.offsets_calc1[this.state.edition_id][0],
-      //   offsets:          this.state.offsets_calc1[this.state.edition_id]
+        // offset_day:       this.state.offsets_calc1[this.state.id_edition][0],
+      //   offsets:          this.state.offsets_calc1[this.state.id_edition]
       // }, () => { // Come definire un blocco di codice come callback senza dover creare una funzione apposta
         // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
         let orig = getTextByVersion(
           this.state.testi.timeframe.editions[0].forecast_data,
-          this.state.edition_id,
-          this.state.forecast_id,
+          this.state.id_edition,
+          this.state.id_forecast_type,
           this.state.offset_day,
           1);
         console.log('handleUpdateTextAreas - orig: ', orig);
         let edit = getTextByVersion(
           this.state.testi.timeframe.editions[0].forecast_data, 
-          this.state.edition_id, 
-          this.state.forecast_id, 
+          this.state.id_edition, 
+          this.state.id_forecast_type, 
           this.state.offset_day, 
           99);
         console.log('handleUpdateTextAreas - edit: ', edit);
@@ -636,7 +529,10 @@ class Dashboard extends React.Component {
             ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            
             id_text_trans:    edit.id_text_trans,
+            id_forecast_data: edit.id_forecast_data,
+
             ita_id:           orig.id_text_ita, // });
             ita_edit_version: edit.it_version, // });
             ita_notes:        'Campo non estratto, da correggere', // })
@@ -649,42 +545,16 @@ class Dashboard extends React.Component {
         },
         this.handleChips({keyCode: 32, target: {value: edit.text_lis}})
         );
-        // console.log('handleUpdateTextAreas - this.state.edition_id: ', this.state.edition_id);
-        // console.log('handleUpdateTextAreas - this.state.forecast_id: ', this.state.forecast_id);
+        // console.log('handleUpdateTextAreas - this.state.id_edition: ', this.state.id_edition);
+        // console.log('handleUpdateTextAreas - this.state.id_forecast_type: ', this.state.id_forecast_type);
         console.log('handleUpdateTextAreas - this.state: ', this.state);
       // });
     } catch (error) {
       console.log('handleUpdateTextAreas catch - Error: ', error);
-      // console.log('handleUpdateTextAreas catch - this.state.edition_id: ', this.state.edition_id);
-      // console.log('handleUpdateTextAreas catch - this.state.forecast_id: ', this.state.forecast_id);
+      // console.log('handleUpdateTextAreas catch - this.state.id_edition: ', this.state.id_edition);
+      // console.log('handleUpdateTextAreas catch - this.state.id_forecast_type: ', this.state.id_forecast_type);
     }
   };
-
-  /*
-  handleEditIta(event) {
-      console.log('handleEditIta - event: ', event);
-      this.setState({ dirty: true });
-      this.setState({ ita_edit: event.target.value });
-    };
-
-  handleEditLis(event) {
-      console.log('handleEditLis - event: ', event);
-      this.setState({ dirty: true });
-      this.setState({ lis_edit: event.target.value });
-    };
-
-  setNum1(event) {
-    this.setState({
-        num1: event.target.value,
-    });
-  }
-
-  setNum2(event) {
-    this.setState({
-        num2: event.target.value,
-    });
-  }
-  */
 
   onVideoChildClicked = _ => {
     // this.props.click(this.props.id);
@@ -812,8 +682,8 @@ class Dashboard extends React.Component {
       // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
       let last_edit = getTextByVersion(
         this.state.testi.timeframe.editions[0].forecast_data,
-        this.state.edition_id,
-        this.state.forecast_id,
+        this.state.id_edition,
+        this.state.id_forecast_type,
         this.state.offset_day,
         99);
       this.setState({
@@ -1035,9 +905,9 @@ class Dashboard extends React.Component {
                 "_" + 
                 ("0" + this.state.pickDate.getMinutes()).slice(-2) +
                 '_edizione_' + 
-                this.state.edition_id + 
-                '_forecast_id_' + 
-                this.state.forecast_id
+                this.state.id_edition + 
+                '_id_forecast_type_' + 
+                this.state.id_forecast_type
             }
           )+"'",
           headers: {'Content-Type': 'application/json'}
@@ -1064,7 +934,6 @@ class Dashboard extends React.Component {
         this.setState({
           path_postergen: p.output_preview + '.jpg',
           path_videogen: p.output_preview + '.mp4',
-          // showVideoPreview: true,
           justPreviewed:    true,
           previewing:    false,
           snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
@@ -1074,22 +943,6 @@ class Dashboard extends React.Component {
         clearInterval(keepVideoLoading);
       });
     });
-    /*
-    console.log('handlePreview - preview paaa: ', paaa);
-
-    this.setState({
-      path_videogen: paaa,
-      showVideoPreview: true,
-      justPreviewed:    true,
-      snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
-    }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
-    */
-    /*
-    })
-    .catch(error => {
-      console.log('handlePreview - request Error: ', error);
-    });
-    */
   };
 
   /**
@@ -1110,6 +963,9 @@ class Dashboard extends React.Component {
         method: 'POST',
         body: "'"+JSON.stringify({
           IdUserEdit: 3,
+          IdForecast: this.state.id_forecast,
+          IdForecastType: this.state.id_forecast_type,
+          IdForecastData: this.state.id_forecast_data,
           IdTextIta: this.state.ita_id,
           TextIta: this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"), //"Provaaaa_manda_a_dashboard",
           VersionIta: this.state.ita_edit_version,
@@ -1144,9 +1000,9 @@ class Dashboard extends React.Component {
                 "_" + 
                 ("0" + this.state.pickDate.getMinutes()).slice(-2) +
                 '_edizione_' + 
-                this.state.edition_id + 
-                '_forecast_id_' + 
-                this.state.forecast_id,
+                this.state.id_edition + 
+                '_id_forecast_type_' + 
+                this.state.id_forecast_type,
               id:         p.id_text_trans,                   // this.state.id_text_trans, // e' sulla trans2
               path_video: this.state.path_videogen,  // '/path/to/video_idtrans'+this.state.id_text_trans,
               // L'ultimo video generato
@@ -1186,6 +1042,7 @@ class Dashboard extends React.Component {
               justPublished:    true
             }, this.handleCloseDialog);
             */
+            window.open('ftp://anonymous:anonymous@localhost/','ftp','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=400,height=350');
             this.setState({
               ita_edit_version: this.state.ita_edit_version + 1,
               lis_edit_version: this.state.lis_edit_version + 1,
@@ -1206,7 +1063,7 @@ class Dashboard extends React.Component {
     .catch(error => {
       console.log('Dashboard handlePublish - POST text_trad Error: ', error);
     });
-  }
+  };
 
   render() {
     let { dirty, showActions, justTranslated, justSaved, justPreviewed, justPublished } = this.state;
@@ -1316,25 +1173,15 @@ class Dashboard extends React.Component {
                 <ToolbarTitle text="Data" style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}} />
                 <DatePicker value={this.state.pickDate} onChange={this.handleOpenDialogChangePicker} />
                 <ToolbarSeparator />
-
-                {/*
-                <ToolbarTitle text="Edizione" style={{padding: 10}} />
-                <DropDownMenu value={this.state.edition_id} onChange={this.handleChangeEditionId_dropdown}>
-                  <MenuItem value={1} primaryText="09:30" />
-                  {/* <MenuItem value={2} primaryText="17:30" disabled={true}/> * /}
-                  <MenuItem value={3} primaryText="18:30" />
-                </DropDownMenu>
-                */}
-
-                <Tabs style={{width: '60%', float: 'left'}} value={this.state.edition_id} onChange={this.handleChangeEditionId_tab}>
-                  <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="09:30" value={1} disabled={this.state.edition_id === 1}></Tab>
-                  <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="17:30" value={3} disabled={this.state.edition_id === 3}></Tab>
+                <Tabs style={{width: '60%', float: 'left'}} value={this.state.id_edition} onChange={this.handleChangeEditionId_tab}>
+                  <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="09:30" value={1} disabled={this.state.id_edition === 1}></Tab>
+                  <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="17:30" value={3} disabled={this.state.id_edition === 3}></Tab>
                 </Tabs>
 
                 {/*
                 <ToolbarSeparator />
                 <ToolbarTitle text="Area" style={{padding: 10}} />
-                <DropDownMenu value={this.state.forecast_id} onChange={this.handleChangeForecastId_dropdown}>
+                <DropDownMenu value={this.state.id_forecast_type} onChange={this.handleChangeForecastId_dropdown}>
                   <MenuItem value={1} primaryText="NORD" />
                   <MenuItem value={2} primaryText="CENTRO E SARDEGNA" />
                   <MenuItem value={3} primaryText="SUD E SICILIA" />
@@ -1344,7 +1191,7 @@ class Dashboard extends React.Component {
                   <MenuItem value={7} primaryText="TUTTA ITALIA" />
                 </DropDownMenu>
                 */}
-                { this.state.forecast_id == 7 ?
+                { this.state.id_forecast_type == 7 ?
                 <React.Fragment>
                   <ToolbarSeparator />
                   <ToolbarTitle text="Giorno" style={{padding: 10}} />
@@ -1356,14 +1203,14 @@ class Dashboard extends React.Component {
                 {/*<ToolbarSeparator />*/}
               </ToolbarGroup>
             </Toolbar>
-            <Tabs style={{width: '100%', float: 'left'}} value={this.state.forecast_id} onChange={this.handleChangeForecastId_tab}>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="NORD" value={1} disabled={this.state.forecast_id === 1}></Tab>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="CENTRO E SARDEGNA" value={2} disabled={this.state.forecast_id === 2}></Tab>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="SUD E SICILIA" value={3} disabled={this.state.forecast_id === 3}></Tab>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="TEMPERATURE" value={4} disabled={this.state.forecast_id === 4}></Tab>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="VENTI" value={5} disabled={this.state.forecast_id === 5}></Tab>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="MARI" value={6} disabled={this.state.forecast_id === 6}></Tab>
-              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="TUTTA ITALIA" value={7} disabled={this.state.forecast_id === 7}></Tab>
+            <Tabs style={{width: '100%', float: 'left'}} value={this.state.id_forecast_type} onChange={this.handleChangeForecastId_tab}>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="NORD" value={1} disabled={this.state.id_forecast_type === 1}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="CENTRO E SARDEGNA" value={2} disabled={this.state.id_forecast_type === 2}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="SUD E SICILIA" value={3} disabled={this.state.id_forecast_type === 3}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="TEMPERATURE" value={4} disabled={this.state.id_forecast_type === 4}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="VENTI" value={5} disabled={this.state.id_forecast_type === 5}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="MARI" value={6} disabled={this.state.id_forecast_type === 6}></Tab>
+              <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="TUTTA ITALIA" value={7} disabled={this.state.id_forecast_type === 7}></Tab>
             </Tabs>
 
             <div className="row">
@@ -1471,6 +1318,6 @@ class Dashboard extends React.Component {
       </MuiThemeProvider>
     );
   };
-}
+};
 
 export default Dashboard;

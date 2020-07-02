@@ -88,12 +88,6 @@ class TablePage extends React.Component {
     this.vm.$destroy();
   };
 
-  /*
-  componentWillUnmount() {
-    this.vm.$destroy();
-  }
-  */
-
   handleDeleteOpen = (id) => {
     this.setState({deleteId: id, deleteOpen: true});
   };
@@ -167,22 +161,6 @@ class TablePage extends React.Component {
       />,
     ];
 
-
-    /*
-    const handleAdd = _ => {
-      if (addName) {
-        this.dispatch({ Add: addName });
-        this.setState({ addName: '' });
-      }
-    };
-
-    const handleUpdate = employee => {
-      let newState = Employees.map(item => (item.Id === employee.Id ? Object.assign(item, employee) : item));
-      this.setState({ Employees: newState });
-      this.dispatch({ Update: employee });
-    };
-    */
-
     const handleFilter = value => {
       // setState({ filter: event.target.value })
       console.log('Table - handleFilter - value: ', value);
@@ -191,28 +169,11 @@ class TablePage extends React.Component {
       this.dispatch(newState);
     };
 
-
     const handleSelectPage = page => {
       const newState = { SelectedPage: page };
       this.setState(newState);
       this.dispatch(newState);
     };
-
-    // const hideNotification = _ => this.setState({ ShowNotification: false });
-    /*
-    const handleMenuClick = (idrequest, area) => { // route => {
-      // Dashboard.handleFetch("2010-01-08");
-      // console.log('Table - handleMenuClick - route: ', route);
-      console.log('Table - handleMenuClick - idrequest: ', idrequest);
-      console.log('Table - handleMenuClick - area: ', area);
-      // this.vm.$routeTo({TemplateId: "FormPage", Path: "2", RedirectRoot: false}); // route);
-      // window.location = '/Didattica/traduzione'; // /657';
-      if(area == '')
-        window.location = '/Didattica/'+idrequest; // /657';
-      else
-        window.location = '/Meteo/'+idrequest; // /657';
-    };
-    */
 
     const handleLoadFromDB = (route) => { // route => {
       // Dashboard.handleFetch("2010-01-08");
@@ -238,8 +199,6 @@ class TablePage extends React.Component {
       console.log('TablePage RenderConsoleLog: ', children);
       return false;
     };
-    // title={"Lista video " + this.state.Mode} 
-    // <RenderConsoleLog>{Requests}</RenderConsoleLog>
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <BasePage navigation="Applicazione / Video">
@@ -280,8 +239,11 @@ class TablePage extends React.Component {
                   />
                   </TableHeaderColumn>
                   <TableHeaderColumn style={TableStyles.columns.firstName}>Data request</TableHeaderColumn>
-                  { this.state.Mode != "didattica" ?
+                  { this.state.Mode === "meteo" ?
+                  <React.Fragment>
                   <TableHeaderColumn style={TableStyles.columns.remove}>Area forecast</TableHeaderColumn>
+                  <TableHeaderColumn style={TableStyles.columns.remove}>Data forecast</TableHeaderColumn>
+                  </React.Fragment>
                   : null }
                   <TableHeaderColumn style={TableStyles.columns.remove}>Testo ITA</TableHeaderColumn>
                   <TableHeaderColumn style={TableStyles.columns.remove}>Testo LIS</TableHeaderColumn>
@@ -300,8 +262,11 @@ class TablePage extends React.Component {
                   <TableRowColumn title={item.LisRequest.TimeRequest} style={TableStyles.columns.firstName}>{item.LisRequest.TimeRequest}</TableRowColumn>
                     {/*<InlineEdit onChange={value => handleUpdate({ Id: item.Id, FirstName: value })}>{item.FirstName}</InlineEdit>
                   </TableRowColumn>*/}
-                  { this.state.Mode != "didattica" ?
+                  { this.state.Mode === "meteo" ?
+                  <React.Fragment>
                   <TableRowColumn title={item.ForecastArea} style={TableStyles.columns.lastName}>{item.ForecastArea}</TableRowColumn>
+                  <TableRowColumn title={item.ForecastDate} style={TableStyles.columns.lastName}>{item.ForecastDate}</TableRowColumn>
+                  </React.Fragment>
                   : null }
                   {/* <InlineEdit onChange={value => handleUpdate({ Id: item.Id, LastName: value })}>{item.LastName}</InlineEdit> </TableRowColumn> */}
                   <TableRowColumn title={item.TextITA} style={TableStyles.columns.remove}>{item.TextITA}</TableRowColumn>
@@ -384,10 +349,6 @@ class TablePage_1 extends React.Component {
   constructor(props) {
     super(props);
     dotnetify.debug = true;
-
-    // this.vm = dotnetify.react.connect('Table_1', this);
-    
-    // var arg = { User: { Name: "Test" } }; // Visibile in: vm.$vmArg.User.Name
     var arg = { User1: { Id: g_userid, Name: g_username }, num1: 9043835 };
     // dotnetify.react.connect("HelloWorld", this, { vmArg: arg });
     dotnetify.debug= true;
@@ -399,18 +360,11 @@ class TablePage_1 extends React.Component {
       },
       vmArg: arg
     });
-    
     this.dispatch = state => this.vm.$dispatch(state);
-
-
     console.log('TablePage_1 - dotnetify: ', dotnetify);
     console.log('TablePage_1 - props: ', props);
 
     this.state = {
-      // addName:            '',
-      // Employees:          [],
-      // Pages:              [],
-      // ShowNotification:   false,
       sign_json:          [],    // Oggetto "finale" da passare all'endpoint preview
       sign_tot:           [],    // Array con la lista dei segni come arriva dall'endpoint api - serve per poter fare di nuovo il reduce in caso di filter
       sign_names:         [],    // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
@@ -428,26 +382,12 @@ class TablePage_1 extends React.Component {
       selectionStart:     0,
       selectionEnd:       0,
       showVideoPreview:   false, // Mostra anteprima video
-      // position:           0,
       previewing:            false, // Subito dopo una preview, abilita il publish che e' l'ultima fase
-
-      /*
-      ita_id:                   0, // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
-      ita_edit_version:         0,
-
-      lis_id:                   0, // Memorizza l'ID del testo LIS corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
-      lis_edit_version:         0,
-      */
-
-
-      // Mode:               'dizionario', // switch del tab di selezione modo - Tab di default dizionario
       videoPoster:        '', // '/video_gen/mp4/sentence_04_03_2020_11_01_54.jpg',
       // videoUrl:           '', // '/video_gen/mp4/amico.mp4' // 'http://www.silviaronchey.it/materiali/video/mp4/Intervista%20Vernant.mp4',
       videoName:          ''
     };
-    // console.log('TablePage_1 - this.state.Mode: ', this.state.Mode);
     this.handleChangeSign = this.handleChangeSign.bind(this);
-    // this.handleChips = this.handleChips.bind(this);
     this.handleChips = handleChips_b.bind(this);
   };
 
@@ -497,21 +437,6 @@ class TablePage_1 extends React.Component {
     // document.addEventListener("keydown", this.handleSpaceKeyDown, false);
     this.handleGetSigns();
 
-    // && this.state.ita_id == 0
-    /*
-    if (true) { // this.state.Mode == 'traduzione') {
-      console.log('TablePage_1 - g_did_output_preview: ', g_did_output_preview);
-      this.setState({
-        ita_edit: g_did_ita,
-        lis_edit: g_did_lis,
-        videoName: g_did_videoname,
-        videoUrl: g_did_output_preview
-        },
-        this.handleChips({keyCode: 32, target: {value: g_did_lis}})
-      );
-      document.getElementById('lisField').value = 'ghrhtrhrthrhtrhr';
-    }
-    */
     if (this.state.Mode == 'dizionario') {
       this.setState({
         sign_filtered: this.state.sign_iniz
@@ -1160,6 +1085,9 @@ class TablePage_1 extends React.Component {
           // oppure se uso il comando Salva come nuovo.., riparto da 0 (che verra' portato a 1 in backend)
           body: "'"+JSON.stringify({
             IdUserEdit: g_userid, // 4,
+            IdForecast: 0,
+            IdForecastType: 0,
+            IdForecastData: 0,
             IdTextIta:  this.state.ita_id, // 0,
             TextIta:    this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"), //"Provaaaa_manda_a_dashboard",
             VersionIta: this.state.ita_edit_version, 
@@ -1263,7 +1191,7 @@ class TablePage_1 extends React.Component {
       },
       pagination: { marginTop: '1em' },
       campi: {
-        fontSize: 12,
+        fontSize: 16,
         // fontWeight: typography.fontWeightLight
       },
       buttonLabel: {
@@ -1318,7 +1246,7 @@ class TablePage_1 extends React.Component {
               }
             </Tabs>
             <div className="row">
-              <div className="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-b-15 ">
+              <div className="col-xs-12 col-sm-3 col-md-3 col-lg-3 m-b-15 ">
                 <TextField
                   hintText="Cerca Segno"
                   style={{width: '90%'}}
@@ -1369,15 +1297,15 @@ class TablePage_1 extends React.Component {
               </div>
               
               { this.state.Mode === 'dizionario' ? 
-              <div className="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-b-15 ">
-                <div>
-                  <video controls autoPlay={true} width="800" height="600" key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
+              <div className="col-xs-12 col-sm-7 col-md-7 col-lg-7 m-b-15 ">
+                <div style={Table_1Styles.buttonLabel}>
+                  <video controls autoPlay={true} key={this.state.videoUrl}><source src={this.state.videoUrl} /></video>
                 </div>
               </div>
               : null }
             
               { this.state.Mode === 'traduzione' ? 
-              <div className="col-xs-12 col-sm-4 col-md-4 col-lg-4 m-b-15 ">
+              <div className="col-xs-12 col-sm-3 col-md-3 col-lg-3 m-b-15 ">
                 <React.Fragment>
                   <div style={{float: 'left'}}>
                     <div style={Table_1Styles.addButton}>
@@ -1391,10 +1319,10 @@ class TablePage_1 extends React.Component {
                       <RaisedButton label="Carica" onClick={this.handleUploadItaTxtFile} disabled={false} style={{float: 'right', padding: 1}} primary={true} />
                     </div>
                     <TextareaAutosize
-                      cols={48}
-                      rows={20}
-                      maxRows={25}
-                      minRows={3}
+                      cols={34}
+                      rows={30}
+                      maxRows={30}
+                      minRows={4}
                       style={{overflowY: 'scroll'}}
                       inputRef={this.inputRef}
                       ref={el=>this.input=el}
@@ -1421,10 +1349,10 @@ class TablePage_1 extends React.Component {
                       <RaisedButton label="Carica"  onClick={this.handleUploadLisTxtFile} disabled={false} style={{float: 'right', padding: 1}} primary={true} />
                     </div>
                     <TextareaAutosize
-                      cols={48}
-                      rows={20}
-                      maxRows={25}
-                      minRows={3}
+                      cols={34}
+                      rows={30}
+                      maxRows={30}
+                      minRows={4}
                       style={{overflowY: 'scroll'}}
                       inputRef={this.inputRef}
                       ref={el=>this.input=el}
@@ -1608,7 +1536,7 @@ class TablePage_1 extends React.Component {
         </BasePage>
       </MuiThemeProvider>
     );
-  }
+  };
 };
 
 // export default TablePage;

@@ -32,11 +32,21 @@ namespace dotnetify_react_template
       Console.WriteLine("AuthServer.cs - costruttore, stringa DB: " + cs);
          
       var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
-
+        /*
+        config.UseJwtBearerAuthentication(new TokenValidationParameters
+        {
+          IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AuthServer.SecretKey)),
+          ValidateIssuerSigningKey = true,
+          ValidateAudience = false,
+          ValidateIssuer = false,
+          ValidateLifetime = true,
+          ClockSkew = TimeSpan.FromSeconds(0)
+        */
       services
       .AddAuthentication()
       .AddOpenIdConnectServer(options =>
       {
+        options.AccessTokenLifetime = TimeSpan.FromMinutes(600); // 60 minutes * 10 = 10 hours
         options.AccessTokenHandler = new JwtSecurityTokenHandler();
         options.SigningCredentials.AddKey(signingKey);
         options.AllowInsecureHttp = true;

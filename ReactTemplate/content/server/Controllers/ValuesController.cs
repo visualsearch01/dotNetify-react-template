@@ -201,7 +201,7 @@ namespace dotnetify_react_template.server.Controllers
                 {
                     _connection.Open();
                     using(MySqlCommand cmd = new MySqlCommand(@"
-                    select d.date_day, f.id_forecast, f.id_edition, f.offset_day, fc.id_forecast_type, CASE WHEN f.offset_day = 1 THEN ft.name_type ELSE CONCAT(ft.name_type,' +',f.offset_day) END 'name_type', tr.id_text_trans, it.id_text_ita AS id_it, li.id_text_lis AS id_lis, it.version, JSON_OBJECT('data',substr(it.text_ita,1,2000)) AS list, li.version, substr(li.text_lis,1,2000) FROM lis_day d JOIN lis_forecast f ON d.id_day = f.id_day JOIN lis_forecast_data fc ON f.id_forecast = fc.id_forecast JOIN lis_text_trans tr ON tr.id_text_trans=fc.id_translation JOIN lis_text_ita it ON tr.id_text_ita = it.id_text_ita JOIN lis_text_lis li ON tr.id_text_lis = li.id_text_lis AND it.version = li.version JOIN lis_forecast_type ft ON ft.id_forecast_type = fc.id_forecast_type WHERE it.id_text_ita = it.id_text_ita AND it.version IN ( (SELECT MIN(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita),(SELECT MAX(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita)) AND li.id_text_lis = li.id_text_lis AND li.version IN ( (SELECT MIN(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis),(SELECT MAX(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis)) AND d.date_day = '2019-12-19';", _connection))
+                    select d.date_day, f.id_forecast, f.id_edition, f.offset_day, fc.id_forecast_type, CASE WHEN f.offset_day = 1 THEN ft.name_type ELSE CONCAT(ft.name_type,' +',f.offset_day) END 'name_type', tr.id_text_trans, it.id_text_ita AS id_it, li.id_text_lis AS id_lis, it.version, JSON_OBJECT('data',substr(it.text_ita,1,2000)) AS list, li.version, substr(li.text_lis,1,2000) FROM lis_day d JOIN lis_forecast f ON d.id_day = f.id_day JOIN lis_forecast_data fc ON f.id_forecast = fc.id_forecast JOIN lis_text_trans2 tr ON tr.id_text_trans=fc.id_translation JOIN lis_text_ita it ON tr.id_text_ita = it.id_text_ita JOIN lis_text_lis li ON tr.id_text_lis = li.id_text_lis AND it.version = li.version JOIN lis_forecast_type ft ON ft.id_forecast_type = fc.id_forecast_type WHERE it.id_text_ita = it.id_text_ita AND it.version IN ( (SELECT MIN(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita),(SELECT MAX(version) FROM lis_text_ita WHERE id_text_ita = it.id_text_ita)) AND li.id_text_lis = li.id_text_lis AND li.version IN ( (SELECT MIN(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis),(SELECT MAX(version) FROM lis_text_lis WHERE id_text_lis = li.id_text_lis)) AND d.date_day = '2019-12-19';", _connection))
                     {
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
@@ -267,94 +267,86 @@ namespace dotnetify_react_template.server.Controllers
                 {
                     _connection.Open();
                     using(MySqlCommand cmd = new MySqlCommand(@"
-                            SELECT JSON_OBJECT(
-                            'status', 'success',
-                            'data_day', Min(date_day),
-                            'id_day', Min(id_day),
-                            'timeframe', JSON_OBJECT(
-                            'id_timeframe', Max(id_timeframe), 
-                            'editions', JSON_ARRAY(JSON_OBJECT(
-                                'date_day', Min(date_day),
-                                
-                                'offsets', JSON_OBJECT(
-                                'min', Min(offset_day),
-                                'max', Max(offset_day)),
-                                
-                                'id_edition', Min(id_edition), 
-                                'time_edition', Min(name_edition),
-                                'id_timeframe', Min(id_timeframe),
+                      SELECT JSON_OBJECT(
+                        'status',    'success',
+                        'data_day',  MIN(date_day),
+                        'id_day',    MIN(id_day),
+                        'timeframe', JSON_OBJECT(
+                          'id_timeframe', MAX(id_timeframe), 
+                          'editions',     JSON_ARRAY(JSON_OBJECT(
+                            'date_day', MIN(date_day),
+                            'offsets',  JSON_OBJECT(
+                              'min', MIN(offset_day),
+                              'max', MAX(offset_day)),
+                            'id_edition', MIN(id_edition), 
+                                'time_edition', MIN(name_edition),
+                                'id_timeframe', MIN(id_timeframe),
                                 'forecast_data', (SELECT 
-                                JSON_ARRAYAGG(obj))), JSON_OBJECT(
-                                    'date_day', Max(date_day), 
-                                    'id_edition', Max(id_edition), 
-                                    'time_edition', Max(name_edition), 
-                                    'id_timeframe', Max(id_timeframe),
-                                    'forecast_data', (SELECT 
-                                    JSON_ARRAYAGG(obj)))))) AS list 
-                                        FROM   (SELECT * 
-                                                FROM   (SELECT d.id_day, 
-                                                            d.date_day, 
-                                                            le.name_edition, 
-                                                            le.id_edition, 
-                                                            f.offset_day,
-                                                            tf.id_timeframe, 
-                                            Json_object('date_day', d.date_day, 'id_forecast', f.id_forecast, 
-                                            'edition', 
-                                            f.id_edition, 'offset_days', f.offset_day, 
+                                  JSON_ARRAYAGG(obj))), JSON_OBJECT(
+                                    'date_day',     MAX(date_day), 
+                                    'id_edition',   MAX(id_edition), 
+                                    'time_edition', MAX(name_edition), 
+                                    'id_timeframe', MAX(id_timeframe),
+                                    'forecast_data', (SELECT JSON_ARRAYAGG(obj)))))) AS list FROM (SELECT * 
+                                      FROM (SELECT 
+                                        d.id_day, 
+                                        d.date_day, 
+                                        le.name_edition, 
+                                        le.id_edition, 
+                                        f.offset_day,
+                                        tf.id_timeframe, 
+                                        JSON_OBJECT(
+                                          'date_day',           d.date_day, 
+                                          'id_forecast',        f.id_forecast, 
+                                            'edition',          f.id_edition, 
+                                            'offset_days',      f.offset_day, 
+                                            'id_forecast_data', fc.id_forecast_data,
                                             'id_forecast_type', fc.id_forecast_type, 
-                                            'name_type', ( CASE 
-                                            WHEN f.offset_day = 1 THEN ft.name_type 
-                                            ELSE Concat(ft.name_type, ' +', f.offset_day) 
-                                            end ), 
-                                        'id_text_trans', tr.id_text_trans, 'id_text_ita', it.id_text_ita, 'id_text_lis', li.id_text_lis, 'it_version', it.version, 'text_ita',
-                                        it.text_ita, 'li_version', li.version, 'text_lis', li.text_lis, 'path_video', lr.path_video) AS obj 
+                                            'name_type',        ( CASE 
+                                              WHEN f.offset_day = 1 THEN ft.name_type 
+                                              ELSE Concat(ft.name_type, ' +', f.offset_day) end ), 
+                                          'id_text_trans',      tr.id_text_trans,
+                                          'id_text_ita',        it.id_text_ita,
+                                          'id_text_lis',        li.id_text_lis,
+                                          'it_version',         it.version, 
+                                          'text_ita',           it.text_ita, 
+                                          'li_version',         li.version,
+                                          'text_lis',           li.text_lis,
+                                          'path_video',         lr.path_video) AS obj 
                                         FROM   lis_day d 
-                                        JOIN lis_timeframe tf 
-                                        ON d.id_timeframe = tf.id_timeframe 
-                                        JOIN lis_forecast f 
-                                        ON d.id_day = f.id_day 
-                                        JOIN lis_forecast_data fc 
-                                        ON f.id_forecast = fc.id_forecast 
-                                        JOIN lis_text_trans tr 
-                                        ON tr.id_text_trans = fc.id_translation 
-                                        LEFT JOIN lis_request lr 
-                                        ON tr.id_text_trans = lr.id_translation 
-                                        JOIN lis_text_ita it 
-                                        ON tr.id_text_ita = it.id_text_ita 
-                                        JOIN lis_text_lis li 
-                                        ON tr.id_text_lis = li.id_text_lis 
-                                            AND it.version = li.version 
-                                        JOIN lis_forecast_type ft 
-                                        ON ft.id_forecast_type = fc.id_forecast_type 
-                                        JOIN lis_edition le 
-                                        ON f.id_edition = le.id_edition 
-                                        WHERE  it.id_text_ita = it.id_text_ita 
-                                        AND it.version IN ( (SELECT Min(version) 
-                                                            FROM   lis_text_ita 
-                                                            WHERE  id_text_ita = it.id_text_ita), 
-                                                            (SELECT Max(version) 
-                                                            FROM   lis_text_ita 
-                                                            WHERE 
-                                                                id_text_ita = it.id_text_ita) ) 
-                                        AND li.id_text_lis = li.id_text_lis 
-                                        AND li.version IN ( (SELECT Min(version) 
-                                                            FROM   lis_text_lis 
-                                                            WHERE  id_text_lis = li.id_text_lis), 
-                                                            (SELECT Max(version) 
-                                                            FROM   lis_text_lis 
-                                                            WHERE 
-                                                                id_text_lis = li.id_text_lis) ) 
-                                        AND d.date_day = '" + id + @"' 
-                                        ORDER  BY f.id_edition, 
-                                        it.version, 
-                                        fc.id_forecast_type) AS sub 
-                                        GROUP  BY id_day, 
-                                                date_day, 
-                                                name_edition, 
-                                                offset_day,
-                                                id_edition, 
-                                                id_timeframe, 
-                                                obj) AS lot;", 
+                                        JOIN lis_timeframe tf                                 ON d.id_timeframe = tf.id_timeframe 
+                                        JOIN lis_forecast f                                   ON d.id_day = f.id_day 
+                                        JOIN lis_forecast_data fc                             ON f.id_forecast = fc.id_forecast 
+                                        JOIN lis_text_trans2 tr                               ON tr.id_text_trans = fc.id_translation 
+                                        LEFT JOIN lis_request lr                              ON tr.id_text_trans = lr.id_translation 
+                                        JOIN lis_text_ita it                                  ON tr.id_text_ita = it.id_text_ita 
+                                        JOIN lis_text_lis li                                  ON tr.id_text_lis = li.id_text_lis AND it.version = li.version 
+                                        JOIN lis_forecast_type ft                             ON ft.id_forecast_type = fc.id_forecast_type 
+                                        JOIN lis_edition le                                   ON f.id_edition = le.id_edition 
+                                        WHERE 
+                                          it.id_text_ita = it.id_text_ita 
+                                        AND
+                                          it.version IN ( (SELECT Min(version) FROM   lis_text_ita WHERE id_text_ita = it.id_text_ita), 
+                                                          (SELECT Max(version) FROM   lis_text_ita WHERE id_text_ita = it.id_text_ita) ) 
+                                        AND
+                                          li.id_text_lis = li.id_text_lis 
+                                        AND
+                                          li.version IN ( (SELECT Min(version) FROM   lis_text_lis WHERE id_text_lis = li.id_text_lis), 
+                                                          (SELECT Max(version) FROM   lis_text_lis WHERE id_text_lis = li.id_text_lis) ) 
+                                        AND 
+                                          d.date_day = '" + id + @"' 
+                                        ORDER BY
+                                          f.id_edition, 
+                                          it.version, 
+                                          fc.id_forecast_type) AS sub 
+                                        GROUP BY
+                                         id_day, 
+                                         date_day, 
+                                         name_edition, 
+                                         offset_day,
+                                         id_edition, 
+                                         id_timeframe, 
+                                         obj) AS lot;", 
                     _connection))
                     {
                         using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -762,13 +754,11 @@ namespace dotnetify_react_template.server.Controllers
                         // int itaId = changes.IdTextIta;
                         // int lisId = changes.IdTextLis;
                         command.Parameters.Clear();
-
-                        _logger.LogWarning("ValuesController text_trad - changes.IdTextIta: " + (int)changes.IdTextIta);
-                        // Console.WriteLine(changes.IdTextIta);
-                        // _logger.LogWarning("ValuesController text_trad - changes.IdTextLis:");
-                        // Console.WriteLine(changes.IdTextLis);
-                        // _logger.LogWarning("ValuesController text_trad - changes.TextIta:");
-                        // Console.WriteLine(changes.TextIta);
+                        _logger.LogWarning("ValuesController text_trad - (int)changes.IdForecast: " + (int)changes.IdForecast);
+                        _logger.LogWarning("ValuesController text_trad - (int)changes.IdTextIta: " + (int)changes.IdTextIta);
+                        _logger.LogWarning("ValuesController text_trad - (int)changes.IdTextLis: " + (int)changes.IdTextLis);
+                        _logger.LogWarning("ValuesController text_trad - (string)changes.TextIta: " + (string)changes.TextIta);
+                        _logger.LogWarning("ValuesController text_trad - (string)changes.TextLis: " + (string)changes.TextLis);
 
                         if (changes.IdTextIta == 0) {
                           command.CommandText = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ((SELECT MAX(id_text_ita)+1 FROM (select * from lis_text_ita) AS T1), ?id_user, ?version, ?text, ?notes);";
@@ -852,6 +842,22 @@ namespace dotnetify_react_template.server.Controllers
                         // dbcmd.ExecuteNonQuery();
                         lastTrans2Id = command.LastInsertedId;
                         _logger.LogWarning("ValuesController text_trad POST - INSERT TRANS2 OK, lastTrans2Id: " + lastTrans2Id);
+
+
+                        if (changes.IdForecast != 0) {
+                          command.Parameters.Clear();
+                          // command.CommandText = "INSERT INTO lis_forecast_data (id_forecast, id_forecast_type, id_translation, notes) VALUES (?forecast_id, ?id_forecast_type, ?trans_id, 'Note lis_forecast_data forecast_id');";
+                          // command.CommandText = "UPDATE lis_forecast_data SET id_translation = ?id_translation WHERE id_forecast = ?id_forecast AND id_forecast_type = ?id_forecast_type;";
+                          command.CommandText = "UPDATE lis_forecast_data SET id_translation = ?id_translation WHERE id_forecast_data = ?id_forecast_data;";
+                          command.Parameters.AddWithValue("?id_translation", lastTrans2Id);
+                          // command.Parameters.AddWithValue("?id_forecast", changes.IdForecast);
+                          // command.Parameters.AddWithValue("?id_forecast_type", changes.IdForecastType);
+                          command.Parameters.AddWithValue("?id_forecast_data", changes.IdForecastData);
+                          command.ExecuteNonQuery();
+                          lastTransId = command.LastInsertedId;
+                          _logger.LogWarning("ValuesController text_trad POST - UPDATE lis_forecast_data OK, id_forecast:" + (int)changes.IdForecast + ", id_translation: " + lastTrans2Id);
+                        }
+
                     }
                     _connection.Close();
                 }
