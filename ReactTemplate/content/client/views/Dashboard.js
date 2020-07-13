@@ -3,30 +3,38 @@ import dotnetify from 'dotnetify';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { cyan600, pink600, purple600, orange600 } from 'material-ui/styles/colors';
 import { InfoBox, CircularProgressExampleDeterminate, ChipExampleSimple, ListExampleSelectable, handleChips_b } from '../components/dashboard/InfoBox';
-import ServerUsage from '../components/dashboard/ServerUsage';
 import { Utilization , VideoPreview, CardExampleExpandable } from '../components/dashboard/Utilization';
 import { ChipExampleSimple1 , RecentActivities} from '../components/dashboard/RecentActivities';
+import ServerUsage from '../components/dashboard/ServerUsage';
 import BasePage from '../components/BasePage';
 import globalStyles from '../styles/styles';
 import ThemeDefault from '../styles/theme-default';
-import RaisedButton from 'material-ui/RaisedButton';
 import auth from '../auth';
 import DatePicker from 'react-date-picker';
 import TextareaAutosize from 'react-textarea-autosize';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+// import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle } from 'material-ui/Toolbar';
 import TextField from 'material-ui/TextField'
 import {Tabs, Tab} from 'material-ui/Tabs';
-import FlatButton from 'material-ui/FlatButton';
-import Toggle from 'material-ui/Toggle';
-import Snackbar from 'material-ui/Snackbar';
-import CircularProgress from 'material-ui/CircularProgress';
-import Dialog from 'material-ui/Dialog';
-import Badge from 'material-ui/Badge';
+// import Toggle from 'material-ui/Toggle';
 
+// La dialog potrebbe essere usata per indicare un'operazione in corso
+import Dialog from 'material-ui/Dialog';
+
+// La snackbar potrebbe essere usata per indicare l'esito di un'operazione
+import Snackbar from 'material-ui/Snackbar';
+// import CircularProgress from 'material-ui/CircularProgress';
+// import Badge from 'material-ui/Badge';
+
+/**
+ * Questa funzione estrae da un oggetto timeFrame json la prima o l'ultima versione di un testo
+ * in base all'edition, al tipo di forecast e al giorno di offset
+ */
 function getTextByVersion(timeFrameJsonArray, id_edition, id_forecast_type, offset_days, version) {
   console.log('getTextByVersion - id_edition:       ', id_edition);
   console.log('getTextByVersion - id_forecast_type: ', id_forecast_type);
@@ -98,34 +106,40 @@ class Dashboard extends React.Component {
     console.log('Dashboard - props: ', props);
     
     this.state = {
-      dirty:                    false, // flag di abilitazione bottone di salvataggio (se e' stata effettuata una modifica in un campo TextArea)
-      showSnackbar:             false, // Mostra snackbar di salvataggio avvenuto
+      dirty:                    false,          // Flag di abilitazione bottone di salvataggio  - se e' stata effettuata una modifica in un campo TextArea, diventa true
+      showSnackbar:             false,          // Mostra/nascondi snackbar di operazione avvenuta
       snackbarMessage:          "Nuova versione di testo salvata!!",
       snackbarAutoHideDuration: 2000,
-      showProgress:             false, // Mostra circular progress, inizialmente pensato per dare evidenza di caricamento - sostituito dalla dialog
-      showDialog:               false, // Mostra la dialog
-      showActions:              false, // Mostra bottoni solo se c'e' un testo ita/lis presente
-      videoProgressCompleted:   false, // flag true/false di selezione vista progress/video - il componente restituisce un valore false mentre sta caricando, true quando ha finito
-      justTranslated:           false, // Subito dopo una traduzione, disabilita il bottone relativo per evitare ritraduzione dello stesso testo
-      justSaved:                false, // Subito dopo un salvataggio, abilita la preview video
-      justPreviewed:            false, // Subito dopo una preview, abilita il publish che e' l'ultima fase
-      justPublished:            false, // Subito dopo una publish, impedisci di rifarla con lo stesso file
-      previewing:               false, // Durante la preview, disabilita sia anteprima che publish
+
+      showProgress:             false,          // Mostra circular progress, inizialmente pensato per dare evidenza di caricamento - sostituito dalla dialog
+      videoProgressCompleted:   false,          // Flag true/false di selezione vista progress/video - il componente restituisce un valore false mentre sta caricando, true quando ha finito
+      
+      showDialog:               false,          // Mostra la dialog
       dialogTitle:              "Attendere, caricamento...",
       dialogContent:            "Attendere, caricamento...",
-      sign_json:                {},            // Oggetto "finale" da passare all'endpoint preview
-      sign_names:               [],            // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
-      sign_array:               [],            // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
-      chips:                    [],            // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
-      allWordsFound:            false,         // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
-      pickDate:                 new Date(),    // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
-      offset_day:               1,             // Numero di giorni di offset rispetto a oggi - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
-      offsets:                  [],            // Possibili valori di offset nella lista di valori per la data selezionata
-      offsets_calc1:            [],
-      testi:                    null,          // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API // this.state.testi.timeframe.editions
+
+      showActions:              false,          // Mostra bottoni solo se c'e' un testo ita/lis presente
       
-      ita_id:                   0,             // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente
-      ita_orig:                 'Attendere..', // Testo di default
+      justTranslated:           false,          // Subito dopo una traduzione, disabilita il bottone relativo per evitare ritraduzione dello stesso testo
+      justSaved:                false,          // Subito dopo un salvataggio, abilita la preview video
+      justPreviewed:            false,          // Subito dopo una preview, abilita il publish che e' l'ultima fase
+      justPublished:            false,          // Subito dopo una publish, impedisci di rifarla con lo stesso file
+      previewing:               false,          // Durante la preview, disabilita sia anteprima che publish
+      
+      sign_json:                {},             // Oggetto "finale" da passare all'endpoint preview
+      sign_names:               [],             // Array piatto dei nomi - usato per trovare comodamente con il filtro se una parola inserita c'e'
+      sign_array:               [],             // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
+      chips:                    [],             // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
+      allWordsFound:            false,          // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
+
+      pickDate:                 new Date(),     // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
+      offset_day:               1,              // Numero di giorni di offset rispetto a oggi del testo attuale - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
+      offsets:                  [],             // Possibili valori di offset nella lista di valori, per la data selezionata - lista ricevuta da backend dal DB
+      offsets_calcolati_2:      [],             // Possibili valori di offset nella lista di valori, per la data selezionata - lista calcolata in frontend sui distinct dei valori da array json
+      testi:                    null,           // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API quando si cambia edizione o forecast_type // this.state.testi.timeframe.editions
+      
+      ita_id:                   0,              // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente - viene incrementato in caso di publish/save
+      ita_orig:                 'Attendere..',  // Testo ITA di default prima del caricamento
       // ita_edit:                 'Attendere..',
       ita_edit_version:         0,
       ita_notes:                'Attendere..',
@@ -136,28 +150,30 @@ class Dashboard extends React.Component {
       lis_edit_version:         0,
       lis_notes:                'Attendere..',
       
-      id_edition:               1,             // ID dell'edizione visualizzata, di default ID 1, cioe' 9:30
-      id_text_trans:            0,             // ID della traduzione del testo corrente
-      id_forecast_type:         1,             // ID del tipo di forecast di default (1, cioe' NORD)
-      id_forecast:              0,             // ID del forecast corrente (dipende dal giorno di offset)
-      id_forecast_data:         0,             // ID del forecast_data corrente (dipende dal giorno di offset) - da passare alla funzione di publish, che fa anche un save prima
+      id_edition:               1,              // ID dell'edizione visualizzata, di default ID 1, cioe' 09:30 (bisognerebbe farla diventare dinamica - visualizzare di default l'edizione piu' vicina all'ora client o server corrente
+      id_text_trans:            0,              // ID della traduzione del testo corrente (id_text_trans su lis_text_trans2)
+      id_forecast_type:         1,              // ID del tipo di forecast di default (1, cioe' NORD)
+      id_forecast:              0,              // ID del record di forecast corrente (dipende dal giorno di offset)
+      id_forecast_data:         0,              // ID del record di forecast_data corrente (dipende dal giorno di offset) - da passare alla funzione di publish, che fa anche un save prima
       
-      path_video:               null, // Eventuale path video di un testo gia' renderizzato
-      path_postergen:           null, // Path poster generato in anteprima
-      path_videogen:            null, // Path video generato in anteprima
-      videoName:                '',
-      tab_mode_dash:            'dizionario', // Tab di default (UPDATE - i tab usati qui in dashboard servivano per gestire la prima versione "appoggiata" di deliverable 2 - ora tutto spostato in TablePage_1)
-      note_segno:               'Informazioni riguardo al segno selezionato',
-      num1:                     0, 
-      num2:                     300,
-      sum :                     0,
-      toggle1:                  false,
-      toggle2:                  false
+      // path_video:               null,           // Eventuale path video di un testo gia' renderizzato
+      // path_postergen:           null,           // Path poster generato in anteprima
+      path_videogen:            null,           // Path video generato in anteprima
+      // videoName:                '',             // Nome del video da salvare (qui in meteo non usato, viene creato con naming convention)
+      // tab_mode_dash:            'dizionario',   // Tab di default (UPDATE - i tab usati qui in dashboard servivano per gestire la prima versione "appoggiata" di deliverable 2 - ora e' tutto spostato in TablePage_1)
+      // note_segno:               'Informazioni riguardo al segno selezionato',
+      // num1:                     0, 
+      // num2:                     300,
+      // sum :                     0,
+      // toggle1:                  false,
+      // toggle2:                  false
     };
-    this.onVideoChildClicked = this.onVideoChildClicked.bind(this);
-    this.onCircProgressCompleted = this.onCircProgressCompleted.bind(this);
-    this.handleUpdateTextAreas = this.handleUpdateTextAreas.bind(this);
+    // this.onVideoChildClicked = this.onVideoChildClicked.bind(this);
+    // this.onCircProgressCompleted = this.onCircProgressCompleted.bind(this);
+    // this.handleUpdateTextAreas = this.handleUpdateTextAreas.bind(this);
     this.handleChips = handleChips_b.bind(this);
+    this.datepick_focus = React.createRef();
+    this.tabforecast_focus = React.createRef();
   };
   abortController = new AbortController();
   mySignal = this.abortController.signal;
@@ -171,70 +187,74 @@ class Dashboard extends React.Component {
   };
 
   componentDidMount() {
+    document.addEventListener("keydown", this.handleBodyKeyDown);
     // this.state.testi.timeframe.editions = [];
     // this.handleChangePicker_dashboard(new Date());
-    console.log('Dashboard - al mount del componente, caricamento dati meteo data corrente - area NORD di default');
+    // console.log('Dashboard - al mount del componente, caricamento dati meteo data corrente - area NORD di default');
     console.log('Dashboard - componentDidMount this.state.pickDate: ', this.state.pickDate);
     this.handleGetSigns();
-    
-    console.log('Dashboard - componentDidMount this.state-------------------: ', this.state);
-    console.log('Dashboard - g_username: ', g_username);
-    console.log('Dashboard - g_userid: ', g_userid);
+    // console.log('Dashboard - componentDidMount this.state-------------------: ', this.state);
+    // console.log('Dashboard - g_username: ', g_username);
+    // console.log('Dashboard - g_userid: ', g_userid);
   };
 
-  handleChangeEditionId_tab = (value) => {
-    console.log('handleChangeEditionId - value: ', value);
-    console.log('handleChangeEditionId - this.state.offsets_calc1[value]: ', this.state.offsets_calc1[value]);
-    // this.setState({ value_ed: value});
-    this.setState({
-      offsets:    this.state.offsets_calc1[value],
-      id_edition: value
-      }, this.handleUpdateTextAreas);
-    // this.handleUpdateTextAreas(value);
+  handleBodyKeyDown = (event) => {
+    // console.log(document.activeElement);
+    var focused = document.activeElement;
+    if (!focused || focused == document.body) {
+      console.log('Dashboard handleBodyKeyDown event.keyCode: ', event.keyCode);
+      switch( event.keyCode ) {
+        case 37:
+          // this.setState(
+          // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()-1))}); //  , // new Date(this.state.pickDate.getDate() - 1)}, 
+          // console.log(this.state.pickDate)
+          var ieri = new Date(new Date().setDate(this.state.pickDate.getDate() - 1));
+          console.log('Dashboard - handleBodyKeyDown - ieri: ', ieri);
+          this.handleOpenDialogChangePicker(ieri);
+          // );
+          // this.handleChangePicker_dashboard( new Date(new Date().getDate() - 1) );
+          break;
+        case 39:
+          // this.setState(
+          // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()+1))}); // , // new Date(this.state.pickDate.getDate() - 1)}, 
+          // console.log(this.state.pickDate)
+          var domani = new Date(new Date().setDate(this.state.pickDate.getDate() + 1));
+          console.log('Dashboard - handleBodyKeyDown - domani: ', domani);
+          this.handleChangePicker_dashboard(domani);
+            // );
+          break;
+        /*
+        case 38:
+          this.setState(
+            {id_edition: 1},
+            this.handleChangeEditionId_tab(this.state.id_edition)
+          );
+          break;
+        case 40:
+          this.setState(
+            {id_edition: 3},
+            this.handleChangeEditionId_tab(this.state.id_edition)
+          );
+          break;
+        case 33:
+          this.setState(
+            {id_forecast_type: Math.max((this.state.id_forecast_type - 1 ), 1)},
+            this.handleChangeForecastTypeId_tab(this.state.id_forecast_type)
+          );
+          break;
+        case 34:
+          this.setState(
+            {id_forecast_type: Math.min((this.state.id_forecast_type + 1 ), 7)},
+            this.handleChangeForecastTypeId_tab(this.state.id_forecast_type)
+          );
+          break;
+        */
+        default: 
+          break;
+      }
+    }
   };
 
-  // Per qualche motivo pare che l'onchange sul Dropdown passa dei dati diversi da quello sul tab..
-  handleChangeForecastId_dropdown = (event, index, value) => {
-    console.log('handleChangeForecastId - value: ', value);
-    console.log('handleChangeForecastId - this.state.offsets_calc1.shift(): ', this.state.offsets_calc1.shift());
-    console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
-    // this.setState({ value_area: value });
-    this.setState({
-      id_forecast_type: value,
-      offset_day: (value === 7 ? // 2 : 1
-        // this.state.offsets[0][0] : // 2 : 
-        // this.state.offsets[0][1]   // 1
-        this.state.offsets[1] :
-        this.state.offsets[0]
-    )}, this.handleUpdateTextAreas); //.id});
-    // this.handleUpdateTextAreas(7);
-  };
-
-  handleChangeForecastId_tab = (value) => { // (event, index, value) => {
-    console.log('handleChangeForecastId - value: ', value);
-    console.log('handleChangeForecastId - this.state.offsets_calc1: ', this.state.offsets_calc1);
-    console.log('handleChangeForecastId - this.state.offsets_calc1.shift(): ', this.state.offsets_calc1.shift());
-    console.log('handleChangeForecastId - this.state.offsets_calc1.slice(1): ', this.state.offsets_calc1.slice(1));
-    // this.setState({ value_area: value });
-    this.setState({
-      id_forecast_type: value,
-      // offsets: (value === 7 ? this.state.offsets_calc1.shift() : this.state.offsets_calc1),
-      offset_day: (value === 7 ? // 2 : 1
-        // this.state.offsets[0][0] : // 2 : 
-        // this.state.offsets[0][1]   // 1
-        this.state.offsets[1] :
-        this.state.offsets[0]
-    )}, this.handleUpdateTextAreas); //.id});
-    // this.handleUpdateTextAreas(7);
-  };
-
-  handleChangeOffsetDay = (event, index, value) => {
-    console.log('handleChangeOffsetDay - value: ', value);
-    // this.setState({ value_area: value });
-    this.setState({ offset_day: value }, this.handleUpdateTextAreas); //.id});
-    // this.handleUpdateTextAreas(7);
-  };
-  
   handleGetSigns = _ => {
     fetch("/api/values/sign",
       { signal: this.mySignal }
@@ -258,18 +278,6 @@ class Dashboard extends React.Component {
           // return accumulator
           return r;
         }, {});
-        /*
-        let sign_iniz = Object.values(sign_group).sort(function(a, b) {
-          // var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-          // var nameB = b.name.toUpperCase(); // ignore upper and lowercase
-          if (Number.isInteger(+a.Iniziale)) {
-            return 1;
-          }
-          if (Number.isInteger(+b.Iniziale)) {
-            return -1;
-          }
-        });
-        */
         console.log('Dashboard - handleGetSigns data: ',       data); // 0: {id: 60, name: "a"}
         console.log('Dashboard - handleGetSigns sign_group: ', sign_group);
         console.log('Dashboard - handleGetSigns sign_names: ', sign_names);
@@ -281,136 +289,117 @@ class Dashboard extends React.Component {
             sign_array:        sign_array
             // sign_filtered:  sign_iniz
           }, () => {
-            // this.vm.$dispatch(this.state);
-            // console.log('handleGetSigns - this.state.Pick_date_b: ', this.state.Pick_date_b);
-            // console.log('handleGetSigns - this.props.location: ', this.props.location);
-            // console.log('handleGetSigns - this.props.match.params.redirectParam: ', this.props.match.params.redirectParam);
-            // if (this.state.TextITA != '')
-              this.handleChangePicker_dashboard(this.state.pickDate);
-            // this.handleChangePicker_dashboard((this.state.Pick_date_b != '' ? new Date(this.state.Pick_date_b) : this.state.pickDate));
-            // this.handleChangePicker_dashboard((this.state.Pick_date_b != '' ? new Date(this.state.Pick_date_b.split(' ')[0]) : this.state.pickDate));
-            // this.handleChangePicker_dashboard((this.state.Pick_date_b != '' ? new Date('05/05/2020') : this.state.pickDate));
-            // this.handleChangePicker_dashboard((this.state.pickDate)); // Caricando un video, bisognera' reimpostare i campi della taskbar come erano alla data del video, non solo popolare le due textarea
+            this.handleChangePicker_dashboard(this.state.pickDate);
           }
         );
-        // this.setState({ dirty: true });
-        // this.setState({ justTranslated: true });
-        // this.setState({ lis_edit:         data.translation }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
       })
       .catch(error => {
         console.log('Dashboard - handleGetSigns - Error: ', error);
       });
   };
 
-  handleChips_backup_dashboard = (event) => {
-    if (event.target.value.indexOf('Nessun dato') !== -1) {
-      console.log('Dashboard - handleChips - testo vuoto');
-      this.setState({
-        allWordsFound: false,
-        sign_json: {},
-        chips: []
-      },this.handleCloseDialog());
-
-    } else {
-      console.log('Dashboard - handleChips event.key: ', event.key);
-      console.log('Dashboard - handleChips event.keyCode: ', event.keyCode);
-      console.log('Dashboard - handleChips event.Code: ', event.code);
-      // console.log('Dashboard - handleChips input: ', input)
-      // https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-
-      /*        
-      <script>
-      window.addEventListener("keydown", function(event) {
-      let str = "KeyboardEvent: key='" + event.key + "' | code='" +
-        event.code + "'";
-      let el = document.createElement("span");
-      el.innerHTML = str + "<br/>";
-      document.getElementById("output").appendChild(el);
-      }, true);
-      */
-
-      let ret = {};
-      if ([undefined,8,17,32,46].includes(event.keyCode)) { //  === 32) { // 27) { // Space
-        // Do whatever when esc is pressed
-        console.log('Dashboard - handleChips keyCode 12 - Space pressed! ')
-        // let list = event.target.value.replace(/\s\s+/g, ' ').trim().split(' '); // replace("\s\s+","\s"
-        ret.tot = event.target.value.replace(/\s\s+/g, ' ').trim();
-        let list = ret.tot.split(' ');
-        ret.it = [];
-        ret.count = 0;
-        let ar = [];
-        // let tt = ['Test', 'Prova'];
-
-        list.forEach((item, i) => {
-          // if (i === idx) {
-          // console.log(Object.assign({}, {"key3": "value3"}, item));
-          // ar[] = Object.assign({Word: item, Found: tt.includes(item)});
-          // if (!tt.includes(item)) this.setState({ allWordsFound: false });
-          ar[i] = {Word: item, Found: this.state.sign_names.includes(item)};
-          if (this.state.sign_names.includes(item)) {
-            ret.it.push(this.state.sign_array[item]);
-            ret.count += 1;
-          }
-        });
-        // Object.assign
-
-        // Object.keys(obj).some(function(k) {
-        // return obj[k] === "test1";
-        // });
-        console.log('Dashboard - handleChips - Check array: ', ar.some(function(k) {return k.Found === false}));
-        console.log('Dashboard - handleChips - Tot JSON: ', ret);
-        this.setState({
-          allWordsFound: ar.some(function(k) {return k.Found === false}),
-          sign_json: ret,
-          chips: ar // [{Word: 'Redemptioggn', Found: false}, {Word: 'Godfatrrrher', Found: true}, {Word: 'Part', Found: true}, {Word: 'Knight', Found: true}]        
-        },this.handleCloseDialog());
-      }
-      // this.setState({ lis_edit: event.target.value });
-    }
+  handleChangeEditionId_tab = (value) => {
+    console.log('handleChangeEditionId_tab - value: ', value);
+    console.log('handleChangeEditionId_tab - this.state.offsets_calcolati_2[value]: ', this.state.offsets_calcolati_2[value]);
+    this.setState({
+      id_edition: value,
+      offsets:    (undefined === this.state.offsets_calcolati_2[value] ? [] : this.state.offsets_calcolati_2[value]) // Per evitare un errore js che incastra la pagina
+    }, this.handleUpdateTextAreas);
   };
-  
+
+  handleChangeForecastTypeId_tab = (value) => { // (event, index, value) => {
+    console.log('handleChangeForecastTypeId_tab - value: ', value);
+    console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2:::::::::: ', this.state.offsets_calcolati_2);
+    // console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2.shift():: ', this.state.offsets_calcolati_2.shift());
+    // console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2.slice(1): ', this.state.offsets_calcolati_2.slice(1));
+    // Si era pensato di togliere il primo valore (di solito +1) dall'array offsets quando si visualizza le voci 'TUTTA ITALIA'
+    // perche' di solito per quell'area gli offset sono solo +2 e +3
+    // ma generava un errore se si puntava a un array vuoto o che non aveva la chiave giusta
+    // Si e' poi deciso di non farlo perche' anche le voci tutta italia a volte hanno un testo per +1
+    value === 7 ? 
+      this.setState({
+        id_forecast_type: value,
+        offsets:          this.state.offsets_calcolati_2[this.state.id_edition], //  (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2/*.slice(1)*/ : []),
+        offset_day:       (undefined === this.state.offsets[1] ? 1 : this.state.offsets[1]) // Imposta il valore di offset_day corrente al secondo vaore possibile se visualizza TUTTA ITALIA
+      }, this.handleUpdateTextAreas)
+    :
+      this.setState({
+        id_forecast_type: value,
+        offsets:          this.state.offsets_calcolati_2[this.state.id_edition], // (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2 : []),
+        offset_day:       (undefined === this.state.offsets[0] ? 1 : this.state.offsets[0])
+      }, this.handleUpdateTextAreas); //.id});
+  };
+
+  handleChangeOffsetDay = (event, index, value) => {
+    console.log('handleChangeOffsetDay - value: ', value);
+    this.setState({ offset_day: value }, this.handleUpdateTextAreas); //.id});
+  };
+    
   /**
    * Metodo di aggiornamento data
    * La selezione di una data e' l'unica operazione che carica i dati di un nuov giorno
    * Questa versione e' quella pilotata dal picker qui nella dashboard stessa - ce n'e' anche una vesione che passa il bind a un eventuale componente child
    */
-  handleChangePicker_dashboard = date1 => {
-    var datestring = (
+  handleChangePicker_dashboard = date_object => {
+    var datestring1 = (
       "0" + 
-      date1.getDate()).slice(-2) + 
+      date_object.getDate()).slice(-2) + 
       "-" + 
-      ("0"+(date1.getMonth()+1)).slice(-2) + 
+      ("0"+(date_object.getMonth()+1)).slice(-2) + 
       "-" +
-      date1.getFullYear() + 
+      date_object.getFullYear() + 
       " " + 
-      ("0" + date1.getHours()).slice(-2) + 
+      ("0" + date_object.getHours()).slice(-2) + 
       ":" + 
-      ("0" + date1.getMinutes()).slice(-2);
-    var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-    fetch("/api/values/meteo/" + datestring1,
+      ("0" + date_object.getMinutes()).slice(-2);
+    var datestring2 = 
+      date_object.getFullYear() + 
+      "-" + 
+      ("0"+(date_object.getMonth()+1)).slice(-2) + 
+      "-" + 
+      ("0" + date_object.getDate()).slice(-2);
+
+    console.log('handleChangePicker_dashboard - datestring1: ', datestring1);
+    console.log('handleChangePicker_dashboard - this.state.Pick_date_b: ', this.state.Pick_date_b);
+    console.log('handleChangePicker_dashboard - datestring2: ', datestring2);
+
+    fetch("/api/values/meteo/" + datestring2,
       { signal: this.mySignal }
       ).then((response) => {
         return response.json();
       })
       .then(data => {
-        console.log('handleChangePicker_dashboard - fetch/then data: ', data);
-        console.log('handleChangePicker_dashboard - this.state.Pick_date_b: ', this.state.Pick_date_b);
-        if (this.state.Pick_date_b != '') {
+        console.log('handleChangePicker_dashboard - fetch "/api/values/meteo/' + datestring1 + '" data: ', data);
+        // Dati non trovati per la combinazione di data/edizione/forecast_type_id        
+        if (data.id_day == null) {
           this.setState({
-            pickDate:     this.state.Pick_date_b,
-            showActions:  true,
-          }, this.handleChips({keyCode: 32, target: {value: this.state.lis_edit}})); // this.handleCloseDialog);
-        }
-        else if (data.id_day == null) {
-          this.setState({
-            pickDate:         date1,
+            testi:            data,
+            // pickDate:         date_object,
             showActions:      false,
+            dirty:            false,
             ita_orig:         'Nessun dato per la data selezionata',
             ita_edit:         'Nessun dato per la data selezionata',
             lis_orig:         'Nessun dato per la data selezionata',
-            lis_edit:         'Nessun dato per la data selezionata'}, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        } else {
-          let offsets_calc = [
+            lis_edit:         'Nessun dato per la data selezionata'
+          }, () => this.setState({pickDate:         date_object}, this.handleCloseDialog)
+          ) // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+        }
+        /*
+        // Arrivi da link nella tabella I miei video
+        else if (this.state.Pick_date_b != '') {
+          this.setState({
+            testi:            data,
+            // pickDate:     this.state.Pick_date_b,
+            showActions:  true,
+            dirty:        false
+          }, this.handleChips({keyCode: 32, target: {value: this.state.lis_edit}})); // this.handleCloseDialog);
+        }
+        */
+        else {
+          // La query di estrazione testi contiene dei valori di offset, ma non sono corretti (sono globali per tutte le edition quando invece per ogni edition possono cambiare)
+          // Si e' deciso per ora di calcolarli lato frontend
+          // calcolati_1 e _2 sono identici se non per le chiavi degli array che nel primo caso sono 0,1,2 ecc e nel secondo sono pari all'id dell'edition usata (1 e 3 per ora)
+          let offsets_calcolati_1 = [
               [...new Set( data.timeframe.editions[0].forecast_data
                 .filter(data => {return data.edition == 1})
                 .map(data => data.offset_days)) ],
@@ -418,51 +407,46 @@ class Dashboard extends React.Component {
                 .filter(data => {return data.edition == 3})
                 .map(data => data.offset_days)) ]
             ];
-          console.log('handleChangePicker_dashboard - offsets_calc: ', offsets_calc);
+          console.log('handleChangePicker_dashboard - offsets_calcolati_1: ', offsets_calcolati_1);
 
-          let offsets_calc1 = [];
-          offsets_calc1[1] = [...new Set( data.timeframe.editions[0].forecast_data
+          let offsets_calcolati_2 = [];
+          offsets_calcolati_2[1] = [...new Set( data.timeframe.editions[0].forecast_data
                 .filter(data => {return data.edition == 1})
                 .map(data => data.offset_days)) ];
-          offsets_calc1[3] = [...new Set( data.timeframe.editions[0].forecast_data
+          offsets_calcolati_2[3] = [...new Set( data.timeframe.editions[0].forecast_data
                 .filter(data => {return data.edition == 3})
                 .map(data => data.offset_days)) ];
-          // offsets_calc1 = offsets_calc1.filter(Array);
-          console.log('handleChangePicker_dashboard - offsets_calc1: ', offsets_calc1);
+          // offsets_calcolati_2 = offsets_calcolati_2.filter(Array);
+          console.log('handleChangePicker_dashboard - offsets_calcolati_2: ', offsets_calcolati_2);
 
+          let offset_day_current_edition  = offsets_calcolati_2[this.state.id_edition][0]; // Il primo valore di offset dell'edizione corrente
+          let offset_days_current_edition = offsets_calcolati_2[this.state.id_edition]     // Lista di possibili valori per l'edizione corrente
+
+          // L'array data.timeframe.editions contiene due chiavi 0 e 1 che pero' contengono gli stessi dati, cioe' tutti i testi di entrambe le edizioni
+          // Quindi puntare a 0 o 1 e' indifferente
           let orig = getTextByVersion(
             data.timeframe.editions[0].forecast_data, 
             this.state.id_edition, 
             this.state.id_forecast_type, 
-            offsets_calc1[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day,
+            offset_day_current_edition, // offsets_calcolati_2[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day,
             1);
           let edit = getTextByVersion(
             data.timeframe.editions[0].forecast_data, 
             this.state.id_edition, 
             this.state.id_forecast_type, 
-            offsets_calc1[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day, 
+            offset_day_current_edition, // offsets_calcolati_2[1][0], // data.timeframe.editions[0].offsets.min, // this.state.offset_day, 
             99);
 
           this.setState({
-            pickDate:         date1,
+            // pickDate:         date_object,
             showActions:      true,
+            dirty:            false,
             testi:            data,
-            offsets_calc1:    offsets_calc1,
-            offset_day:       offsets_calc1[1][0], //data.timeframe.editions[0].offsets.min,
+
+            offsets_calcolati_2:    offsets_calcolati_2,
+            offset_day:       offset_day_current_edition,  // offsets_calcolati_2[1][0], //data.timeframe.editions[0].offsets.min,
+            offsets:          offset_days_current_edition, // offsets_calcolati_2[1], // Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
             /*
-            offsets:          [
-              [...new Set( data.timeframe.editions[0].forecast_data
-                .filter(data => {return data.edition == 1})
-                .map(data => data.offset_days)) ],
-              [...new Set( data.timeframe.editions[0].forecast_data
-                .filter(data => {return data.edition == 3})
-                .map(data => data.offset_days)) ]
-            ],
-            */
-            // offsets:          Array.from(Array( data.timeframe.editions[0].offsets.max - 1)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
-
-            offsets:          offsets_calc1[1], // Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
-
             ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
             lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
@@ -472,22 +456,25 @@ class Dashboard extends React.Component {
             id_text_trans:    edit.id_text_trans,
             id_forecast:      edit.id_forecast,
             id_forecast_data: edit.id_forecast_data,
-            ita_id:           orig.id_text_ita, // });
-            ita_edit_version: edit.it_version, // });
-            ita_notes:        'Campo non estratto, da correggere', // })
-            lis_id:           orig.id_text_lis, // });
-            lis_edit_version: edit.it_version, // });
-            lis_notes:        'Campo non ancora estratto'
-
-          }, () => {
-            
-            this.setState({
-              showSnackbar:     false,
-              showDialog:       false
-            }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
-            console.log('handleChangePicker_dashboard - this.state: ', this.state);
-          })
-          console.log('handleChangePicker_dashboard - this.state: ', this.state);
+            ita_id:           orig.id_text_ita,
+            ita_edit_version: edit.it_version,
+            ita_notes:        'Note_dasboard_ita',
+            lis_id:           orig.id_text_lis,
+            lis_edit_version: edit.it_version,
+            lis_notes:        'Note_dasboard_lis',
+            // }, () => {
+            // this.setState({
+            */
+            showSnackbar:     false,
+            showDialog:       false
+          // }, this.handleUpdateTextAreas); // () => {
+          }, () => this.setState({pickDate:         date_object}, this.handleUpdateTextAreas)
+          );
+          // });
+            // }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
+            // console.log('handleChangePicker_dashboard - this.state: ', this.state);
+          // });
+          // console.log('handleChangePicker_dashboard - this.state: ', this.state);
         }
       })
       .catch(error => {
@@ -501,15 +488,25 @@ class Dashboard extends React.Component {
    * il caricamento di nuovi testi nei due campi, se disponibili
    */
   handleUpdateTextAreas = (i) => {
-    console.log('handleUpdateTextAreas - this.state.id_edition: ', this.state.id_edition);
-    console.log('handleUpdateTextAreas - this.state.id_forecast_type: ', this.state.id_forecast_type);
-    console.log('handleUpdateTextAreas - this.state.offset_day: ', this.state.offset_day);
+    console.log('handleUpdateTextAreas - this.state.id_edition::::::::', this.state.id_edition);
+    console.log('handleUpdateTextAreas - this.state.id_forecast_type::', this.state.id_forecast_type);
+    console.log('handleUpdateTextAreas - this.state.offset_day::::::::', this.state.offset_day);
     try {
       // this.setState({
-        // offset_day:       this.state.offsets_calc1[this.state.id_edition][0],
-      //   offsets:          this.state.offsets_calc1[this.state.id_edition]
+      // offset_day:       this.state.offsets_calcolati_2[this.state.id_edition][0],
+      //   offsets:          this.state.offsets_calcolati_2[this.state.id_edition]
       // }, () => { // Come definire un blocco di codice come callback senza dover creare una funzione apposta
-        // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
+      // let forecast_data = this.state.testi.timeframe.editions[0].forecast_data;
+
+      if (this.state.testi.id_day == null) {
+        this.setState({
+          ita_orig:         'Nessun dato per la data selezionata',
+          ita_edit:         'Nessun dato per la data selezionata',
+          lis_orig:         'Nessun dato per la data selezionata',
+          lis_edit:         'Nessun dato per la data selezionata'
+        }); // , this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+      }
+      else {
         let orig = getTextByVersion(
           this.state.testi.timeframe.editions[0].forecast_data,
           this.state.id_edition,
@@ -525,29 +522,36 @@ class Dashboard extends React.Component {
           99);
         console.log('handleUpdateTextAreas - edit: ', edit);
         this.setState({
-            ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            
-            id_text_trans:    edit.id_text_trans,
-            id_forecast_data: edit.id_forecast_data,
+          ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+          ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+          lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+          lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+          
+          id_text_trans:    edit.id_text_trans,
+          id_forecast_data: edit.id_forecast_data,
 
-            ita_id:           orig.id_text_ita, // });
-            ita_edit_version: edit.it_version, // });
-            ita_notes:        'Campo non estratto, da correggere', // })
-            lis_id:           orig.id_text_lis, // });
-            lis_edit_version: edit.it_version, // });
-            lis_notes:        'Campo non ancora estratto',
-            justPreviewed:    false,
-            justPublished:    false,
-            path_videogen:    null
+          id_text_trans:    edit.id_text_trans,
+          id_forecast:      edit.id_forecast,
+          id_forecast_data: edit.id_forecast_data,
+
+          ita_id:           orig.id_text_ita, // });
+          ita_edit_version: edit.it_version, // });
+          ita_notes:        'Campo non estratto, da correggere', // })
+          lis_id:           orig.id_text_lis, // });
+          lis_edit_version: edit.it_version, // });
+          lis_notes:        'Campo non ancora estratto',
+
+          path_videogen:    edit.path_video, // /video_gen/mp4/sentence_07_06_2020_14_38_04.mp4
+          justPreviewed:    false,
+          justPublished:    false,
+          // path_videogen:    null
         },
-        this.handleChips({keyCode: 32, target: {value: edit.text_lis}})
+          this.handleChips({keyCode: 32, target: {value: edit.text_lis}})
         );
         // console.log('handleUpdateTextAreas - this.state.id_edition: ', this.state.id_edition);
         // console.log('handleUpdateTextAreas - this.state.id_forecast_type: ', this.state.id_forecast_type);
-        console.log('handleUpdateTextAreas - this.state: ', this.state);
+        // console.log('handleUpdateTextAreas - this.state: ', this.state);
+      }
       // });
     } catch (error) {
       console.log('handleUpdateTextAreas catch - Error: ', error);
@@ -556,57 +560,19 @@ class Dashboard extends React.Component {
     }
   };
 
-  onVideoChildClicked = _ => {
-    // this.props.click(this.props.id);
-    // console.log('onVideoChildClicked - _: ', _);
-    // this.setState({ ita: this.state.testi[0]['CENTRO E SARDEGNA']});
-    // this.setState({ lis: this.state.testi[1]['NORD']}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    console.log('video child clicked');
-    this.handleOpenDialogPublish();
-    /*
-    this.setState({ ita_orig: this.state.centro_lis_orig }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    this.setState({ ita_edit: this.state.centro_ita_edit }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    this.setState({ lis_orig: this.state.centro_lis_orig }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    this.setState({ lis_edit: this.state.centro_lis_edit }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    */
-  };
-
-  onCircProgressCompleted = _ => {
-    // this.props.click(this.props.id);
-    // console.log('onVideoChildClicked - _: ', _);
-    this.setState({ videoProgressCompleted: true }, this.handleStopProgress); // ita: this.state.testi[0]['CENTRO E SARDEGNA']});
-    // this.setState({ lis: this.state.testi[1]['NORD']}); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-    // alert('child progress comple');
-  };
-
-  handleStopProgress() {
-    // Il metodo Stop ha gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
-    // Start e stop servono a far partire e a fermare l'observable che dovrebbe ritornare il valore della dimensione del file video man mano che viene generato
-    this.dispatch({
-      Stop: {
-        IdUserEdit: 2,
-        IdTextIta: this.state.ita_id,
-        VersionIta: this.state.ita_edit_version,
-        TextIta: this.state.ita_edit,
-        NotesIta: "Provaaa_note_ita",
-        IdTextLis: this.state.lis_id,
-        VersionLis: this.state.lis_edit_version,
-        TextLis: this.state.lis_edit,
-        NotesLis: "Provaaa_note_lis"
-      }
-    });
-  };
-
+  
   // Ogni metodo di handle decide se mostrare la dialog o la snackbar
-  handleOpenDialogChangePicker = (date1) => {
+  handleOpenDialogChangePicker = (date_object) => {
     this.setState({
       dialogTitle:        'Attendere, caricamento...',
-      dialogContent:      'Attendere, caricamento data ' + date1,
-      showDialog: true,
+      dialogContent:      'Attendere, caricamento data ' + date_object,
+      showDialog:         true,
       snackbarMessage:    'Attendere..',
-      showSnackbar:       false
-    }, () => this.handleChangePicker_dashboard(date1));
+      showSnackbar:       false,
+      path_videogen:      null
+    }, () => this.handleChangePicker_dashboard(date_object));
   };
+  
 
   handleOpenDialogPublish = () => {
     this.setState({
@@ -692,119 +658,6 @@ class Dashboard extends React.Component {
         dirty:            false,
         justTranslated:   false
         }, this.handleChips({keyCode: 32, target: {value: last_edit.text_lis}})); // this.handleCloseDialog);
-  };
-
-  handleSave = _ => {
-    /*
-    this.dispatch({
-      Save: {
-        IdUserEdit: 2,
-        IdTextIta: this.state.ita_id, // Gli ID dei testi sia ita che lis servono perche' non deve essere creato un nuovo ID - bisogna riutilizzare quello che c'e'!!
-        VersionIta: this.state.ita_edit_version, // Va aumentato di 1 sia nella INSERT sia in interfaccia
-        TextIta: this.state.ita_edit, //"Provaaaa_manda_a_dashboard",
-        NotesIta: "Provaaa_note_ita",
-        IdTextLis: this.state.lis_id,
-        VersionLis: this.state.lis_edit_version,
-        TextLis: this.state.lis_edit, //"Provaaaa_manda_a_dashboard",
-        NotesLis: "Provaaa_note_lis"
-      }
-    });
-    */
-
-    console.log('Dashboard handleSave - creazione text_trad');
-    fetch(
-      "/api/values/text_trad", // La chiamata text_trad salva la coppia di testi e l'aggancio nella text_trans e text_trans2
-      {
-        signal: this.mySignal,
-        method: 'POST',
-        body: "'"+JSON.stringify({
-          IdUserEdit: 3,
-          IdTextIta: this.state.ita_id,
-          TextIta: this.state.ita_edit,
-          VersionIta: this.state.ita_edit_version,
-          NotesIta: "Provaaa_note_ita dashboard " + this.state.ita_edit,
-          IdTextLis: this.state.lis_id,
-          TextLis: this.state.lis_edit,
-          VersionLis: this.state.lis_edit_version,
-          NotesLis: "Provaaa_note_lis dashboard " + this.state.lis_edit
-        })+"'",
-        headers: {'Content-Type': 'application/json'}
-      })
-    .then(res => res.json())
-    .then(p => {
-      console.log('Dasboard handleSave - Risultato text_trad POST: ', p);
-      console.log('Dashboard handleSave - creazione request - bisogna passare l\'id_text_trans nella trans2');
-      // return Ok("{\"id_text_trans\": \"" + lastId + "\"}");
-
-      fetch("/api/values/request",
-      {
-        signal: this.mySignal,
-        method: 'POST',
-        body: "'"+JSON.stringify({
-          name_video: this.state.videoName,
-          id: p.id_text_trans,                   // this.state.id_text_trans,
-          path_video: this.state.path_videogen,  // '/path/to/video_idtrans'+this.state.id_text_trans, // L'ultimo video generato // Passare solo il nome file con path.replace(/^.*[\\\/]/, '') se si vuole copiarlo o rinominarlo
-          notes: "Note_request id_text_trans: " + p.id_text_trans + " - Attenzione, questo e l id sulla trans2"
-        })+"'",
-        headers: {'Content-Type': 'application/json'}
-      })
-      .then(res => res.json())
-      .then(p => {
-        console.log('Dashboard handleSave - Risultato request POST: ', p);
-        this.setState({
-          ita_edit_version: this.state.ita_edit_version + 1,
-          lis_edit_version: this.state.lis_edit_version + 1,
-          id_text_trans:    p.id_text_trans,
-          dirty:            false,
-          justSaved:        true
-        }, this.handleCloseSnackbar);
-      })
-      .catch(error => {
-        console.log('Dashboard handleSave - POST request Error: ', error);
-      });
-    })
-    .catch(error => {
-      console.log('Dashboard handleSave - POST text_trad Error: ', error);
-    });
-    
-  };
-
-  // Una prima versione di translate usava il metodo GET
-  handleTranslate_get = _ => {
-    // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-    // var url = "/api/values/translate/";
-    // this.setState({ showProgress: true });
-    fetch("/api/values/translate",
-      { signal: this.mySignal }
-      ).then((response) => {
-        return response.json();
-      })
-      .then(data => {
-        console.log('handleChangePicker_dashboard - Data: ', data);
-        this.setState({
-          dirty:            true,
-          justTranslated:   true,
-          lis_edit:         data.translation
-        }, this.handleCloseDialog); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-        /*          
-        this.setState({ lis_orig:         orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ lis_edit:         edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                  this.setState({ ita_id:           orig.id_text_ita });
-                  this.setState({ ita_edit_version: edit.it_version });
-                  this.setState({ ita_notes:        'Non estratte ancora' })
-                  this.setState({ lis_id:           orig.id_text_lis });
-                  this.setState({ lis_edit_version: edit.it_version });
-                  this.setState({ lis_notes:        'Da estrarre', });
-                  console.log('handleChangePicker_dashboard - this.state: ', this.state);
-
-                  body: "'"+JSON.stringify({value: 'UkVTSURVRSBQSU9HR0UgTkVMTEUgUFJJTUUgT1JFIERFTCBNQVRUSU5PIFNVTExFIEFSRUUgQVBQRU5OSU5JQ0hFIEVNSUxJQU5FIEUgTFVOR08gTEUgWk9ORSBDT1NUSUVSRSBBRFJJQVRJQ0hFLCBNQSBJTiBTVUNDRVNTSVZPIFJBUElETyBNSUdMSU9SQU1FTlRPIENPTiBDSUVMTyBURVJTTy5CRUwgVEVNUE8gU1VMIFJFU1RBTlRFIFNFVFRFTlRSSU9ORSwgQSBQQVJURSBVTiBQTycgREkgTlVCSSBDT01QQVRURSBBVFRFU0UgTkVMTEEgUFJJTUEgUEFSVEUgREVMTEEgTUFUVElOQVRBIFNVTExFIEFSRUUgQUxQSU5FIENPTiBERUJPTEkgTkVWSUNBVEUgQSBBU1NPQ0lBVEUgQSBQQVJUSVJFIERBSSAxMjAwIEEgTUVUUkkuQUwgUFJJTU8gTUFUVElOTyBFIERPUE8gSUwgVFJBTU9OVE8gRk9STUFaSU9ORSBESSBGT1NDSElFIERFTlNFIEUgQkFOQ0hJIERJIE5FQkJJQSBFIFNVTExBIFBJQU5VUkEgRSBQQURBTkE='})+"'",
-        headers: {'Content-Type': 'application/json'}
-        */
-        // this.setState({ showProgress: false });
-      })
-      .catch(error => {
-        console.log('handleTranslate_get - Error: ', error);
-      });
   };
 
   handleTranslate = _ => {
@@ -932,7 +785,7 @@ class Dashboard extends React.Component {
         });
 
         this.setState({
-          path_postergen: p.output_preview + '.jpg',
+          // path_postergen: p.output_preview + '.jpg',
           path_videogen: p.output_preview + '.mp4',
           justPreviewed:    true,
           previewing:    false,
@@ -955,7 +808,7 @@ class Dashboard extends React.Component {
    */
   handlePublish = _ => {
     console.log('Dashboard handlePublish - creazione text_trad');
-    console.log('Dashboard handlePublish - pulizia text_ita: ', this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"));
+    // console.log('Dashboard handlePublish - pulizia text_ita: ', this.state.ita_edit.replace(/'/g, "").replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t"));
     fetch(
       "/api/values/text_trad", // La chiamata text_trad salva la coppia di testi e l'aggancio nella text_trans e text_trans2
       {
@@ -1050,7 +903,11 @@ class Dashboard extends React.Component {
               dirty:            false,
               justSaved:        true,
               justPublished:    true
-            }, this.handleCloseDialog); // }, this.handleCloseSnackbar);
+            }, () => {
+                this.handleCloseDialog();
+                this.handleChangePicker_dashboard(this.state.pickDate);
+              }
+              ); // }, this.handleCloseSnackbar);
           })
           .catch(error => {
             console.log('Dashboard handlePublish - POST publish Error: ', error);
@@ -1091,53 +948,21 @@ class Dashboard extends React.Component {
       }
     };
 
-    const handleTranslate1 = _ => {
-      // var datestring1 = date1.getFullYear() + "-" + ("0"+(date1.getMonth()+1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2);
-      // var url = "/api/values/translate/";
-      // this.setState({ showProgress: true });
-      fetch("/api/values/translate", { signal: this.mySignal }) //2019-12-23") // + date.toISOString().split('T')[0].trim()) // aggiungere la data // new Date().toISOString().split(' ')[0]
-        .then((response) => {
-          return response.json();
-        })
-        .then(data => {
-          console.log('handleChangePicker_dashboard - Data: ', data);
-          this.setState({ lis_edit:         data.translation }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-          /*          
-          this.setState({ lis_orig:         orig.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                    this.setState({ lis_edit:         edit.text_lis }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-                    this.setState({ ita_id:           orig.id_text_ita });
-                    this.setState({ ita_edit_version: edit.it_version });
-                    this.setState({ ita_notes:        'Non estratte ancora' })
-                    this.setState({ lis_id:           orig.id_text_lis });
-                    this.setState({ lis_edit_version: edit.it_version });
-                    this.setState({ lis_notes:        'Da estrarre', });
-                    console.log('handleChangePicker_dashboard - this.state: ', this.state);
-          */
-          // this.setState({ showProgress: false });
-        })
-        .catch(error => {
-          console.log('handleChangePicker_dashboard - Error: ', error);
-        });
+    const handleEditIta1 = (event) => {
+      console.log('handleEditIta1 - event: ', event);
+      this.setState({
+        dirty: true,
+        ita_edit: event.target.value
+      });
     };
 
-    const handleEditIta1 = event => {
-      console.log('handleEditIta - event: ', event);
-      // this.setState({ dirty: true });
-      this.setState({ dirty: true, ita_edit: event.target.value });
-      // let textVal = 
-      // const input = document.getElementById('myTextarea');  
-      // input.focus();
-      // input.setSelectionRange(2, 5);
-      
-      // this.refs.myTextarea.setSelectionRange(2, 5);
-    };
-
-    const handleEditLis1 = event => {
-      console.log('handleEditLis - event: ', event);
+    const handleEditLis1 = (event) => {
+      console.log('handleEditLis1 - event: ', event);
       this.setState({
         dirty: true,
         lis_edit: event.target.value
-      });
+      }, this.handleChips(event));
+      // }, this.handleChips({keyCode: 32, target: {value: this.state.lis_edit}})); // this.handleCloseDialog);
     };
 
     const RenderConsoleLog = ({ children }) => {
@@ -1148,6 +973,16 @@ class Dashboard extends React.Component {
     return (
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <BasePage title="Meteo" navigation="Applicazione / Meteo">
+          <div className="mr-auto" style={{visibility: (location.hostname === "localhost" ? 'show' : 'hidden')}}>
+              Pickdate: {this.state.pickDate.toString()}<br />
+              Offset_day: {this.state.offset_day}<br />
+              Offsets: {this.state.offsets.join(',')}<br />
+              Offset calc2: {this.state.offsets_calcolati_2.join(',')}<br />
+              Id edition: {this.state.id_edition}<br />
+              ID forecast type: {this.state.id_forecast_type}<br />
+              ID forecast: {this.state.id_forecast}<br />
+              ID forecast data: {this.state.id_forecast_data}<br />
+            </div>
           <div>
           <RenderConsoleLog>{this.state}</RenderConsoleLog>
             <Toolbar style={{
@@ -1171,7 +1006,7 @@ class Dashboard extends React.Component {
                 }}>
               <ToolbarGroup firstChild={true} style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}}>
                 <ToolbarTitle text="Data" style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}} />
-                <DatePicker value={this.state.pickDate} onChange={this.handleOpenDialogChangePicker} />
+                <DatePicker value={this.state.pickDate} onChange={this.handleChangePicker_dashboard} ref={this.datepick_focus} />
                 <ToolbarSeparator />
                 <Tabs style={{width: '60%', float: 'left'}} value={this.state.id_edition} onChange={this.handleChangeEditionId_tab}>
                   <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="09:30" value={1} disabled={this.state.id_edition === 1}></Tab>
@@ -1181,7 +1016,7 @@ class Dashboard extends React.Component {
                 {/*
                 <ToolbarSeparator />
                 <ToolbarTitle text="Area" style={{padding: 10}} />
-                <DropDownMenu value={this.state.id_forecast_type} onChange={this.handleChangeForecastId_dropdown}>
+                <DropDownMenu value={this.state.id_forecast_type} onChange={this.handleChangeForecastTypeId_dropdown}>
                   <MenuItem value={1} primaryText="NORD" />
                   <MenuItem value={2} primaryText="CENTRO E SARDEGNA" />
                   <MenuItem value={3} primaryText="SUD E SICILIA" />
@@ -1191,7 +1026,7 @@ class Dashboard extends React.Component {
                   <MenuItem value={7} primaryText="TUTTA ITALIA" />
                 </DropDownMenu>
                 */}
-                { this.state.id_forecast_type == 7 ?
+                { this.state.id_forecast_type == 7 && this.state.offsets.length > 0 ?
                 <React.Fragment>
                   <ToolbarSeparator />
                   <ToolbarTitle text="Giorno" style={{padding: 10}} />
@@ -1203,7 +1038,7 @@ class Dashboard extends React.Component {
                 {/*<ToolbarSeparator />*/}
               </ToolbarGroup>
             </Toolbar>
-            <Tabs style={{width: '100%', float: 'left'}} value={this.state.id_forecast_type} onChange={this.handleChangeForecastId_tab}>
+            <Tabs style={{width: '100%', float: 'left'}} value={this.state.id_forecast_type} onChange={this.handleChangeForecastTypeId_tab} ref={this.tabforecast_focus}>
               <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="NORD" value={1} disabled={this.state.id_forecast_type === 1}></Tab>
               <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="CENTRO E SARDEGNA" value={2} disabled={this.state.id_forecast_type === 2}></Tab>
               <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="SUD E SICILIA" value={3} disabled={this.state.id_forecast_type === 3}></Tab>
@@ -1234,13 +1069,6 @@ class Dashboard extends React.Component {
                     value={this.state.ita_edit}
                     onChange={handleEditIta1}
                   />
-                  {/*this.state.User1.Name}<br />
-                  {this.state.VersionITA}<br />
-                  {this.state.Color.Red*/}<br />
-                  {/*this.state.TextITA*/}<br />
-                  {/*this.state.Reqtrans.ForecastDate justTranslated 
-                  disabled={!dirty || justTranslated}
-                  */}
                   <br />
                   { showActions ?
                   <React.Fragment>
@@ -1252,14 +1080,6 @@ class Dashboard extends React.Component {
               </div>
 
               <div className="col-xs-12 col-sm-3 col-md-3 col-lg-3 m-b-15 ">
-                {/*
-                <div style={dashboardStyles.buttons}>
-                  <div style={globalStyles.navigation}>Testo LIS originale{this.state.lis_edit_version ? ' (versione 1)' : '' }:</div>
-                </div>
-                <label>{this.state.lis_orig}</label>
-                value={this.state.lis_edit}
-                onChange={handleEditLis1}
-                */}
                 <div style={dashboardStyles.buttons}>
                   <CardExampleExpandable title={"Testo LIS originale" + (this.state.lis_edit_version ? " (versione 1)" : "") } subtitle="Cliccare per espandere" text={this.state.lis_orig} />
                   <div style={globalStyles.navigation}>Testo LIS editato{this.state.lis_edit_version ? ' (versione ' + this.state.lis_edit_version + ')' : '' }:</div>
@@ -1270,17 +1090,9 @@ class Dashboard extends React.Component {
                     minRows={3}
                     style={{overflowY: 'scroll'}}
                     value={this.state.lis_edit}
-                    onChange={(event) => {
-                        this.setState({
-                          lis_edit:       event.target.value,
-                          dirty: true
-                        }, this.handleChips(event))
-                    }}
-                    onKeyDown={(event) => {
-                        this.setState({
-                          lis_edit:       event.target.value,
-                        }, this.handleChips(event))
-                    }}
+                    onChange={handleEditLis1}
+                    onKeyDown={handleEditLis1}
+                    onKeyPress={handleEditLis1}
                   />
                   {/*this.state.TextLIS*/}
                   <ChipExampleSimple1 chips={this.state.chips}/>

@@ -180,7 +180,7 @@ const CardExampleExpandable = props => (
       actAsExpander={true}
       showExpandableButton={true}
     />
-    <CardText style={{fontSize: 8}} expandable={true}>
+    <CardText style={{fontSize: 12}} expandable={true}>
       {props.text}
     </CardText>
   </Card>
