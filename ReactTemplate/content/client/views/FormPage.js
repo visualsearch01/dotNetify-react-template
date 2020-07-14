@@ -41,9 +41,9 @@ class FormPage extends React.Component {
       Employees:        [],
       FirstName:        '',
       LastName:         '',
-      PaginaTelevideo:  '',
-      IndirizzoFTP:     '',
-      IndirizzoEmail:   '',
+      // PaginaTelevideo:  '',
+      // IndirizzoFTP:     '',
+      // IndirizzoEmail:   '',
       time1:            '09:10',
       time2:            '18:25',
       toggle1:          true,
@@ -103,10 +103,11 @@ class FormPage extends React.Component {
     console.log('Form - componentDidMount');
     // window.addEventListener('beforeunload', this.handleLeavePage);    
   };
-
+  /*
   handleLeavePage(e) {
     this.vm.$destroy();
   }
+  */
   
   /*
   componentDidMount() {
@@ -298,7 +299,7 @@ class FormPage extends React.Component {
                     floatingLabelText="Indirizzo pagina televideo"
                     fullWidth={true}
                     style={styles.textfield}
-                    value={this.state.PaginaTelevideo || ''}
+                    value='http://www.televideo.rai.it/televideo/pub/catturaSottopagine.jsp?pagina=710&regione='
                     onChange={event => this.setState({ PaginaTelevideo: event.target.value, dirty: true })}
                   />
                   <TextField
@@ -306,7 +307,7 @@ class FormPage extends React.Component {
                     floatingLabelText="Indirizzo FTP di pubblicazione"
                     fullWidth={true}
                     style={styles.textfield}
-                    value={this.state.IndirizzoFTP || ''}
+                    value='test:test@ftp.rai.it'
                     onChange={event => this.setState({ IndirizzoFTP: event.target.value, dirty: true })}
                   />
                   <TextField
@@ -314,7 +315,7 @@ class FormPage extends React.Component {
                     floatingLabelText="Email di amministrazione"
                     fullWidth={true}
                     style={styles.textfield}
-                    value={this.state.IndirizzoEmail || ''}
+                    value='crit@rai.it'
                     onChange={event => this.setState({ IndirizzoEmail: event.target.value, dirty: true })}
                   />
                 </div>
@@ -351,9 +352,9 @@ class FormPage extends React.Component {
                 </div>
                 <div>
                   <div style={styles.buttons}>
-                    <h3>Gestione regole - Download CSV</h3>
+                    <h2>Gestione regole - Download CSV</h2>
                     <RaisedButton label="Download" onClick={this.handleDownload} disabled={false} style={styles.saveButton} primary={true} />
-                    <h3>Gestione regole - Upload CSV</h3>
+                    <h2>Gestione regole - Upload CSV</h2>
                     { /* <button onClick={this.handleDownload}>Download</button> */ }
                     { /*
                     The ::-webkit-file-upload-button CSS pseudo-element represents the button of an <input> of  type="file".
@@ -396,25 +397,29 @@ class FormPage extends React.Component {
             </div>
             */}
               <div className="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-md m-b-15">
-                <h3>Monitor servizi</h3>
+                <h2>Monitor servizi</h2>
                 <div style={styles.buttons}>
                   <Toggle
                     label="Webserver"
+                    labelStyle={styles.textfield}
                     toggled={this.state.toggle1}
                     onToggle={() => this.setState({toggle1: !this.state.toggle1})}
                   />
                   <Toggle
-                    label="ATLAS Player"
+                    label="LIS Player"
+                    labelStyle={styles.textfield}
                     toggled={this.state.toggle2}
                     onToggle={() => this.setState({toggle1: !this.state.toggle2})}
                   />
                   <Toggle
                     label="FTP"
+                    labelStyle={styles.textfield}
                     toggled={this.state.toggle3}
                     onToggle={() => this.setState({toggle1: !this.state.toggle3})}
                   />
                   <Toggle
                     label="MySQL"
+                    labelStyle={styles.textfield}
                     toggled={this.state.toggle4}
                     onToggle={() => this.setState({toggle2: !this.state.toggle4})}
                   />

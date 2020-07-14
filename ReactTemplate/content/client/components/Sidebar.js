@@ -169,22 +169,11 @@ const Sidebar = props => {
           { [2].includes(props.userid) && ( typeof (menus_amm) !== "undefined" && Array.isArray(menus_amm) && menus_amm.length) ?
           <React.Fragment>
             <MenuItem
-              primaryText="Amministrazione"
+              primaryText="Impostazioni"
               checked={false}
               style={sidebarStyle.menuItem}
               rightIcon={<ArrowDropRight />}
-              menuItems={
-                menus_amm.map((menu, index) => (
-                  <MenuItem
-                    button 
-                    selected={index === 0}
-                    key={index}
-                    primaryText={menu.Title}
-                    leftIcon={<FontIcon className="material-icons">{menu.Icon}</FontIcon>}
-                    containerElement={<RouteLink vm={vm} route={menu.Route} />}
-                  />
-                ))
-              }
+              containerElement={<RouteLink vm={vm} route={menus_amm[0].Route} />}
             />
             <Divider />
           </React.Fragment>
