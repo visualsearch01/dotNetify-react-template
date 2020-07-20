@@ -30,6 +30,9 @@ namespace dotnetify_react_template.server.Models
     {
         public string ForecastDate { get; set; }
         public string ForecastArea { get; set; }
+        public int ForecastTypeId { get; set; }
+        public int ForecastId { get; set; }
+        public int ForecastDataId { get; set; }
 
         public int IdITA { get; set; }
         public int IdLIS { get; set; }
@@ -126,11 +129,14 @@ namespace dotnetify_react_template.server.Models
                             lr.notes,
                             lr.time_request,
                             fd.id_forecast_type,
+                            fd.id_forecast_data,
+                            lf.id_forecast,
                             ft.name_type,
                             ld.date_day,
                             it.version AS version_ita_edit,
                             it.text_ita AS text_ita_edit,
                             it.id_text_ita AS id_text_ita_edit,
+                            li.version AS version_lis_edit,
                             li.text_lis AS text_lis_edit,
                             li.id_text_lis AS id_text_lis_edit,
                             us.name_user
@@ -157,9 +163,11 @@ namespace dotnetify_react_template.server.Models
                         while (reader.Read())
                         {
                             list.Add(new LisRequestTrans(){
-                                ForecastDate = Convert.IsDBNull(reader["date_day"]) ? "" : Convert.ToDateTime(reader["date_day"]).ToString("dd/MM/yyyy"), //      reader.GetString("date_day"),
+                                ForecastDate = Convert.IsDBNull(reader["date_day"]) ? "" : Convert.ToDateTime(reader["date_day"]).ToString("yyyy-MM-dd"), //      reader.GetString("date_day"),
                                 ForecastArea = Convert.IsDBNull(reader["name_type"]) ? "" : reader.GetString("name_type"),
+                                ForecastTypeId = Convert.IsDBNull(reader["id_forecast_type"]) ? 0 : reader.GetInt32("id_forecast_type"),
                                 VersionITA = reader.GetInt32("version_ita_edit"),
+                                VersionLIS = reader.GetInt32("version_lis_edit"),
                                 // PathVideo = "PathVideo",
                                 TextITA = reader.GetString("text_ita_edit"),
                                 TextLIS = reader.GetString("text_lis_edit"),
@@ -171,7 +179,7 @@ namespace dotnetify_react_template.server.Models
                                     IdTranslation = reader.GetInt32("id_translation"),
                                     PathVideo = reader.GetString("path_video"),
                                     Notes = reader.GetString("notes"),
-                                    TimeRequest = reader.GetString("time_request"),
+                                    TimeRequest = Convert.ToDateTime(reader["time_request"]).ToString("yyyy-MM-dd"),
                                     IdTranslationNavigation = new  LisTextTrans (){
                                         IdTextTrans = reader.GetInt32("id_translation"),
                                         IdTextIta = reader.GetInt32("id_text_ita_edit"),
@@ -242,6 +250,7 @@ namespace dotnetify_react_template.server.Models
                             req = new LisRequestTrans(){
                                 ForecastDate = Convert.IsDBNull(reader["date_day"]) ? "" : Convert.ToDateTime(reader["date_day"]).ToString("dd/MM/yyyy"), //      reader.GetString("date_day"),
                                 ForecastArea = Convert.IsDBNull(reader["name_type"]) ? "" : reader.GetString("name_type"),
+                                ForecastId = Convert.IsDBNull(reader["id_forecast_type"]) ? 0 : reader.GetInt32("id_forecast_type"),
                                 // VersionITA = reader.GetInt32("version_ita_edit"),
                                 // PathVideo = "PathVideo",
 

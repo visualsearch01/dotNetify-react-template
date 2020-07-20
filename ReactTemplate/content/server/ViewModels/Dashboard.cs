@@ -26,8 +26,20 @@ namespace dotnetify_react_template
     public Person User1 { get; set; } = new Person(); // new{"fdfdf"});
 
     public LisRequestTrans Reqtrans; // => new LisRequestTrans(){};
-    public string TextITA;
-    public string TextLIS;
+    // public string TextITA;
+    // public string TextLIS;
+
+    public string TextITA
+    {
+      get => Get<string>();
+      set => Set(value);
+    }
+
+    public string TextLIS
+    {
+      get => Get<string>();
+      set => Set(value);
+    }
     
     public string ita_edit;
     public string lis_edit;
@@ -38,9 +50,29 @@ namespace dotnetify_react_template
     public int num1 { get; set; }
 
     public string Pick_date_b;
-    public int Edition_b;
-    public int Area_b;
-    public int OffsetDay_b;
+
+    // public DateTime Pick_date => DateTime.Now;
+    // public string Pick_date_c;
+    // public DateTime Pick_date;
+    // public DateTime Pick_date_nn = DateTime.Now;       // returns current date and time
+    // public DateTime todaysDate = DateTime.Today;          // returns today's date
+    // public DateTime currentDateTimeUTC = DateTime.UtcNow; // returns current UTC date and time
+    /*
+    public string SelectedDate
+    {
+      get => Get<string>();
+      set
+      {
+        Set(value);
+        Changed(nameof(Pick_date_c));
+      }
+    }
+    */
+    // public DateTime Pick_date; //  => DateTime.Now;
+
+    public int Edition_b = 3;
+    public int Area_b = 4;
+    public int OffsetDay_b = 1;
 
     // Prove fatte per vedere se e' possibile passare al frontend degli oggetti invece che solo tipi primitivi
     public object RequestData;
@@ -88,6 +120,7 @@ namespace dotnetify_react_template
     };
 
     public Dashboard(ILiveDataService liveDataService, IUserRepository _userRepository) {
+      
       _connectionString = liveDataService.getCs();
       AddProperty<string>("Download").SubscribeTo(liveDataService.Download);
       AddProperty<string>("Upload").SubscribeTo(liveDataService.Upload);
@@ -122,6 +155,8 @@ namespace dotnetify_react_template
       ita_edit = "";
       lis_edit = "";
 
+      Pick_date_b = "2015-05-03";
+
       this.OnRouted((sender, e) =>
       {
         Console.WriteLine("Dashboard - Nameeeeee -------------------------: " + _userRepository.GetUserNetworkId());
@@ -131,29 +166,37 @@ namespace dotnetify_react_template
         Console.WriteLine("Dashboard - User1.Name = " + this.User1.Name); // afsfsdfg"; //  = new Person("test_person");
         Console.WriteLine("Dashboard - num1 = " + this.num1); // afsfsdfg"; //  = new Person("test_person");
 
+        Pick_date_b = "2015-05-09";
+        // Pick_date = new DateTime(2015, 12, 31);
+        // SelectedDate = "2015-05-03";
+        /*
         var param = e?.From?.Replace($"{AppLayout.DashboardPath}/", "");
         if (string.Equals(param, "")){
           Console.WriteLine("Dashboard - e.From param vuoto");
           Reqtrans = new LisRequestTrans(){};
           ita_edit = "";
           lis_edit = "";
-          Pick_date_b = "";
+          // Pick_date_b = "";
         }
         else if (int.TryParse(param, out int id))
         {
           Console.WriteLine("Dashboard - int.TryParse OK, id: " + id);
-          LoadRequest(id);
+          // LoadRequest(id);
           Console.WriteLine("Dashboard - Color.Red: " + Color.Red);
         } else {
           Console.WriteLine("Dashboard - e.From string OK, param: " + param);
           Reqtrans = new LisRequestTrans(){};
           ita_edit = "";
           lis_edit = "";
-          Pick_date_b = "";
+          // Pick_date_b = "";
         }
+        Changed(nameof(Pick_date_b));
+        */
       });
     }
 
+    
+    
     private void LoadRequest(int id) {
       Reqtrans = new LisRequestDBContext(_connectionString).GetLisRequestTrans(id); // GetLisRequest(id);
       TextITA = Reqtrans.TextITA; // "FirstName";
@@ -162,7 +205,8 @@ namespace dotnetify_react_template
       lis_edit = Reqtrans.TextLIS;
 
       Pick_date_b = Reqtrans.ForecastDate;
-      Console.WriteLine("Dashboard - Pick_date_b: " + Pick_date_b);
+      // Pick_date = Reqtrans.ForecastDate;
+      Console.WriteLine("Dashboard LoadRequest - Pick_date_b: " + Pick_date_b);
       VersionITA = Reqtrans.VersionITA;
       Color.Red = Reqtrans.VersionITA;
     }

@@ -88,6 +88,10 @@ function getTextByVersion(timeFrameJsonArray, id_edition, id_forecast_type, offs
   }
 };
 
+function getShowDate (date_object, offset) {
+  return new Date(new Date().setDate(date_object.getDate() + offset)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0];
+};
+
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
@@ -102,8 +106,9 @@ class Dashboard extends React.Component {
       vmArg: arg
     });
     this.dispatch = state => this.vm.$dispatch(state);
-    console.log('Dashboard - dotnetify: ', dotnetify);
-    console.log('Dashboard - props: ', props);
+
+    console.log('Dashboard - constructor - dotnetify: ', dotnetify);
+    console.log('Dashboard - constructor - props::::: ', props);
     
     this.state = {
       dirty:                    false,          // Flag di abilitazione bottone di salvataggio  - se e' stata effettuata una modifica in un campo TextArea, diventa true
@@ -131,29 +136,31 @@ class Dashboard extends React.Component {
       sign_array:               [],             // Array associativo name -> {id: int, name: string} per poter recuperare l'id in handleChips e costruire sign_json
       chips:                    [],             // Chips delle parole inserite in lis_edit - verde: trovata, rossa: non trovata
       allWordsFound:            false,          // true se tutte le parole in lis_edit hanno corrispondente segno (tutti chips verdi)
-
-      pickDate:                 new Date(),     // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
+      
+      // pickDate:                 location.pathname == '/' ||  location.pathname == '/Meteo' ? new Date() : new Date(Date.parse(location.pathname.split('/')[2].split('_')[0])),
+      pickDate:                 new Date('1970-01-01'),     // '2020-04-21'), // pickDate vael la data odeirna, oppure la data di un video caricato dalla lista I miei video
       showDate:                 '',             // data della previsione (quindi es. domani rispetto a oggi nel caso di +1)
+      
       offset_day:               1,              // Numero di giorni di offset rispetto a oggi del testo attuale - per tutte le aree meno l'ultima (tutta Italia) dovrebbe sempre essere +1, l'ultima area invece ha di solito i due valori +2 e +3
       offsets:                  [],             // Possibili valori di offset nella lista di valori, per la data selezionata - lista ricevuta da backend dal DB
       offsets_calcolati_2:      [],             // Possibili valori di offset nella lista di valori, per la data selezionata - lista calcolata in frontend sui distinct dei valori da array json
       testi:                    null,           // Memorizza il contenuto totale dei forecast della data corrente, per non dover fare altre chiaamte API quando si cambia edizione o forecast_type // this.state.testi.timeframe.editions
       
-      ita_id:                   0,              // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente - viene incrementato in caso di publish/save
+      ita_id:                   0, // location.pathname == '/' ||  location.pathname == '/Meteo' ? 0 : location.pathname.split('/')[2].split('_')[3],              // Memorizza l'ID del testo ITA corrente - bisogna portarselo dietro perche' nuove versioni salvate avranno sempre lo stesso ID ma versione crescente - viene incrementato in caso di publish/save
       ita_orig:                 'Attendere..',  // Testo ITA di default prima del caricamento
       // ita_edit:                 'Attendere..',
       ita_edit_version:         0,
       ita_notes:                'Attendere..',
 
-      lis_id:                   0,
+      lis_id:                   0, // location.pathname == '/' ||  location.pathname == '/Meteo' ? 0 : location.pathname.split('/')[2].split('_')[4],
       lis_orig:                 'Attendere..',
       // lis_edit:                 'Attendere..',
       lis_edit_version:         0,
       lis_notes:                'Attendere..',
       
-      id_edition:               1,              // ID dell'edizione visualizzata, di default ID 1, cioe' 09:30 (bisognerebbe farla diventare dinamica - visualizzare di default l'edizione piu' vicina all'ora client o server corrente
+      id_edition:               1, // location.pathname == '/' ||  location.pathname == '/Meteo' ? 1 : location.pathname.split('/')[2].split('_')[1],              // ID dell'edizione visualizzata, di default ID 1, cioe' 09:30 (bisognerebbe farla diventare dinamica - visualizzare di default l'edizione piu' vicina all'ora client o server corrente
       id_text_trans:            0,              // ID della traduzione del testo corrente (id_text_trans su lis_text_trans2)
-      id_forecast_type:         1,              // ID del tipo di forecast di default (1, cioe' NORD)
+      id_forecast_type:         1, // location.pathname == '/' ||  location.pathname == '/Meteo' ? 1 : location.pathname.split('/')[2].split('_')[2],              // ID del tipo di forecast di default (1, cioe' NORD)
       id_forecast:              0,              // ID del record di forecast corrente (dipende dal giorno di offset)
       id_forecast_data:         0,              // ID del record di forecast_data corrente (dipende dal giorno di offset) - da passare alla funzione di publish, che fa anche un save prima
       
@@ -169,6 +176,7 @@ class Dashboard extends React.Component {
       // toggle1:                  false,
       // toggle2:                  false
     };
+
     // this.onVideoChildClicked = this.onVideoChildClicked.bind(this);
     // this.onCircProgressCompleted = this.onCircProgressCompleted.bind(this);
     // this.handleUpdateTextAreas = this.handleUpdateTextAreas.bind(this);
@@ -178,6 +186,61 @@ class Dashboard extends React.Component {
   };
   abortController = new AbortController();
   mySignal = this.abortController.signal;
+  
+  handleBodyKeyDown = (event) => {
+    // console.log(document.activeElement);
+    var focused = document.activeElement;
+    if (!focused || focused == document.body) {
+      console.log('Dashboard handleBodyKeyDown event.keyCode: ', event.keyCode);
+      switch( event.code ) {
+        case 'ArrowLeft': // 37: //sx
+          // this.setState(
+          // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()-1))}); //  , // new Date(this.state.pickDate.getDate() - 1)}, 
+          // console.log(this.state.pickDate)
+          var ieri = new Date(new Date().setDate(this.state.pickDate.getDate() - 1));
+          console.log('Dashboard - handleBodyKeyDown - ieri: ', ieri);
+          this.handleOpenDialogChangePicker(ieri);
+          // );
+          // this.handleChangePicker_dashboard( new Date(new Date().getDate() - 1) );
+          break;
+        case 'ArrowRight': // 39: // dx
+          // this.setState(
+          // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()+1))}); // , // new Date(this.state.pickDate.getDate() - 1)}, 
+          // console.log(this.state.pickDate)
+          var domani = new Date(new Date().setDate(this.state.pickDate.getDate() + 1));
+          console.log('Dashboard - handleBodyKeyDown - domani: ', domani);
+          this.handleChangePicker_dashboard(domani);
+            // );
+          break;
+        case 'ShiftLeft': // 37: //sx
+          this.setState(
+            {id_edition: 1},
+            this.handleChangeEditionId_tab(this.state.id_edition)
+          );
+          break;
+        case 'ShiftRigth': // 37: //sx
+          this.setState(
+            {id_edition: 3},
+            this.handleChangeEditionId_tab(this.state.id_edition)
+          );
+          break;
+        case 'ControlLeft':
+          this.setState(
+            {id_forecast_type: Math.max((this.state.id_forecast_type - 1 ), 1)},
+            this.handleChangeForecastTypeId_tab(this.state.id_forecast_type)
+          );
+          break;
+        case 'ControlRigth':
+          this.setState(
+            {id_forecast_type: Math.min((this.state.id_forecast_type + 1 ), 7)},
+            this.handleChangeForecastTypeId_tab(this.state.id_forecast_type)
+          );
+          break;        
+        default: 
+          break;
+      }
+    }
+  };
 
   componentWillUnmount() {
     console.log('Dashboard - componentWillUnmount()');
@@ -189,80 +252,7 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleBodyKeyDown);
-    // this.state.testi.timeframe.editions = [];
-    // this.handleChangePicker_dashboard(new Date());
-    // console.log('Dashboard - al mount del componente, caricamento dati meteo data corrente - area NORD di default');
-    console.log('Dashboard - componentDidMount this.state.pickDate: ', this.state.pickDate);
     this.handleGetSigns();
-    // console.log('Dashboard - componentDidMount this.state-------------------: ', this.state);
-    // console.log('Dashboard - g_username: ', g_username);
-    // console.log('Dashboard - g_userid: ', g_userid);
-
-    // new Date(new Date().setDate(this.state.pickDate.getDate() + 1)).toString()
-    // let options = {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-    
-    this.setState({
-      showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + 1)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
-    });
-    
-    // 'Printed on ' + new Date().toLocaleTimeString('it-it', options);
-  };
-
-  handleBodyKeyDown = (event) => {
-    // console.log(document.activeElement);
-    var focused = document.activeElement;
-    if (!focused || focused == document.body) {
-      console.log('Dashboard handleBodyKeyDown event.keyCode: ', event.keyCode);
-      switch( event.keyCode ) {
-        case 37:
-          // this.setState(
-          // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()-1))}); //  , // new Date(this.state.pickDate.getDate() - 1)}, 
-          // console.log(this.state.pickDate)
-          var ieri = new Date(new Date().setDate(this.state.pickDate.getDate() - 1));
-          console.log('Dashboard - handleBodyKeyDown - ieri: ', ieri);
-          this.handleOpenDialogChangePicker(ieri);
-          // );
-          // this.handleChangePicker_dashboard( new Date(new Date().getDate() - 1) );
-          break;
-        case 39:
-          // this.setState(
-          // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()+1))}); // , // new Date(this.state.pickDate.getDate() - 1)}, 
-          // console.log(this.state.pickDate)
-          var domani = new Date(new Date().setDate(this.state.pickDate.getDate() + 1));
-          console.log('Dashboard - handleBodyKeyDown - domani: ', domani);
-          this.handleChangePicker_dashboard(domani);
-            // );
-          break;
-        /*
-        case 38:
-          this.setState(
-            {id_edition: 1},
-            this.handleChangeEditionId_tab(this.state.id_edition)
-          );
-          break;
-        case 40:
-          this.setState(
-            {id_edition: 3},
-            this.handleChangeEditionId_tab(this.state.id_edition)
-          );
-          break;
-        case 33:
-          this.setState(
-            {id_forecast_type: Math.max((this.state.id_forecast_type - 1 ), 1)},
-            this.handleChangeForecastTypeId_tab(this.state.id_forecast_type)
-          );
-          break;
-        case 34:
-          this.setState(
-            {id_forecast_type: Math.min((this.state.id_forecast_type + 1 ), 7)},
-            this.handleChangeForecastTypeId_tab(this.state.id_forecast_type)
-          );
-          break;
-        */
-        default: 
-          break;
-      }
-    }
   };
 
   handleGetSigns = _ => {
@@ -288,20 +278,47 @@ class Dashboard extends React.Component {
           // return accumulator
           return r;
         }, {});
+        
         console.log('Dashboard - handleGetSigns data: ',       data); // 0: {id: 60, name: "a"}
         console.log('Dashboard - handleGetSigns sign_group: ', sign_group);
         console.log('Dashboard - handleGetSigns sign_names: ', sign_names);
         console.log('Dashboard - handleGetSigns sign_array: ', sign_array);
 
+        // this.setState({
+        // sign_json:      data,
+        // pickDate:          location.pathname == '/' ||  location.pathname == '/Meteo' ? new Date() : new Date(Date.parse(location.pathname.split('/')[2].split('_')[0]))
+        // }, () => {
         this.setState({
-            // sign_json:      data,
-            sign_names:        sign_names,
-            sign_array:        sign_array
-            // sign_filtered:  sign_iniz
+          sign_names:        sign_names,
+          sign_array:        sign_array
           }, () => {
-            this.handleChangePicker_dashboard(this.state.pickDate);
-          }
-        );
+            if (location.pathname == '/' ||  location.pathname == '/Meteo')
+              this.setState({
+                // pickDate:                 location.pathname == '/' ||  location.pathname == '/Meteo' ? new Date() : new Date(Date.parse(location.pathname.split('/')[2].split('_')[0])),
+                pickDate:                 new Date(),
+                // showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + 1)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+              //});
+              }, () => {
+                this.handleChangePicker_dashboard(this.state.pickDate);
+              })
+            else {
+              // alert('>'+location.pathname.split('/')[2].split('_')[2]+'<');
+              this.setState({
+                  pickDate:                 new Date(Date.parse(location.pathname.split('/')[2].split('_')[0])),
+                  ita_id:                   parseInt(location.pathname.split('/')[2].split('_')[3]),
+                  ita_edit_version:         parseInt(location.pathname.split('/')[2].split('_')[5]),
+                  lis_id:                   parseInt(location.pathname.split('/')[2].split('_')[4]),
+                  lis_edit_version:         parseInt(location.pathname.split('/')[2].split('_')[6]),
+                  id_edition:               parseInt(location.pathname.split('/')[2].split('_')[1]),
+                  id_forecast_type:         parseInt(location.pathname.split('/')[2].split('_')[2]),
+                  id_forecast:              parseInt(location.pathname.split('/')[2].split('_')[7]),
+                  id_forecast_data:         parseInt(location.pathname.split('/')[2].split('_')[8])
+                }, () => {
+                  this.handleChangePicker_dashboard(this.state.pickDate);
+              });
+            }
+          });
+          // );
       })
       .catch(error => {
         console.log('Dashboard - handleGetSigns - Error: ', error);
@@ -310,17 +327,37 @@ class Dashboard extends React.Component {
 
   handleChangeEditionId_tab = (value) => {
     console.log('handleChangeEditionId_tab - value: ', value);
-    console.log('handleChangeEditionId_tab - this.state.offsets_calcolati_2[value]: ', this.state.offsets_calcolati_2[value]);
+    // console.log('handleChangeEditionId_tab - this.state.offsets_calcolati_2[value]: ', this.state.offsets_calcolati_2[value]);
+    /*
     this.setState({
       id_edition: value,
       // offsets:    (undefined === this.state.offsets_calcolati_2[value] ? [] : this.state.offsets_calcolati_2[value]) // Per evitare un errore js che incastra la pagina
-      offsets:          this.state.offsets_calcolati_2[value] //  (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2/*.slice(1)*/ : []),
+      offsets:          this.state.offsets_calcolati_2[value] //  (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2 : []),
     }, this.handleUpdateTextAreas);
+    */
+
+    this.state.id_forecast_type === 7 ? 
+      this.setState({
+        id_edition:       value,
+        offsets:          this.state.offsets_calcolati_2[value], //  (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2/*.slice(1)*/ : []),
+        offset_day:       this.state.offsets_calcolati_2[value][1], // (undefined === this.state.offsets[1] ? 1 : this.state.offsets[1]), // Imposta il valore di offset_day corrente al secondo vaore possibile se visualizza TUTTA ITALIA
+        // showDate:         new Date(new Date().setDate(this.state.pickDate.getDate() + this.state.offsets_calcolati_2[value][1])).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+        showDate:         getShowDate(this.state.pickDate, this.state.offsets_calcolati_2[value][1])
+      }, this.handleUpdateTextAreas)
+    :
+      this.setState({
+        id_edition:       value,
+        offsets:          this.state.offsets_calcolati_2[value], // (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2 : []),
+        offset_day:       this.state.offsets_calcolati_2[value][0], // (undefined === this.state.offsets[0] ? 1 : this.state.offsets[0]),
+        // showDate:        new Date(new Date().setDate(this.state.pickDate.getDate() + this.state.offsets_calcolati_2[value][0])).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+        showDate:         getShowDate(this.state.pickDate, this.state.offsets_calcolati_2[value][0])
+      }, this.handleUpdateTextAreas); //.id});
+
   };
 
   handleChangeForecastTypeId_tab = (value) => { // (event, index, value) => {
     console.log('handleChangeForecastTypeId_tab - value: ', value);
-    console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2:::::::::: ', this.state.offsets_calcolati_2);
+    // console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2:::::::::: ', this.state.offsets_calcolati_2);
     // console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2.shift():: ', this.state.offsets_calcolati_2.shift());
     // console.log('handleChangeForecastTypeId_tab - this.state.offsets_calcolati_2.slice(1): ', this.state.offsets_calcolati_2.slice(1));
     // Si era pensato di togliere il primo valore (di solito +1) dall'array offsets quando si visualizza le voci 'TUTTA ITALIA'
@@ -332,14 +369,16 @@ class Dashboard extends React.Component {
         id_forecast_type: value,
         offsets:          this.state.offsets_calcolati_2[this.state.id_edition], //  (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2/*.slice(1)*/ : []),
         offset_day:       this.state.offsets_calcolati_2[this.state.id_edition][1], // (undefined === this.state.offsets[1] ? 1 : this.state.offsets[1]), // Imposta il valore di offset_day corrente al secondo vaore possibile se visualizza TUTTA ITALIA
-        showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + this.state.offsets_calcolati_2[this.state.id_edition][1])).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+        // showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + this.state.offsets_calcolati_2[this.state.id_edition][1])).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+        showDate:         getShowDate(this.state.pickDate, this.state.offsets_calcolati_2[this.state.id_edition][1])
       }, this.handleUpdateTextAreas)
     :
       this.setState({
         id_forecast_type: value,
         offsets:          this.state.offsets_calcolati_2[this.state.id_edition], // (this.state.offsets.length > 0 ? this.state.offsets_calcolati_2 : []),
         offset_day:       this.state.offsets_calcolati_2[this.state.id_edition][0], // (undefined === this.state.offsets[0] ? 1 : this.state.offsets[0]),
-        showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + this.state.offsets_calcolati_2[this.state.id_edition][0])).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+        // showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + this.state.offsets_calcolati_2[this.state.id_edition][0])).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+        showDate:         getShowDate(this.state.pickDate, this.state.offsets_calcolati_2[this.state.id_edition][0])
       }, this.handleUpdateTextAreas); //.id});
   };
 
@@ -347,7 +386,8 @@ class Dashboard extends React.Component {
     console.log('handleChangeOffsetDay - value: ', value);
     this.setState({
       offset_day: value,
-      showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + value)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+      // showDate: new Date(new Date().setDate(this.state.pickDate.getDate() + value)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+      showDate:         getShowDate(this.state.pickDate, value)
     }, this.handleUpdateTextAreas); //.id});
   };
     
@@ -356,7 +396,7 @@ class Dashboard extends React.Component {
    * La selezione di una data e' l'unica operazione che carica i dati di un nuov giorno
    * Questa versione e' quella pilotata dal picker qui nella dashboard stessa - ce n'e' anche una vesione che passa il bind a un eventuale componente child
    */
-  handleChangePicker_dashboard = date_object => {
+  handleChangePicker_dashboard = (date_object) => {
     var datestring1 = (
       "0" + 
       date_object.getDate()).slice(-2) + 
@@ -368,16 +408,17 @@ class Dashboard extends React.Component {
       ("0" + date_object.getHours()).slice(-2) + 
       ":" + 
       ("0" + date_object.getMinutes()).slice(-2);
-    var datestring2 = 
+    
+    var datestring2 = (
       date_object.getFullYear() + 
       "-" + 
       ("0"+(date_object.getMonth()+1)).slice(-2) + 
       "-" + 
-      ("0" + date_object.getDate()).slice(-2);
+      ("0" + date_object.getDate()).slice(-2));
 
-    console.log('handleChangePicker_dashboard - datestring1: ', datestring1);
-    console.log('handleChangePicker_dashboard - this.state.Pick_date_b: ', this.state.Pick_date_b);
-    console.log('handleChangePicker_dashboard - datestring2: ', datestring2);
+    // console.log('handleChangePicker_dashboard - datestring1: ', datestring1);
+    // console.log('handleChangePicker_dashboard - this.state.Pick_date_b: ', this.state.Pick_date_b);
+    // console.log('handleChangePicker_dashboard - datestring2: ', datestring2);
 
     fetch("/api/values/meteo/" + datestring2,
       { signal: this.mySignal }
@@ -385,7 +426,7 @@ class Dashboard extends React.Component {
         return response.json();
       })
       .then(data => {
-        console.log('handleChangePicker_dashboard - fetch "/api/values/meteo/' + datestring1 + '" data: ', data);
+        console.log('handleChangePicker_dashboard - fetch "/api/values/meteo/' + datestring2 + '" data: ', data);
         // Dati non trovati per la combinazione di data/edizione/forecast_type_id        
         if (data.id_day == null) {
           this.setState({
@@ -396,21 +437,13 @@ class Dashboard extends React.Component {
             ita_orig:         'Nessun dato per la data selezionata',
             ita_edit:         'Nessun dato per la data selezionata',
             lis_orig:         'Nessun dato per la data selezionata',
-            lis_edit:         'Nessun dato per la data selezionata'
+            lis_edit:         'Nessun dato per la data selezionata',
+            showSnackbar:     false,
+            showDialog:       false,
+            showDate:         getShowDate(this.state.pickDate, 1)
           }, () => this.setState({pickDate:         date_object}, this.handleCloseDialog)
           ) // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
         }
-        /*
-        // Arrivi da link nella tabella I miei video
-        else if (this.state.Pick_date_b != '') {
-          this.setState({
-            testi:            data,
-            // pickDate:     this.state.Pick_date_b,
-            showActions:  true,
-            dirty:        false
-          }, this.handleChips({keyCode: 32, target: {value: this.state.lis_edit}})); // this.handleCloseDialog);
-        }
-        */
         else {
           // La query di estrazione testi contiene dei valori di offset, ma non sono corretti (sono globali per tutte le edition quando invece per ogni edition possono cambiare)
           // Si e' deciso per ora di calcolarli lato frontend
@@ -428,9 +461,11 @@ class Dashboard extends React.Component {
           let offsets_calcolati_2 = [];
           offsets_calcolati_2[1] = [...new Set( data.timeframe.editions[0].forecast_data
                 .filter(data => {return data.edition == 1})
+                .filter(function (el) {return el != null;})
                 .map(data => data.offset_days)) ];
           offsets_calcolati_2[3] = [...new Set( data.timeframe.editions[0].forecast_data
                 .filter(data => {return data.edition == 3})
+                .filter(function (el) {return el != null;})
                 .map(data => data.offset_days)) ];
           // offsets_calcolati_2 = offsets_calcolati_2.filter(Array);
           console.log('handleChangePicker_dashboard - offsets_calcolati_2: ', offsets_calcolati_2);
@@ -454,45 +489,30 @@ class Dashboard extends React.Component {
             99);
 
           this.setState({
-            // pickDate:         date_object,
-            showActions:      true,
-            dirty:            false,
-            testi:            data,
+            // pickDate:              date_object,
+            showActions:            true,
+            dirty:                  false,
+            testi:                  data,
 
             offsets_calcolati_2:    offsets_calcolati_2,
-            offset_day:       offset_day_current_edition,  // offsets_calcolati_2[1][0], //data.timeframe.editions[0].offsets.min,
-            offsets:          offset_days_current_edition, // offsets_calcolati_2[1], // Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
-            /*
-            ita_orig:         orig.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            ita_edit:         edit.text_ita, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_orig:         orig.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
-            lis_edit:         edit.text_lis, // }); // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
+            offset_day:             offset_day_current_edition,  // offsets_calcolati_2[1][0], //data.timeframe.editions[0].offsets.min,
+            offsets:                offset_days_current_edition, // offsets_calcolati_2[1], // Array.from(Array( data.timeframe.editions[0].offsets.max)).map((e,i) => i + data.timeframe.editions[0].offsets.min),
             
-            // Ogni volta che le textare cambiano, cambia l'id di traduzione e l'id di forecast_data
-            id_text_trans:    edit.id_text_trans,
-            id_forecast:      edit.id_forecast,
-            id_forecast_data: edit.id_forecast_data,
-            ita_id:           orig.id_text_ita,
-            ita_edit_version: edit.it_version,
-            ita_notes:        'Note_dasboard_ita',
-            lis_id:           orig.id_text_lis,
-            lis_edit_version: edit.it_version,
-            lis_notes:        'Note_dasboard_lis',
-            // }, () => {
-            // this.setState({
-            */
-            showSnackbar:     false,
-            showDialog:       false
-          // }, this.handleUpdateTextAreas); // () => {
-          }, () => this.setState({
-            pickDate:         date_object,
-            // showDate:         new Date(new Date().setDate(this.state.pickDate.getDate() + 1)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+            showSnackbar:           false,
+            showDialog:             false,
+            showDate:               getShowDate(this.state.pickDate, offset_day_current_edition)
+            // }, this.handleUpdateTextAreas); // () => {
+            // }, () => this.setState({
+            // pickDate:               date_object,
+            // showDate:             new Date(new Date().setDate(date_object.getDate() + 1)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+            // showDate:         new Date(new Date().setDate(this.state.pickDate.getDate() + 1)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+            // .toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
             // new Date(new Date().setDate(this.state.pickDate.getDate() + 1)).toLocaleTimeString('it-it', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-            }, this.handleUpdateTextAreas)
-          );
+            }, this.handleUpdateTextAreas);
+          // );
           // });
-            // }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
-            // console.log('handleChangePicker_dashboard - this.state: ', this.state);
+          // }, this.handleChips({keyCode: 32, target: {value: edit.text_lis}})); // this.handleCloseDialog);
+          // console.log('handleChangePicker_dashboard - this.state: ', this.state);
           // });
           // console.log('handleChangePicker_dashboard - this.state: ', this.state);
         }
@@ -590,11 +610,9 @@ class Dashboard extends React.Component {
       snackbarMessage:    'Attendere..',
       showSnackbar:       false,
       path_videogen:      null,
-
       // this.setState({
-      showDate: new Date(new Date().setDate(date_object.getDate() + this.state.offset_day)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
-    // });
-
+      // showDate: new Date(new Date().setDate(date_object.getDate() + this.state.offset_day)).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0]
+      // });
     }, () => this.handleChangePicker_dashboard(date_object));
   };
   
@@ -721,28 +739,7 @@ class Dashboard extends React.Component {
     console.log('Dashboard handlePreview - creazione anteprima');
     console.log('Dashboard handlePreview - non salva nulla su DB');
     console.log('Dashboard handlePreview - parte un setInterval che fa vedere la rotella nel video');
-    // Attiva il progress sul player a intervalli di 1 secondo
-    var keepVideoLoading = setInterval(function() {
-      document.getElementById("meteo_video").load();
-    }, 1000);
-    // let paaa = '';
-    /*
-    fetch("/api/values/request",
-    {
-      signal: this.mySignal,
-      method: 'POST',
-      body: "'"+JSON.stringify({
-        name_video: this.state.videoName,
-        id: this.state.id_text_trans,
-        path_video: this.state.path_videogen, // '/path/to/video_idtrans'+this.state.id_text_trans,
-        notes: 'note_request_idtrans'+this.state.id_text_trans
-      })+"'",
-      headers: {'Content-Type': 'application/json'}
-    })
-    .then(res => res.json())
-    .then(p => {
-      console.log('handlePreview - Risultato request POST: ', p);
-    */
+    
     this.dispatch({
       StartObserve: { // I metodi Start e Stop hanno gli stessi parametri di Save ma solo per comodita' di implementazione, non servono
         IdUserEdit: 2,
@@ -759,8 +756,12 @@ class Dashboard extends React.Component {
     this.setState({
       previewing:       true,
       justPreviewed:    false,
+      path_videogen:    ''
       // showVideoPreview: true // Doveva servire per visualizzare o meno l'anteprima - non piu' usato, il player video e' visibile sempre
     }, () => {
+      var keepVideoLoading = setInterval(function() {
+        document.getElementById("meteo_video").load();
+      }, 1000);
       // var h = 
       fetch(
         "/api/values/preview",
@@ -812,7 +813,7 @@ class Dashboard extends React.Component {
         this.setState({
           // path_postergen: p.output_preview + '.jpg',
           path_videogen: p.output_preview + '.mp4',
-          justPreviewed:    true,
+          justPreviewed: true,
           previewing:    false,
           snackbarAutoHideDuration: 2000 // Rimetti a 2 secondi
         }, this.handleCloseSnackBar); // this.handleCloseDialog); // Niente dialog per la preview - c'e' gia' il progress circolare
@@ -920,7 +921,10 @@ class Dashboard extends React.Component {
               justPublished:    true
             }, this.handleCloseDialog);
             */
-            window.open('ftp://anonymous:anonymous@localhost/','ftp','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=400,height=350');
+            location.hostname === "localhost" ?
+              window.open('ftp://anonymous:anonymous@localhost/','ftp','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=400,height=350')
+            :
+              window.open('ftp://rai_meteo_lis:Corso_Giambone_68@10.54.131.143/','ftp','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=400,height=350');
             this.setState({
               ita_edit_version: this.state.ita_edit_version + 1,
               lis_edit_version: this.state.lis_edit_version + 1,
@@ -948,7 +952,7 @@ class Dashboard extends React.Component {
   };
 
   render() {
-    let { dirty, showActions, justTranslated, justSaved, justPreviewed, justPublished } = this.state;
+    let { dirty, showActions, justTranslated, justSaved, justPreviewed, justPublished, TextITA } = this.state;
 
     const dashboardStyles = {
       dialogTitle: {
@@ -999,7 +1003,8 @@ class Dashboard extends React.Component {
       <MuiThemeProvider muiTheme={ThemeDefault}>
         <BasePage title="Meteo" navigation="Applicazione / Meteo">
           <React.Fragment>
-            <div className="mr-auto" style={{visibility: (location.hostname === "localhost" ? 'show' : 'hidden')}}>
+          { location.hostname === "localhost" ?
+            <div className="mr-auto">
               Pickdate: {this.state.pickDate.toString()}<br />
               Offset_day: {this.state.offset_day}<br />
               Offsets: {this.state.offsets.join(',')}<br />
@@ -1009,40 +1014,44 @@ class Dashboard extends React.Component {
               ID forecast: {this.state.id_forecast}<br />
               ID forecast data: {this.state.id_forecast_data}<br />
             </div>
+          : null }
             <div>
               <RenderConsoleLog>{this.state}</RenderConsoleLog>
+              <Tabs style={{width: '100%', float: 'left'}}>
+                <Tab style={{fontSize: 18, fontWeight: 'bold', textTransform: 'none' }} buttonStyle={{paddingLeft: '55px', alignItems: 'flex-start'}} label={'Previsione per ' + this.state.showDate}></Tab>
+              </Tabs>
               <Toolbar style={{
                 backgroundColor: 'rgb(0, 188, 212)',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'left',
                 justifyContent: 'center',
                 height: '48px',
                 paddingLeft: '60px',
               }}>
+              {/* ref={this.datepick_focus} */}
                 <ToolbarGroup firstChild={true} style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}}>
-                  <ToolbarTitle text="Data" style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold'}} />
-                  <DatePicker value={this.state.pickDate} onChange={this.handleChangePicker_dashboard} ref={this.datepick_focus} />
+                  <ToolbarTitle text={"Dati televideo di " + this.state.pickDate.toLocaleDateString([], {  weekday: 'long'}) } style={{paddingLeft: 20, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold', float: 'left'}} />
+                  <DatePicker value={this.state.pickDate} onChange={this.handleChangePicker_dashboard} />
                   <ToolbarSeparator />
-                  <Tabs style={{width: '60%', float: 'left'}} value={this.state.id_edition} onChange={this.handleChangeEditionId_tab}>
+                  <ToolbarTitle text="Estrazione delle" style={{paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold', float: 'left'}} />
+                  <Tabs style={{width: '10%', float: 'left'}} value={this.state.id_edition} onChange={this.handleChangeEditionId_tab}>
                     <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="09:30" value={1} disabled={this.state.id_edition === 1}></Tab>
                     <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="17:30" value={3} disabled={this.state.id_edition === 3}></Tab>
                   </Tabs>
                   { this.state.id_forecast_type == 7 && this.state.offsets.length > 0 ?
                   <React.Fragment>
                     <ToolbarSeparator />
-                    <ToolbarTitle text="Giorno" style={{padding: 10}} />
+                    <ToolbarTitle text="Giorno" style={{width: '30%', float: 'right', padding: 10}} />
                     <DropDownMenu value={this.state.offset_day} onChange={this.handleChangeOffsetDay} labelStyle={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>
                       {this.state.offsets.map(item => <MenuItem key={item} value={item} primaryText={'+' + item} />)}
                     </DropDownMenu>
                   </React.Fragment>
                   : null}
                   {/*<ToolbarSeparator />*/}
+                  <ToolbarTitle text="" style={{width: '10%', paddingLeft: 10, padding: 10, color: 'white', fontSize: 18, fontWeight: 'bold', float: 'left'}} />
                 </ToolbarGroup>
               </Toolbar>
-              <Tabs style={{width: '100%', float: 'left'}}>
-                <Tab style={{fontSize: 18, fontWeight: 'bold'}} buttonStyle={{paddingLeft: '55px', alignItems: 'flex-start'}} label={'Previsioni per data ' + this.state.showDate}></Tab>
-              </Tabs>
+
               <Tabs style={{width: '100%', float: 'left'}} value={this.state.id_forecast_type} onChange={this.handleChangeForecastTypeId_tab} ref={this.tabforecast_focus}>
                 <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="NORD" value={1} disabled={this.state.id_forecast_type === 1}></Tab>
                 <Tab style={{fontSize: 18, fontWeight: 'bold'}} label="CENTRO E SARDEGNA" value={2} disabled={this.state.id_forecast_type === 2}></Tab>
@@ -1075,6 +1084,7 @@ class Dashboard extends React.Component {
                       onChange={handleEditIta1}
                     />
                     <br />
+                    {TextITA}
                     { showActions ?
                     <React.Fragment>
                       <RaisedButton label="Annulla"         onClick={this.handleCancel}              style={dashboardStyles.buttonStyle} labelStyle={dashboardStyles.buttonLabel} primary={true} disabled={!dirty && !justTranslated} />

@@ -125,7 +125,9 @@ namespace dotnetify_react_template
           .Select(i => new LisRequestTrans(){
               ForecastDate = i.ForecastDate, // "2020-01-01",
               ForecastArea = i.ForecastArea, // "NORD",
-              VersionITA = i.VersionITA, // IdRequest,
+              ForecastId = i.ForecastId,
+              VersionITA = i.VersionITA,
+              VersionLIS = i.VersionLIS,
               TextITA = i.TextITA,
               TextLIS = i.TextLIS,
               Status = "OK",
@@ -154,7 +156,24 @@ namespace dotnetify_react_template
               // Route = this.Redirect("Dashboard", "Meteo")
                 string.Equals(i.ForecastArea, "") ?
                   this.Redirect(AppLayout.TablePage_1Path, i.LisRequest.IdRequest.ToString()) :
-                  this.Redirect(AppLayout.DashboardPath, i.LisRequest.IdRequest.ToString())
+                  this.Redirect(AppLayout.DashboardPath, i.ForecastDate.Replace('/','-') + 
+                  '_' + 
+                  '1' + 
+                  '_' + 
+                  i.ForecastTypeId +
+                  '_' +
+                  i.LisRequest.IdTranslationNavigation.IdTextIta +
+                  '_' +
+                  i.LisRequest.IdTranslationNavigation.IdTextLis +
+                  '_' +
+                  i.VersionITA + 
+                  '_' +
+                  i.VersionLIS +
+                  '_' + 
+                  i.ForecastId +
+                  '_' + 
+                  i.ForecastDataId
+                )// i.LisRequest.IdRequest.ToString())
           })
       // } catch(Exception ex) {
       //  _logger.LogWarning("IEnumerable<LisRequestTrans> Requests => PaginateRequest Ex - Error: " + ex.Message);
