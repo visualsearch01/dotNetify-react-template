@@ -431,7 +431,6 @@ class Dashboard extends React.Component {
         if (data.id_day == null) {
           this.setState({
             testi:            data,
-            // pickDate:         date_object,
             showActions:      false,
             dirty:            false,
             ita_orig:         'Nessun dato per la data selezionata',
@@ -440,8 +439,11 @@ class Dashboard extends React.Component {
             lis_edit:         'Nessun dato per la data selezionata',
             showSnackbar:     false,
             showDialog:       false,
-            showDate:         getShowDate(this.state.pickDate, 1)
-          }, () => this.setState({pickDate:         date_object}, this.handleCloseDialog)
+
+            pickDate:         date_object,
+            showDate:         getShowDate(date_object, 1)
+            // }, () => this.setState({pickDate:         date_object}, this.handleCloseDialog)
+            }, this.handleCloseDialog
           ) // { teams: [{value: '', display: '(Select your favourite team)'}].concat(teamsFromApi) });
         }
         else {
@@ -489,7 +491,6 @@ class Dashboard extends React.Component {
             99);
 
           this.setState({
-            // pickDate:              date_object,
             showActions:            true,
             dirty:                  false,
             testi:                  data,
@@ -500,7 +501,9 @@ class Dashboard extends React.Component {
             
             showSnackbar:           false,
             showDialog:             false,
-            showDate:               getShowDate(this.state.pickDate, offset_day_current_edition)
+
+            pickDate:               date_object,
+            showDate:               getShowDate(date_object, offset_day_current_edition)
             // }, this.handleUpdateTextAreas); // () => {
             // }, () => this.setState({
             // pickDate:               date_object,
