@@ -14,9 +14,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 // using Microsoft.AspNetCore.Session;
 using Microsoft.AspNetCore.SpaServices.Webpack;
+
 using Microsoft.Extensions.Configuration;
-
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -25,13 +24,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MySql.Data.EntityFrameworkCore;
 using MySql.Data.EntityFrameworkCore.Extensions;
+
 using System;
 using System.IO;
-using System.Security.Principal;
-
-using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Principal;
+using System.Text;
 
 namespace dotnetify_react_template
 {
@@ -152,6 +151,7 @@ namespace dotnetify_react_template
       }
       app.UseFileServer();
       app.UseStaticFiles();
+
       // _configuration.GetValue<string>("Paths:video_rel"), _configuration.GetValue<string>("Paths:video_dir")
       var videoPath = Path.Combine(Directory.GetCurrentDirectory(), _configuration.GetValue<string>("Paths:video_rel"), _configuration.GetValue<string>("Paths:video_dir"));
       _logger.LogInformation("Startup.cs - Configure, video relative path: " + videoPath);
@@ -162,6 +162,18 @@ namespace dotnetify_react_template
         FileProvider = new PhysicalFileProvider(videoPath),
         RequestPath = new PathString( _configuration.GetValue<string>("Urls:video_url")) // "/video_gen/mp4")
       });
+      
+      // string rulesPath = Path.Combine(HostingEnvironment.ApplicationPhysicalPath, @"wwwroot\rules");
+
+      string rulesPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\dist\rules");
+      if (!Directory.Exists(rulesPath))
+      {
+        _logger.LogInformation("Startup.cs - Configure, rules path KO: " + rulesPath);
+        Directory.CreateDirectory(rulesPath);
+      }
+      else {
+        _logger.LogInformation("Startup.cs - Configure, rules path OK: " + rulesPath);
+      }
       
       app.UseMvc(routes =>
       {

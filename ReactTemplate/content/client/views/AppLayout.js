@@ -9,7 +9,7 @@ import ThemeDefault from '../styles/theme-default';
 import { blue600 } from 'material-ui/styles/colors';
 import auth from '../auth';
 import FontIcon from 'material-ui/FontIcon';
-import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
+import { BottomNavigation, BottomNavigationItem } from 'material-ui/BottomNavigation';
 import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
@@ -53,14 +53,14 @@ class AppLayout extends React.Component {
     this.state = {
       // Greetings: "",
       // ServerTime: "",
-      rightSidebarOpen: false,
-      leftSidebarOpen: props.width === LARGE,
-      Menus_del1: [],
-      Menus_del2: [],
-      Menus_amm: [],
-      currentDate: new Date().getDate(), //Current Date
+      rightSidebarOpen:   false,
+      leftSidebarOpen:    props.width === LARGE,
+      Menus_del1:         [],
+      Menus_del2:         [],
+      Menus_amm:          [],
+      currentDate:        new Date().getDate(), //Current Date
       BottomNavigationSelectedIndex: 0,
-      deliverable: true // Per ora, pre rendere piu' facile il toggle, deliverable e' bool (false = 1 deliv, true 2 deliv)
+      deliverable:        true // Per ora, pre rendere piu' facile il toggle, deliverable e' bool (false = 1 deliv, true 2 deliv)
     };
     console.log('AppLayout - this: ', this);
     console.log('AppLayout - dotnetify: ', dotnetify);
@@ -133,10 +133,10 @@ class AppLayout extends React.Component {
     console.log('BottomNavigationSelect - index: ', index);
     this.setState({BottomNavigationSelectedIndex: index});
   };
-
-  handleDeliverableToggle2 = id => this.setState({ deliverable: id });
   
   handleSidebarToggle1 = () => this.setState({ leftSidebarOpen: !this.state.leftSidebarOpen });
+  
+  handleRightSidebarToggle = () => this.setState({rightSidebarOpen: !this.state.rightSidebarOpen});
   
   // const handleDeliverableToggle1 = id => this.handleDeliverableToggle2({ deliverable: id });
   handleDeliverableToggle1 = () => {
@@ -146,7 +146,7 @@ class AppLayout extends React.Component {
     console.log('AppLayout.js - g_deliverable: ', g_deliverable);
   };
 
-  handleRightSidebarToggle = () => this.setState({rightSidebarOpen: !this.state.rightSidebarOpen});
+  handleDeliverableToggle2 = id => this.setState({ deliverable: id });
 
   render() {
     let { leftSidebarOpen, Menus_del1, Menus_del2, Menus_amm, UserAvatar, UserName, UserId, deliverable } = this.state;
@@ -284,7 +284,7 @@ class AppLayout extends React.Component {
         </React.Fragment>
       </MuiThemeProvider>
     );
-  }
+  };
 };
 
 AppLayout.propTypes = {

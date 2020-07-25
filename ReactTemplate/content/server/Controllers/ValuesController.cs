@@ -14,7 +14,9 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml.Linq;
 
 namespace dotnetify_react_template.server.Controllers
@@ -444,11 +446,11 @@ namespace dotnetify_react_template.server.Controllers
          * Endpoint GET di download file dist/rules/glossario.csv
          * 
          */
-        [HttpGet("download")]
-        public async Task<IActionResult> Download(string downloadFileName)
+        [HttpGet("download_glos")]
+        public async Task<IActionResult> Download_glos(string downloadFileName)
         {
             // filename = "index.html";
-            downloadFileName = "dist/rules/glossario.csv";
+            downloadFileName = "dist/rules/glossario.csv"; // + downloadFileName; // 
             if (downloadFileName == null)
               return Content("downloadFileName not present");
             var downloadFilePath = Path.Combine(
@@ -467,6 +469,28 @@ namespace dotnetify_react_template.server.Controllers
             return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
         }
 
+        [HttpGet("download_stop")]
+        public async Task<IActionResult> Download_stop(string downloadFileName)
+        {
+            // filename = "index.html";
+            downloadFileName = "dist/rules/stopwords.csv"; // + downloadFileName; // 
+            if (downloadFileName == null)
+              return Content("downloadFileName not present");
+            var downloadFilePath = Path.Combine(
+               Directory.GetCurrentDirectory(),
+               "wwwroot", downloadFileName);
+               
+            // formFile.SaveAsAsync("Your-File-Path"); // [ Async call ]
+            // formFile.SaveAs("Your-File-Path");
+            
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(downloadFilePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
+        }
         /**
          * Endpoint GET meteo di prova - data cablata
          * Tanto per provare
@@ -1310,35 +1334,59 @@ namespace dotnetify_react_template.server.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files)
+        public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files_1)
         {
-            long uploadFileSize = files.Sum(f => f.Length);
-            _logger.LogWarning("ValuesController - upload uploadFileSize:" + uploadFileSize);
-            string uploadFilePath = "";
-            foreach (var formFile in files)
+          var files = Request.Form.Files;
+          string uploadFilePath = "";
+          _logger.LogWarning("ValuesController - upload files.Count:::::::::::::::::: " + files.Count);
+          long totalUploadFileSize = files.Sum(f => f.Length);
+          _logger.LogWarning("ValuesController - upload totalUploadFileSize:::::::::: " + totalUploadFileSize);
+
+          if (totalUploadFileSize == 0)
+            return Ok(new { count = 0, totalUploadFileSize = 0, uploadFilePath = "no files" });
+
+          
+          /*
+          string subPath ="..\..\wwwroot\dist\rules"; // your code goes here
+          bool exists = Directory.Exists(Server.MapPath(subPath));
+          if (!exists) {
+            // Directory.CreateDirectory(Server.MapPath(subPath));
+            _logger.LogWarning("ValuesController - upload subPath non esiste:" + subPath);
+          } else {
+            _logger.LogWarning("ValuesController - upload subPath non esiste:" + subPath);
+          }
+          */
+          foreach (var formFile in files)
+          {
+            _logger.LogWarning("ValuesController - upload foreach formFile.Length::::: " + formFile.Length);
+            _logger.LogWarning("ValuesController - upload foreach formFile.Name::::::: " + formFile.Name);
+            _logger.LogWarning("ValuesController - upload foreach formFile.FileName::: " + formFile.FileName);
+            if (formFile.Length > 0)
             {
-                if (formFile.Length > 0)
-                {
-                    _logger.LogWarning("ValuesController - upload: " + formFile);
-                    _logger.LogWarning("ValuesController - upload: " + formFile);
-                    uploadFilePath = Path.Combine(
-                        Directory.GetCurrentDirectory(),
-                        "wwwroot", "dist/rules/glossario.csv");
-                    
-                    // Path.GetTempFileName();
-                    using (var stream = System.IO.File.Create(uploadFilePath))
-                    {
-                        await formFile.CopyToAsync(stream);
-                    }
-                } else {
-                    _logger.LogWarning("ValuesController - upload: no files");
-                    _logger.LogWarning("ValuesController - upload KO:");
-                    return Ok(new { count = 0, uploadFileSize = 0, uploadFilePath = "no files" });
-                }
+              // _logger.LogWarning("ValuesController - upload: " + formFile);
+              uploadFilePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "dist/rules/" + 
+                Regex.Replace(     Regex.Replace(formFile.FileName, ".*glossario.*", "glossario.csv", RegexOptions.IgnoreCase), ".*stopwords.*", "stopwords.csv", RegexOptions.IgnoreCase)
+                // formFile.FileName.Replace(".*glossario.*", "glossario.csv").Replace(".*stopwords.*", "stopwords.csv")
+              );
+                  
+              // Path.GetTempFileName();
+              using (var stream = System.IO.File.Create(uploadFilePath))
+              {
+                await formFile.CopyToAsync(stream);
+              }
+            } else {
+              _logger.LogWarning("ValuesController - upload " + formFile.FileName + ": no Length");
+              // _logger.LogWarning("ValuesController - upload KO:");
+              // return Ok(new { count = 0, totalUploadFileSize = 0, uploadFilePath = "no files" });
             }
-            // Process uploaded files
-            // Don't rely on or trust the FileName property without validation.
-            return Ok(new { count = files.Count, uploadFileSize, uploadFilePath });
+          }
+          _logger.LogWarning("ValuesController - upload OK");
+          // Process uploaded files
+          // Don't rely on or trust the FileName property without validation.
+          return Ok(new { count = files.Count, totalUploadFileSize, uploadFilePath });
         }
         
         // PUT api/values/menu/5
