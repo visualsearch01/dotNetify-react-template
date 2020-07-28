@@ -965,9 +965,12 @@ namespace dotnetify_react_template.server.Controllers
         {
             _logger.LogWarning("ValuesController.cs - POST translate - value: " + json);
             dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
-            var translateText = results.value;
+            var translateText = results.text;
+            var translateDate = results.date;
+            var translateArea = results.area;
             _logger.LogWarning("ValuesController.cs - POST translate - translateText:");
             Console.WriteLine(translateText);
+            
             try {
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = @"powershell.exe";
@@ -997,13 +1000,21 @@ namespace dotnetify_react_template.server.Controllers
 
                 if (!string.Equals(output[1],"")) {
                     // string base64 = "YWJjZGVmPT0=";
-                    var bytes = System.Text.Encoding.UTF8.GetBytes(output[0]); // out_orig);
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(
+                      "Lemmi non trovati:" + Environment.NewLine +
+                      output[1] + Environment.NewLine +
+                      Environment.NewLine +
+                      "Traduzione: " + Environment.NewLine + 
+                      output[0]
+                    );
+                    
+                    // output[0]); // out_orig);
                     // byte[] bytes = Convert.ToBase64String(gg);
                     // string str = Encoding.UTF8.GetString(bytes);
 
                     startInfo = new ProcessStartInfo();
                     startInfo.FileName = @"powershell.exe";
-                    startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 'no_us' -Param2 'no_pw' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 'oggi'  -Param5 'test'""";
+                    startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 'no_us_manual' -Param2 'no_pw_manual' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 '" + translateDate + @"'  -Param5 '" + translateArea + @"'""";
 
                     startInfo.RedirectStandardOutput = true;
                     startInfo.RedirectStandardError = true;

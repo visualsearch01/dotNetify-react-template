@@ -163,7 +163,7 @@ class Dashboard extends React.Component {
       id_forecast_type:         1, // location.pathname == '/' ||  location.pathname == '/Meteo' ? 1 : location.pathname.split('/')[2].split('_')[2],              // ID del tipo di forecast di default (1, cioe' NORD)
       id_forecast:              0,              // ID del record di forecast corrente (dipende dal giorno di offset)
       id_forecast_data:         0,              // ID del record di forecast_data corrente (dipende dal giorno di offset) - da passare alla funzione di publish, che fa anche un save prima
-      
+      forecast_name_type:       '',
       // path_video:               null,           // Eventuale path video di un testo gia' renderizzato
       // path_postergen:           null,           // Path poster generato in anteprima
       path_videogen:            null,           // Path video generato in anteprima
@@ -575,7 +575,7 @@ class Dashboard extends React.Component {
 
           id_text_trans:    edit.id_text_trans,
           id_forecast:      edit.id_forecast,
-          id_forecast_data: edit.id_forecast_data,
+          forecast_name_type: edit.name_type,
 
           ita_id:           orig.id_text_ita, // });
           ita_edit_version: edit.it_version, // });
@@ -712,7 +712,11 @@ class Dashboard extends React.Component {
       {
         signal: this.mySignal,
         method: 'POST',
-        body: "'"+JSON.stringify({value: btoa(this.state.ita_edit)})+"'", // Attenzione - il btoa Javascript sembra che converte sempre in UTF8, non in Unicode
+        body: "'"+JSON.stringify({
+          text: btoa(this.state.ita_edit),
+          date: new Date(new Date().setDate(this.state.pickDate.getDate())).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0], // this.state.pickDate.toString(),
+          area: this.state.forecast_name_type
+        })+"'", // Attenzione - il btoa Javascript sembra che converte sempre in UTF8, non in Unicode
         headers: {'Content-Type': 'application/json'}
       })
       .then(res => res.json())
