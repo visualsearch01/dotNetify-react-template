@@ -231,7 +231,7 @@ class FormPage extends React.Component {
                       floatingLabelText="Indirizzo FTP di pubblicazione"
                       fullWidth={true}
                       style={forsStyles.textfield}
-                      value='test:test@ftp.rai.it'
+                      value='ftp://rai_meteo_lis:Corso_Giambone_68@10.54.131.143/'
                       onChange={event => this.setState({ IndirizzoFTP: event.target.value, dirty: true })}
                     />
                     <TextField
@@ -239,7 +239,7 @@ class FormPage extends React.Component {
                       floatingLabelText="Email di amministrazione"
                       fullWidth={true}
                       style={forsStyles.textfield}
-                      value='crit@rai.it'
+                      value='andrea.delprincipe@rai.it'
                       onChange={event => this.setState({ IndirizzoEmail: event.target.value, dirty: true })}
                     />
                   </div>

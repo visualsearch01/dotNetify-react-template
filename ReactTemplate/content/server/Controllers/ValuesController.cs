@@ -69,6 +69,7 @@ namespace dotnetify_react_template.server.Controllers
         // private string _connectionStringcs = @"server=localhost;port=3306;database=lis2;user=root;password=root";
         private readonly string _connectionString;
         private readonly string _translatescript;
+        private readonly string _mailscript;
         private readonly string _xmlscript;
         private readonly string _udpscript;
         private readonly string _zipscript;
@@ -116,6 +117,9 @@ namespace dotnetify_react_template.server.Controllers
 
           _translatescript = configuration.GetValue<string>("Scripts:translate");
           _logger.LogWarning("ValuesController.cs - costruttore, script Powershell di translate: " + _translatescript); //_configuration["ConnectionStrings:lis"]);
+
+          _mailscript = configuration.GetValue<string>("Scripts:notfound_mail");
+          _logger.LogWarning("ValuesController.cs - costruttore, script Powershell di invio mail: " + _mailscript); //_configuration["ConnectionStrings:lis"]);
 
           _xmlscript  = configuration.GetValue<string>("Scripts:sentence_xml");
           _logger.LogWarning("ValuesController.cs - costruttore, script Powershell di xml: " + _xmlscript); //_configuration["ConnectionStrings:lis"]);
@@ -976,17 +980,45 @@ namespace dotnetify_react_template.server.Controllers
                 Process process = new Process();
                 process.StartInfo = startInfo;
                 process.Start();
-
+                process.WaitForExit();
                 // string 
-                string[] output = process.StandardOutput.ReadToEnd().Split(
+                string out_orig = process.StandardOutput.ReadToEnd();
+                string[] output = out_orig.Split(
                     new[] { Environment.NewLine },
                     StringSplitOptions.None
                 );
                 // var output = process.StandardOutput.ReadToEnd().Split; // .Replace(System.Environment.NewLine, "");
-                _logger.LogWarning("ValuesController.cs - POST translate powershell output: " + output[0]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output prima riga: " + output[0]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output seconda riga: " + output[1]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output terza riga: " + output[2]);
                 
                 process.Dispose();
+                // GC.Collect(); // Just for the diagnostics..
+
+                if (!string.Equals(output[1],"")) {
+                    // string base64 = "YWJjZGVmPT0=";
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(output[0]); // out_orig);
+                    // byte[] bytes = Convert.ToBase64String(gg);
+                    // string str = Encoding.UTF8.GetString(bytes);
+
+                    startInfo = new ProcessStartInfo();
+                    startInfo.FileName = @"powershell.exe";
+                    startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 'no_us' -Param2 'no_pw' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 'oggi'  -Param5 'test'""";
+
+                    startInfo.RedirectStandardOutput = true;
+                    startInfo.RedirectStandardError = true;
+                    startInfo.UseShellExecute = false;
+                    startInfo.CreateNoWindow = true;
+                    
+                    process = new Process();
+                    process.StartInfo = startInfo;
+                    process.Start();
+                    process.WaitForExit();
+                    process.Dispose();
+                }
                 GC.Collect(); // Just for the diagnostics....
+                // var output = process.StandardOutput.ReadToEnd().Split; // .Replace(System.Environment.NewLine, "");
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output: " + output[0]);
 
                 return Ok("{\"translation\": \"" + output[0] + "\"}");
                 // return Ok("{\"expiresAt\": \"2015-11-03T10:15:57.000Z\", \"status\": \"SUCCESS\", \"relayState\": \"/myapp/some/deep/link/i/want/to/return/to\", \"sessionToken\": \"00Fpzf4en68pCXTsMjcX8JPMctzN2Wiw4LDOBL_9pe\", \"_embedded\": { \"user\": { \"id\": \"00ub0oNGTSWTBKOLGLNR\", \"passwordChanged\": \"2015-09-08T20:14:45.000Z\", \"profile\": { \"login\": \"dade.murphy@example.com\", \"firstName\": \"Dade\", \"lastName\": \"Murphy\", \"locale\": \"en_US\", \"timeZone\": \"America/Los_Angeles\" } } } } ");
