@@ -963,16 +963,22 @@ namespace dotnetify_react_template.server.Controllers
         [HttpPost("translate")]
         public ActionResult Post_translate([FromBody] string json) //  [FromBody] string b)
         {
-            _logger.LogWarning("ValuesController.cs - POST translate - value: " + json);
-            dynamic results = JsonConvert.DeserializeObject<dynamic>(json);
-            var translateText = results.text;
-            var translateDate = results.date;
-            var translateArea = results.area;
-            _logger.LogWarning("ValuesController.cs - POST translate - translateText:");
-            Console.WriteLine(translateText);
+            _logger.LogWarning("ValuesController.cs - POST translate - json: " + json);
+            dynamic values = JsonConvert.DeserializeObject<dynamic>(json);
+            var translateText = values.text;
+            var translateDate = values.date;
+            var translateArea = values.area;
+            _logger.LogWarning("ValuesController.cs - POST translate - translateText: " + (string)values.text);
+            _logger.LogWarning("ValuesController.cs - POST translate - translateDate: " + (string)values.date);
+            _logger.LogWarning("ValuesController.cs - POST translate - translateArea: " + (string)values.area);
+            // Console.WriteLine(translateText);
             
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            Process process = new Process();
+            byte[] bytes = new byte[] {};
+            string out_orig = "";
+            string[] output = new string[] {};
             try {
-                ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = @"powershell.exe";
                 startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _translatescript + @" -Param1 '" + translateText + @"' -Param2 'manual'""";
                 startInfo.RedirectStandardOutput = true;
@@ -980,53 +986,75 @@ namespace dotnetify_react_template.server.Controllers
                 startInfo.UseShellExecute = false;
                 startInfo.CreateNoWindow = true;
                 
-                Process process = new Process();
                 process.StartInfo = startInfo;
                 process.Start();
-                process.WaitForExit();
-                // string 
-                string out_orig = process.StandardOutput.ReadToEnd();
-                string[] output = out_orig.Split(
+                // process.WaitForExit();
+                // string
+
+                out_orig = process.StandardOutput.ReadToEnd();
+                output = out_orig.Split(
                     new[] { Environment.NewLine },
                     StringSplitOptions.None
                 );
                 // var output = process.StandardOutput.ReadToEnd().Split; // .Replace(System.Environment.NewLine, "");
-                _logger.LogWarning("ValuesController.cs - POST translate powershell output prima riga: " + output[0]);
-                _logger.LogWarning("ValuesController.cs - POST translate powershell output seconda riga: " + output[1]);
-                _logger.LogWarning("ValuesController.cs - POST translate powershell output terza riga: " + output[2]);
-                
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output[0]:::: " + output[0]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output[1]:::: " + output[1]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output[2]:::: " + output[2]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output[3]:::: " + output[3]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output[4]:::: " + output[4]);
+                _logger.LogWarning("ValuesController.cs - POST translate powershell output[5]:::: " + output[5]);
+                process.WaitForExit();
                 process.Dispose();
                 // GC.Collect(); // Just for the diagnostics..
 
-                if (!string.Equals(output[1],"")) {
-                    // string base64 = "YWJjZGVmPT0=";
-                    var bytes = System.Text.Encoding.UTF8.GetBytes(
-                      "Lemmi non trovati:" + Environment.NewLine +
-                      output[1] + Environment.NewLine +
-                      Environment.NewLine +
-                      "Traduzione: " + Environment.NewLine + 
-                      output[0]
-                    );
-                    
-                    // output[0]); // out_orig);
+                // if (!string.Equals(output[1],"")) {
+                if (string.Equals(output[1], ""))
+                    output[1] = "Nessuno!";
+
+                // string base64 = "YWJjZGVmPT0=";
+                bytes = System.Text.Encoding.UTF8.GetBytes(
+                  "Lemmi non trovati:" + Environment.NewLine +
+                  output[1] + Environment.NewLine +
+                  Environment.NewLine +
+                  "Traduzione: " + Environment.NewLine + 
+                  output[0]
+                );
+
+            } catch(InvalidOperationException ex){
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
+                _logger.LogWarning(ex.Message);
+                return Ok("{\"translation\": \"" + ex.Message + "\"}");
+            } catch(IndexOutOfRangeException ex){
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
+                _logger.LogWarning(ex.Message);
+                return Ok("{\"translation\": \"" + ex.Message + "\"}");
+            }
+            catch(Exception ex) {
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
+                _logger.LogWarning(ex.Message);
+                return Ok("{\"translation\": \"" + ex.Message + "\"}");
+            }
+
+            
+            // output[0]); // out_orig);
                     // byte[] bytes = Convert.ToBase64String(gg);
-                    // string str = Encoding.UTF8.GetString(bytes);
+            // string str = Encoding.UTF8.GetString(bytes);
+            try {
+                startInfo = new ProcessStartInfo();
+                startInfo.FileName = @"powershell.exe";
+                startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 '$Env:lis_us' -Param2 '$Env:lis_pw' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 '" + translateDate + @"'  -Param5 '" + translateArea + @"'""";
 
-                    startInfo = new ProcessStartInfo();
-                    startInfo.FileName = @"powershell.exe";
-                    startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 'no_us_manual' -Param2 'no_pw_manual' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 '" + translateDate + @"'  -Param5 '" + translateArea + @"'""";
-
-                    startInfo.RedirectStandardOutput = true;
-                    startInfo.RedirectStandardError = true;
-                    startInfo.UseShellExecute = false;
-                    startInfo.CreateNoWindow = true;
-                    
-                    process = new Process();
-                    process.StartInfo = startInfo;
-                    process.Start();
-                    process.WaitForExit();
-                    process.Dispose();
-                }
+                startInfo.RedirectStandardOutput = true;
+                startInfo.RedirectStandardError = true;
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+                
+                process = new Process();
+                process.StartInfo = startInfo;
+                process.Start();
+                // process.WaitForExit();
+                process.Dispose();
+                // }
                 GC.Collect(); // Just for the diagnostics....
                 // var output = process.StandardOutput.ReadToEnd().Split; // .Replace(System.Environment.NewLine, "");
                 _logger.LogWarning("ValuesController.cs - POST translate powershell output: " + output[0]);
@@ -1035,6 +1063,10 @@ namespace dotnetify_react_template.server.Controllers
                 // return Ok("{\"expiresAt\": \"2015-11-03T10:15:57.000Z\", \"status\": \"SUCCESS\", \"relayState\": \"/myapp/some/deep/link/i/want/to/return/to\", \"sessionToken\": \"00Fpzf4en68pCXTsMjcX8JPMctzN2Wiw4LDOBL_9pe\", \"_embedded\": { \"user\": { \"id\": \"00ub0oNGTSWTBKOLGLNR\", \"passwordChanged\": \"2015-09-08T20:14:45.000Z\", \"profile\": { \"login\": \"dade.murphy@example.com\", \"firstName\": \"Dade\", \"lastName\": \"Murphy\", \"locale\": \"en_US\", \"timeZone\": \"America/Los_Angeles\" } } } } ");
                 // return Ok(ff); // new string[] { "value1", "value2_" + product };
             } catch(InvalidOperationException ex){
+                _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
+                _logger.LogWarning(ex.Message);
+                return Ok("{\"translation\": \"" + ex.Message + "\"}");
+            } catch(IndexOutOfRangeException ex){
                 _logger.LogWarning("ValuesController - Error in [HttpPost(\"translate\")]. Error: " + ex.Message);
                 _logger.LogWarning(ex.Message);
                 return Ok("{\"translation\": \"" + ex.Message + "\"}");
