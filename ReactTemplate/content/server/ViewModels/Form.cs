@@ -1,9 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using DotNetify;
 using DotNetify.Routing;
 using DotNetify.Security;
+using Microsoft.Extensions.Logging;
+using dotnetify_react_template.server.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace dotnetify_react_template
 {
@@ -12,12 +14,15 @@ namespace dotnetify_react_template
   {
     private readonly IEmployeeService _employeeService;
     public RoutingState RoutingState { get; set; }
+    ILogger _logger;
+    private string _connectionString; // { get; set; }
     public class EmployeeInfo
     {
       public int Id { get; set; }
       public string Name { get; set; }
       public Route Route { get; set; }
     };
+    
     public class SavedEmployeeInfo
     {
       public int Id { get; set; }
@@ -27,6 +32,17 @@ namespace dotnetify_react_template
       public string IndirizzoFTP { get; set; }
       public string IndirizzoEmail { get; set; }
     };
+
+    public IEnumerable<LisSetting> Settings => 
+      new LisSettingDBContext(_connectionString)
+        .GetLisSettings()
+        .Select(i => new LisSetting(){
+          IdSetting = i.IdSetting,
+          NameSetting = i.NameSetting,
+          ValueSetting = i.ValueSetting,
+          Notes = i.Notes
+        });
+
     public IEnumerable<EmployeeInfo> Employees =>
       _employeeService
         .GetAll()                        // Usa idrettamente la lista di employees e non la lista di settings - 
@@ -37,6 +53,7 @@ namespace dotnetify_react_template
           Name = i.FullName,
           Route = this.Redirect(AppLayout.FormPagePath, i.Id.ToString())
         });
+    
     
     public int Id
     {
@@ -68,9 +85,30 @@ namespace dotnetify_react_template
       get => Get<string>();
       set => Set(value);
     }
+    public string Edition1
+    {
+      get => Get<string>();
+      set => Set(value);
+    }
+    public string Edition2
+    {
+      get => Get<string>();
+      set => Set(value);
+    }
+    public string Edition3
+    {
+      get => Get<string>();
+      set => Set(value);
+    }
     public Action<int> Cancel => id => LoadEmployee(id);
     public Action<SavedEmployeeInfo> Save => changes =>
     {
+      _logger.LogWarning("Form.cs - Save changes:");
+      _logger.LogWarning(changes.PaginaTelevideo);
+      _logger.LogWarning(changes.IndirizzoEmail);
+      _logger.LogWarning(changes.IndirizzoFTP);
+      new LisSettingDBContext(_connectionString).UpdateLisSettings(changes.PaginaTelevideo, changes.IndirizzoEmail, changes.IndirizzoFTP);
+      /*
       var record = _employeeService.GetById(changes.Id);
       if (record != null)
       {
@@ -82,10 +120,25 @@ namespace dotnetify_react_template
         _employeeService.Update(record);
         Changed(nameof(Employees));
       }
+      */
     };
-    public Form(IEmployeeService employeeService)
+    public Form(IEmployeeService employeeService, ILogger<Form> logger)
     {
       _employeeService = employeeService;
+      _logger = logger;
+      _connectionString = employeeService.getCs();
+
+      // PaginaTelevideo = _employeeService.getUrl(); // "fffff";
+      FirstName = _employeeService.get1ed();
+      LastName = _employeeService.get3ed();
+      
+      PaginaTelevideo = _employeeService.getUrl();
+      IndirizzoFTP = _employeeService.getFtp();
+      IndirizzoEmail = _employeeService.getEmail();
+
+      Edition1 = _employeeService.get1ed();
+      Edition2 = _employeeService.get2ed();
+      Edition3 = _employeeService.get3ed();
 
       // La pagina Form carica direttamente i dati senza dover fare una chiamata API
       // perche' durante l'OnRouted del costruttore carica direttamente i dati dell'Employee 1
@@ -93,6 +146,7 @@ namespace dotnetify_react_template
       {
         Console.WriteLine("Form.cs - Costruttore - sender: " + sender);
         Console.WriteLine("Form.cs - Costruttore - e: " + e);
+        Changed(nameof(Settings));
         if (int.TryParse(e?.From?.Replace($"{AppLayout.FormPagePath}/", ""), out int id))
           LoadEmployee(id);
       });

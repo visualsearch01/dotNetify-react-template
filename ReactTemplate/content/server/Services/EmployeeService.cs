@@ -23,6 +23,12 @@ namespace dotnetify_react_template
     IList<LisSetting> GetAllSet();
     EmployeeModel GetById(int id);
     string getCs();
+    string getUrl();
+    string getEmail();
+    string getFtp();
+    string get1ed();
+    string get2ed();
+    string get3ed();
     int Add(EmployeeModel record);
     void Update(EmployeeModel record);
     void Delete(int id);
@@ -48,7 +54,14 @@ namespace dotnetify_react_template
     // private List<LisRequest> _requests;
     // private List<LisSetting> _settings;
     private int _newId;
-    private string _product = "";
+    
+    private string _url = "";
+    private string _email = "";
+    private string _ftp = "";
+    private string _1ed = "";
+    private string _2ed = "";
+    private string _3ed = "";
+
     private MySqlConnection _connection;
     // private string _cs = @"server=localhost;port=3306;database=lis2;user=root;password=root";
     // private string _connectionString;
@@ -57,7 +70,12 @@ namespace dotnetify_react_template
     // La stringa di connessione MySQL viene passata a questo componente da Startup
     // Il metodo seguente serve per passarla ad altri componenti che possono averne bisogno, anchese bisognerebbe centralizzare qui
     public string getCs() { return this._connectionString; }
-
+    public string getUrl() { return this._url; }
+    public string getEmail() { return this._email; }
+    public string getFtp() { return this._ftp; }
+    public string get1ed() { return this._1ed; }
+    public string get2ed() { return this._2ed; }
+    public string get3ed() { return this._3ed; }
     // private readonly IHttpContextAccessor _httpContextAccessor;      
     // IHttpContextAccessor httpContextAccessor, 
     public EmployeeService(string connectionString) // IServiceCollection services, IConfiguration configuration)
@@ -89,28 +107,37 @@ namespace dotnetify_react_template
       // _requests = new LisRequestDBContext(_connectionString).GetLisRequests();
       // _settings = new LisSettingDBContext(_connectionString).GetLisSettings();
       _newId = _employees.Count;
-      _connection = new MySqlConnection(_connectionString);
-      _connection.Open();
-      using (_connection)
-      {
-        MySqlCommand _cmd = new MySqlCommand(@"SELECT name_setting, value_setting FROM lis_setting", _connection);
-        using (MySqlDataReader _reader = _cmd.ExecuteReader())
+      try {
+        _connection = new MySqlConnection(_connectionString);
+        _connection.Open();
+        using (_connection)
         {
-          while (_reader.Read())
+          // MySqlCommand _cmd = new MySqlCommand(@"SET @N = 0; SELECT @N := @N +1 AS number, name_setting, value_setting FROM lis_setting", _connection);
+          // MySqlCommand _cmd = new MySqlCommand(@"SET @N = 0; SELECT name_setting, value_setting FROM lis_setting UNION ALL SELECT concat((@N := @N +1), '_ed') AS name_setting, name_edition AS value_setting FROM lis_edition WHERE id_edition IN (1,3);", _connection);
+          MySqlCommand _cmd = new MySqlCommand(@"SELECT name_setting, value_setting FROM lis_setting UNION ALL SELECT CONCAT(id_edition, '_ed') AS name_setting, name_edition AS value_setting FROM lis_edition;", _connection); //  WHERE id_edition IN (1,3)
+          using (MySqlDataReader _reader = _cmd.ExecuteReader())
           {
-            // product = reader.GetString("product");
-            _product = _reader.GetString("value_setting");
-            if (_reader.GetString("name_setting") == "Url")
-              _employees.ForEach(emp => {emp.PaginaTelevideo = _product;} );
-            if (_reader.GetString("name_setting") == "email")
-              _employees.ForEach(emp => {emp.IndirizzoEmail = _product;} );
-            if (_reader.GetString("name_setting") == "ftp")
-              _employees.ForEach(emp => {emp.IndirizzoFTP = _product;} );
+            while (_reader.Read())
+            {
+              // product = reader.GetString("product");
+              // _product = _reader.GetString("value_setting");
+              if (_reader.GetString("name_setting") == "url")   _url = _reader.GetString("value_setting");   // _employees.ForEach(emp => {emp.PaginaTelevideo = _product;} );
+              if (_reader.GetString("name_setting") == "email") _email = _reader.GetString("value_setting"); // _employees.ForEach(emp => {emp.IndirizzoEmail = _product;} );
+              if (_reader.GetString("name_setting") == "ftp")   _ftp = _reader.GetString("value_setting");   // _employees.ForEach(emp => {emp.IndirizzoFTP = _product;} );
+              if (_reader.GetString("name_setting") == "1_ed")  _1ed = _reader.GetString("value_setting");   // _employees.ForEach(emp => {emp.IndirizzoFTP = _product;} );
+              if (_reader.GetString("name_setting") == "2_ed")  _2ed = _reader.GetString("value_setting");   // _employees.ForEach(emp => {emp.IndirizzoFTP = _product;} );
+              if (_reader.GetString("name_setting") == "3_ed")  _3ed = _reader.GetString("value_setting");   // _employees.ForEach(emp => {emp.IndirizzoFTP = _product;} );
+            }
           }
         }
+        // _employees.ForEach(emp => {emp.IndirizzoEmail = _product;} );
+        Console.WriteLine("EmployeeService - SELECT name_setting, value_setting FROM lis_setting OK...\n");
+      } catch (MySqlException ex) {
+        // Log.Info("Error in adding mysql row. Error: " + ex.Message);
+        Console.WriteLine("EmployeeService - Error in MySQL. Error: " + ex.Message);
+      } catch(Exception ex) {
+        Console.WriteLine(ex.Message);
       }
-      // _employees.ForEach(emp => {emp.IndirizzoEmail = _product;} );
-      Console.WriteLine("EmployeeService - SELECT name_setting, value_setting FROM lis_setting OK...\n");
     }
 
     public IList<EmployeeModel> GetAll() => _employees; // .ForEach(emp => {emp.IndirizzoEmail = _product;} ); //  .ForEach(x => { if(x.RemoveMe) someList.Remove(x); }); 

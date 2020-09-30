@@ -18,14 +18,30 @@ namespace dotnetify_react_template
     public static void Main(string[] args)
     {
       // Console.WriteLine("Program.cs - started: " + args[1]);
-      BuildWebHost(args).Run();
+      BuildWebHost(args)
+        .Run();
     }
 
     public static IWebHost BuildWebHost(string[] args) =>
+      
       WebHost
         .CreateDefaultBuilder(args)
         .UseStartup<Startup>()
         .UseUrls("http://0.0.0.0:5000") // Url raggiungibile anche dall'esterno
         .Build();
+      
+      /*
+        new WebHostBuilder()
+              // WebHost
+              .UseKestrel()
+              .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
+              .UseContentRoot(Directory.GetCurrentDirectory())
+              // .UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "..", "wwwroot"))
+              .UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
+              .UseIISIntegration()
+              // WebHost.CreateDefaultBuilder(args)
+              .UseStartup<Startup>()
+              .Build();
+      */
    }
 }

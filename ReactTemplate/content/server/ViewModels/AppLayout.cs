@@ -54,12 +54,10 @@ namespace dotnetify_react_template
     private RouteTemplate FormPageTemplate => new RouteTemplate { Id = "FormPage", UrlPattern = $"{FormPagePath}(/:id)", ViewUrl = nameof(_routes.FormPage) };
     private RouteTemplate TablePageTemplate => new RouteTemplate { Id = "TablePage", UrlPattern = $"{TablePagePath}(/:id)", ViewUrl = nameof(_routes.TablePage) };
     private RouteTemplate TablePage_1Template => new RouteTemplate { Id = "TablePage_1", UrlPattern = $"{TablePage_1Path}(/:id)", ViewUrl = nameof(_routes.TablePage_1) };
-
     // private Route dasroute => this.GetRoute(nameof(_routes.Dashboard), $"{DashboardPath}");
     // private Route ffff => this.GetRoute(nameof(_routes.TablePage), $"{TablePagePath}/meteo");
     // public Route ggg() {return this.ffff;}
     // public static int getUserId() {return UserId;}
-
     public object Menus_del1 => new List<object>()
     {
       new { Title = "Meteo",          Icon = "assessment", Route = this.GetRoute(nameof(_routes.Dashboard), $"{DashboardPath}") },
@@ -89,14 +87,13 @@ namespace dotnetify_react_template
         _logger.LogInformation("Applayout.cs -------------- CLAIM TYPE: " + claim.Type);
         _logger.LogInformation("Applayout.cs -------------- CLAIM VALUE: " + claim.Value); //  + "</br>");
       }
-
-      try {
+      try {
         UserName = userIdentity.Name;
         UserAvatar = userIdentity.Claims.FirstOrDefault(i => i.Type == ClaimTypes.Uri)?.Value;
         UserIsAdmin = string.Equals(UserName, "rai");
       } catch(Exception ex) {
-        _logger.LogError("Applayout.cs Name Exception - " + ex.Message);
-      }
+        _logger.LogError("Applayout.cs Name Exception - " + ex.Message);
+      }
       _logger.LogInformation("Applayout.cs - UserName : " + UserName);
       _logger.LogInformation("Applayout.cs - UserId   : " + UserId);
       if (int.TryParse(userIdentity.Claims.Last(i => i.Type == ClaimTypes.NameIdentifier).Value, out int id)) {
@@ -107,11 +104,8 @@ namespace dotnetify_react_template
       else {
         _logger.LogInformation("Applayout.cs - No UserId: " + userIdentity.Claims.Last(i => i.Type == ClaimTypes.NameIdentifier).Value);
       }
-
       // var _userRepository = new UserRepository(principalAccessor);
       // Console.WriteLine("Applayout.cs - NetworkID -------------------------: " + _userRepository.GetUserNetworkId());
-
-
       if (UserId == 3 || UserIsAdmin) {
         this.RegisterRoutes("/", new List<RouteTemplate>
         {
@@ -133,23 +127,18 @@ namespace dotnetify_react_template
           new RouteTemplate { Id = "TablePage_1", UrlPattern = $"{TablePage_1Path}(/:id)", ViewUrl = nameof(_routes.TablePage_1) }
         });
       }
-
     }
-
     public override void Dispose() => _timer.Dispose();
-   }
+  }
 
+  public interface IUserRepository
+  {
+    string GetUserNetworkId();
+    int GetUserPhoneKey();
+    string GetUserInfo();
+  }
 
-
-    public interface IUserRepository
-    {
-      string GetUserNetworkId();
-      int GetUserPhoneKey();
-      string GetUserInfo();
-    }
-
-
-   public class UserRepository : IUserRepository
+  public class UserRepository : IUserRepository
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -201,10 +190,8 @@ namespace dotnetify_react_template
                 try {     
                   Console.WriteLine("UserRepository - Nameeeeee -------------------------: " + userClaims[0] );
                 } catch(Exception ex) {
-                  Console.WriteLine("UserRepository Exception - " + ex.Message);
+                  Console.WriteLine("UserRepository Exception - " + ex.Message);
                 }
-                
-                
                 // userName = identity.Id; // _httpContextAccessor.HttpContext.User.Claims.Last(i => i.Type == ClaimTypes.NameIdentifier).Value;//   NameIdentifier;
                 // _httpContextAccessor.HttpContext.User.Name;
             }

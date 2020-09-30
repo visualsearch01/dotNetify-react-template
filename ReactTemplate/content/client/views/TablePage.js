@@ -1194,6 +1194,9 @@ class TablePage_1 extends React.Component {
         fontSize: 16,
         // fontWeight: typography.fontWeightLight
       },
+      buttonStyle: {
+        margin: 12 // marginLeft: 5
+      },
       buttonLabel: {
         fontSize: 8, // '6px'
         padding: '.5em 0'
@@ -1517,7 +1520,7 @@ class TablePage_1 extends React.Component {
                   <video id="did_video" controls autoPlay={true} key={this.state.videoUrl}><source src={this.state.videoUrl} /></video><br />
                   {/* width="560" height="440" style={{ objectFit: 'contain'}}*/}
                   {/* onload="valutare la possibilita' di lancaire load() ricorsivamente per far girare il progress finche' non c'e' il video" */}
-                  <RaisedButton label="Genera video" onClick={this.handlePreview} disabled={!this.state.allWordsFound || this.state.previewing} style={{float: 'left'}} primary={true} /><br />
+                  <RaisedButton label="Genera video" onClick={this.handlePreview}                         style={Table_1Styles.buttonStyle} primary={true} disabled={!this.state.allWordsFound || this.state.previewing} /><br />
                   <TextField
                     hintText="Nome video..."
                     style={{width: '95%'}}
@@ -1526,8 +1529,8 @@ class TablePage_1 extends React.Component {
                       this.setState({ videoName: event.target.value })
                     }
                   /><br />
-                  <RaisedButton label="Salva" onClick={() => this.handleSave('Salva')} disabled={!this.state.allWordsFound || this.state.previewing || !this.state.videoUrl || this.state.videoName == ''} style={{float: 'left'}} primary={true} />
-                  <RaisedButton label="Salva come nuovo..." onClick={() => this.handleSave('SalvaNuovo')} disabled={!this.state.allWordsFound || this.state.previewing || !this.state.videoUrl || this.state.videoName == ''} style={{float: 'right'}} primary={true} />
+                  <RaisedButton label="Salva" onClick={() => this.handleSave('Salva')}                    style={Table_1Styles.buttonLabel} secondary={true} disabled={!this.state.allWordsFound || this.state.previewing || !this.state.videoUrl || this.state.videoName == ''} />
+                  <RaisedButton label="Salva come nuovo..." onClick={() => this.handleSave('SalvaNuovo')} style={Table_1Styles.buttonLabel} secondary={true} disabled={!this.state.allWordsFound || this.state.previewing || !this.state.videoUrl || this.state.videoName == ''} />
                 </div>
               </div>
               : null }

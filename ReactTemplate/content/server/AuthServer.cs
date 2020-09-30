@@ -73,9 +73,7 @@ namespace dotnetify_react_template
               description: "Invalid user credentials.");
               return Task.CompletedTask;
           }
-
-
-          try {
+          try {
             Console.WriteLine("AuthService.cs - OnHandleTokenRequest - IdUser OK");
             var identity = new ClaimsIdentity(context.Scheme.Name,
               OpenIdConnectConstants.Claims.Name,
@@ -99,18 +97,14 @@ namespace dotnetify_react_template
                   OpenIdConnectConstants.Destinations.AccessToken,
                   OpenIdConnectConstants.Destinations.IdentityToken);
 
-
               identity.AddClaim("username", "Pinpoint",
                   OpenIdConnectConstants.Destinations.AccessToken,
                   OpenIdConnectConstants.Destinations.IdentityToken);
 
               identity.AddClaim(OpenIdConnectConstants.Claims.Name, context.Request.Username);
 
-
               // identity.AddClaim(new Claim(ClaimTypes.Name, "rai"));
               identity.AddClaim(new Claim("DisplayName", "hhhhhhhhhhhhhhhhhhh"));
-
-
 
               identity.AddClaim(ClaimTypes.Name, context.Request.Username,
                 OpenIdConnectConstants.Destinations.AccessToken,
@@ -121,11 +115,8 @@ namespace dotnetify_react_template
                 OpenIdConnectConstants.Destinations.IdentityToken);
               */
 
-
               // var _userRepository = new UserRepository(context.HttpContext);
               // Console.WriteLine("AuthService.cs - NetworkID -------------------------: " + _userRepository.GetUserNetworkId());
-
-
 
               // public class ClaimsTransformationModule : ClaimsAuthenticationManager {  
               // public override ClaimsPrincipal Authenticate(string resourceName, ClaimsPrincipal incomingPrincipal) {  
@@ -156,11 +147,9 @@ namespace dotnetify_react_template
 
 
               context.Validate(ticket);
-          } catch(Exception ex) {
-            Console.WriteLine("AuthService.cs Exception - " + ex.Message);
-          }
-
-
+          } catch(Exception ex) {
+            Console.WriteLine("AuthService.cs Exception - " + ex.Message);
+          }
           return Task.CompletedTask;
         };
         /*

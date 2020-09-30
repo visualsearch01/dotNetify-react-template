@@ -15,9 +15,10 @@ namespace dotnetify_react_template
   public class Table : BaseVM, IRoutable
   {
     private readonly IEmployeeService _employeeService;
+    public RoutingState RoutingState { get; set; }
+    
     private readonly int _recordsPerPage = 10; // 8;
     ILogger _logger;
-    public RoutingState RoutingState { get; set; }
     private string _connectionString; // { get; set; }
     // private MySqlConnection connection;
     public string Mode = "didattica";
@@ -30,7 +31,7 @@ namespace dotnetify_react_template
       public int Id { get; set; }
       public string FirstName { get; set; }
       public string LastName { get; set; }
-    }
+    };
     /*
     public class SettingInfo
     {
@@ -106,7 +107,7 @@ namespace dotnetify_react_template
           LastName = i.LastName
         })
     );
-      
+    
     public IEnumerable<LisRequestTrans> Requests => PaginateRequest(
       // try {
         new LisRequestDBContext(_connectionString)

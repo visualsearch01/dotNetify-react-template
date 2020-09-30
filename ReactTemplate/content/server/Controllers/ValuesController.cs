@@ -113,6 +113,8 @@ namespace dotnetify_react_template.server.Controllers
           _logger.LogWarning("ValuesController.cs - costruttore, HttpContext: " + HttpContext); //_configuration["ConnectionStrings:lis"]);
 
           _connectionString = configuration.GetConnectionString("lis"); //  _configuration.GetValue<string>("ConnectionStrings:lis");
+          // Versione IIS
+          // _connectionString =  liveDataService.getCs();
           _logger.LogWarning("ValuesController.cs - costruttore, stringa connessione DB MySQL: " + _connectionString); //_configuration["ConnectionStrings:lis"]);
 
           _translatescript = configuration.GetValue<string>("Scripts:translate");
@@ -447,32 +449,35 @@ namespace dotnetify_react_template.server.Controllers
         }
 
         /**
-         * Endpoint GET di download file dist/rules/glossario.csv
-         * 
+         * Endpoint GET di download file CSV di glossario - stopwords - regole virgola
+         * L'endoint inizialmente era uno solo, ne sono stati creati uno per file
          */
-        [HttpGet("download_glos")]
+        [HttpGet("download_glos/{downloadFileName}")]
         public async Task<IActionResult> Download_glos(string downloadFileName)
         {
-            // filename = "index.html";
-            downloadFileName = "dist/rules/glossario.csv"; // + downloadFileName; // 
-            if (downloadFileName == null)
-              return Content("downloadFileName not present");
-            var downloadFilePath = Path.Combine(
-               Directory.GetCurrentDirectory(),
-               "wwwroot", downloadFileName);
-               
-            // formFile.SaveAsAsync("Your-File-Path"); // [ Async call ]
-            // formFile.SaveAs("Your-File-Path");
+          // filename = "index.html";
+          if (downloadFileName == null)
+            return Content("File di glossario non definito");
+          downloadFileName = "dist/rules/" + downloadFileName + ".csv"; // + downloadFileName; // 
+          var downloadFilePath = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot",
+            downloadFileName
+          );
             
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(downloadFilePath, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            memory.Position = 0;
-            return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
-        }
+          if(!System.IO.File.Exists(downloadFilePath)) {
+            return Content("File di glossario non presente");
+          }
 
+          var memory = new MemoryStream();
+          using (var stream = new FileStream(downloadFilePath, FileMode.Open))
+          {
+            await stream.CopyToAsync(memory);
+          }
+          memory.Position = 0;
+          return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
+        }
+        /*
         [HttpGet("download_stop")]
         public async Task<IActionResult> Download_stop(string downloadFileName)
         {
@@ -495,9 +500,34 @@ namespace dotnetify_react_template.server.Controllers
             memory.Position = 0;
             return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
         }
+
+        [HttpGet("download_rules")]
+        public async Task<IActionResult> Download_rules(string downloadFileName)
+        {
+            // filename = "index.html";
+            downloadFileName = "dist/rules/regole.csv"; // + downloadFileName; // 
+            if (downloadFileName == null)
+              return Content("downloadFileName not present");
+            var downloadFilePath = Path.Combine(
+               Directory.GetCurrentDirectory(),
+               "wwwroot", downloadFileName);
+               
+            // formFile.SaveAsAsync("Your-File-Path"); // [ Async call ]
+            // formFile.SaveAs("Your-File-Path");
+            
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(downloadFilePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, GetMimeType(downloadFilePath), Path.GetFileName(downloadFilePath));
+        }
+        */
+
         /**
-         * Endpoint GET meteo di prova - data cablata
-         * Tanto per provare
+         * Endpoint GET lista segni
+         * I segni definiti sul DB devono essere presenti anche su filesystem
          */
         [HttpGet("sign")]
         public IActionResult Get_sign()
@@ -1037,13 +1067,14 @@ namespace dotnetify_react_template.server.Controllers
 
             
             // output[0]); // out_orig);
-                    // byte[] bytes = Convert.ToBase64String(gg);
+            // byte[] bytes = Convert.ToBase64String(gg);
             // string str = Encoding.UTF8.GetString(bytes);
             try {
                 startInfo = new ProcessStartInfo();
                 startInfo.FileName = @"powershell.exe";
-                startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 '$Env:lis_us' -Param2 '$Env:lis_pw' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 '" + translateDate + @"'  -Param5 '" + translateArea + @"'""";
-
+                // startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 $Env:lis_us -Param2 $Env:lis_pw -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 '" + translateDate + @"'  -Param5 '" + translateArea + @"'""";
+                startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _mailscript + @" -Param1 'no_us_manual' -Param2 'no_pw_manual' -Param3 '" + Convert.ToBase64String(bytes) + @"' -Param4 '" + translateDate + @"'  -Param5 '" + translateArea + @"'""";
+                
                 startInfo.RedirectStandardOutput = true;
                 startInfo.RedirectStandardError = true;
                 startInfo.UseShellExecute = false;
@@ -1443,7 +1474,11 @@ namespace dotnetify_react_template.server.Controllers
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
                 "dist/rules/" + 
-                Regex.Replace(     Regex.Replace(formFile.FileName, ".*glossario.*", "glossario.csv", RegexOptions.IgnoreCase), ".*stopwords.*", "stopwords.csv", RegexOptions.IgnoreCase)
+                Regex.Replace(
+                  Regex.Replace(
+                    Regex.Replace(formFile.FileName, ".*regole.*", "regole.csv", RegexOptions.IgnoreCase), 
+                  ".*glossario.*", "glossario.csv", RegexOptions.IgnoreCase), 
+                ".*stopwords.*", "stopwords.csv", RegexOptions.IgnoreCase)
                 // formFile.FileName.Replace(".*glossario.*", "glossario.csv").Replace(".*stopwords.*", "stopwords.csv")
               );
                   

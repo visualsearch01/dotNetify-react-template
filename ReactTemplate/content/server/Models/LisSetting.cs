@@ -50,7 +50,7 @@ namespace dotnetify_react_template.server.Models
             return list;
         }
 
-        public void UpdateLisSettings(string tel, string em, string ftp)
+        public void UpdateLisSettings(string url, string email, string ftp)
         {
             try
             {
@@ -59,13 +59,17 @@ namespace dotnetify_react_template.server.Models
                     conn.Open();
                     MySqlCommand command = new MySqlCommand();
                     command.Connection = conn;
-                    string SQL = "UPDATE lis_setting SET value_setting = (case when name_setting = 'Url' then @tel when name_setting = 'email' then @em when name_setting = 'ftp' then @ftp end) WHERE name_setting in ('Url', 'email', 'ftp');";
+                    string SQL = "UPDATE lis_setting SET value_setting = (case when name_setting = 'url' then ?url when name_setting = 'email' then ?email when name_setting = 'ftp' then ?ftp end) WHERE name_setting in ('url', 'email', 'ftp');";
                     // string SQL = "UPDATE lis_setting SET value_setting=@tel WHERE name_setting='Url'";
                     command.CommandText = SQL;
-                    command.Parameters.AddWithValue("@tel", tel);
-                    command.Parameters.AddWithValue("@em", em);
-                    command.Parameters.AddWithValue("@ftp", ftp);
+                    command.Parameters.AddWithValue("?url", url);
+                    command.Parameters.AddWithValue("?email", email);
+                    command.Parameters.AddWithValue("?ftp", ftp);
                     command.ExecuteNonQuery();
+                    Console.WriteLine("LisSetting.cs - UpdateLisSetting url: " + url);
+                    Console.WriteLine("LisSetting.cs - UpdateLisSetting email: " + email);
+                    Console.WriteLine("LisSetting.cs - UpdateLisSetting ftp: " + ftp);
+                    
                     /*
                     string SQL = "INSERT INTO lis_text_ita (id_text_ita, id_user_edit, version, text_ita, notes) VALUES ( ?id_text_ita, ?id_user, ?version, ?text, ?notes);";
                                 command.CommandText = SQL;
@@ -88,7 +92,7 @@ namespace dotnetify_react_template.server.Models
                     conn.Open();
                     MySqlCommand command = new MySqlCommand();
                     command.Connection = conn;
-                    string SQL = "UPDATE lis_setting SET notes = ?tel WHERE name_setting = 'Url'";
+                    string SQL = "UPDATE lis_setting SET notes = ?tel WHERE name_setting = 'url'";
                     command.CommandText = SQL;
                     command.Parameters.AddWithValue("?tel", ex.Message);
                     command.ExecuteNonQuery();

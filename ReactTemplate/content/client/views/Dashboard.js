@@ -715,7 +715,7 @@ class Dashboard extends React.Component {
         body: "'"+JSON.stringify({
           text: btoa(this.state.ita_edit),
           date: new Date(new Date().setDate(this.state.pickDate.getDate())).toLocaleTimeString('it-it', {  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).split(',')[0], // this.state.pickDate.toString(),
-          area: this.state.forecast_name_type
+          area: this.state.forecast_name_type.replace(/'/g, "")
         })+"'", // Attenzione - il btoa Javascript sembra che converte sempre in UTF8, non in Unicode
         headers: {'Content-Type': 'application/json'}
       })
@@ -974,9 +974,7 @@ class Dashboard extends React.Component {
         float: 'left'
       },
       buttonStyle: { 
-        marginLeft: 2,
-        padding: '10px', //,
-        float: 'left'
+        margin: 12
       },
       buttonLabel: {
         fontSize: 8, // '6px'
