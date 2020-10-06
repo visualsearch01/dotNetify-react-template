@@ -74,7 +74,10 @@ namespace dotnetify_react_template.server.Controllers
         private readonly string _udpscript;
         private readonly string _zipscript;
         private readonly string _videoUrl;
-        private readonly string _savePath;
+        private readonly string _saveSentencePath;
+        private readonly string _saveZipPath;
+        private readonly string _saveVideoPath;
+
         
         private IUserRepository hh;
         private IHttpContextAccessor _hhh;
@@ -135,10 +138,17 @@ namespace dotnetify_react_template.server.Controllers
           _videoUrl = configuration.GetValue<string>("Urls:video_url");
           _logger.LogWarning("ValuesController.cs - costruttore, url Powershell dei video: " + _videoUrl); //_configuration["ConnectionStrings:lis"]);
 
-          _savePath = configuration.GetValue<string>("Paths:save_videos");
+          _saveSentencePath = configuration.GetValue<string>("Paths:save_sentence");
           // _savePath = Path.Combine(Directory.GetCurrentDirectory(), @"..\\", configuration.GetValue<string>("Paths:video_rel"), configuration.GetValue<string>("Paths:video_dir"));
-          _logger.LogWarning("ValuesController.cs - costruttore, path Powershell di save: " + _savePath); //_configuration["ConnectionStrings:lis"]);
+          _logger.LogWarning("ValuesController.cs - costruttore, path Powershell di save sentence: " + _saveSentencePath); //_configuration["ConnectionStrings:lis"]);
 
+          _saveZipPath = configuration.GetValue<string>("Paths:save_zip");
+          // _savePath = Path.Combine(Directory.GetCurrentDirectory(), @"..\\", configuration.GetValue<string>("Paths:video_rel"), configuration.GetValue<string>("Paths:video_dir"));
+          _logger.LogWarning("ValuesController.cs - costruttore, path Powershell di save zip : " + _saveZipPath); //_configuration["ConnectionStrings:lis"]);
+
+          _saveVideoPath = configuration.GetValue<string>("Paths:save_video");
+          // _savePath = Path.Combine(Directory.GetCurrentDirectory(), @"..\\", configuration.GetValue<string>("Paths:video_rel"), configuration.GetValue<string>("Paths:video_dir"));
+          _logger.LogWarning("ValuesController.cs - costruttore, path Powershell di save video: " + _saveVideoPath); //_configuration["ConnectionStrings:lis"]);
         }
         /*
         [HttpGet("user")]
@@ -1148,7 +1158,7 @@ namespace dotnetify_react_template.server.Controllers
 
             try {
               string fileName = "sentence_" + DateTime.Now.ToString("MM_dd_yyyy_HH_mm_ss");
-              string xmlName = _savePath + @"\" + fileName + "_ok.xml"; // Scrivi direttamente il file xml giusto invece del mockup
+              string xmlName = _saveSentencePath + @"\" + fileName + "_ok.xml"; // Scrivi direttamente il file xml giusto invece del mockup
 
               XDocument sentenceDocument = new XDocument(new XDeclaration("1.0", "UTF-8", null));
 
@@ -1180,13 +1190,13 @@ namespace dotnetify_react_template.server.Controllers
               string result1 = sw1.GetStringBuilder().ToString();
               _logger.LogWarning("ValuesController.cs - result1:" + result1);
 
-              string path = Path.Combine(_savePath, fileName + "_ok.xml");
+              string path = Path.Combine(_saveSentencePath, fileName + "_ok.xml");
               sentenceDocument.Save(path);
 
               try {
                   ProcessStartInfo startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
-                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
+                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + xmlName + @"' -Param2 '" + fileName + @"' -Param3 '" + _saveSentencePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
                   _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
@@ -1252,7 +1262,7 @@ namespace dotnetify_react_template.server.Controllers
               try {
                   ProcessStartInfo startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
-                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _xmlscript + @" -Param1 '" + _savePath + @"' -Param2 '" + fileName + @"' -Param3 '" + results.tot + @"' -Param4 '" + results.tot_id + @"'  """;     // results.tot
+                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _xmlscript + @" -Param1 '" + _saveSentencePath + @"' -Param2 '" + fileName + @"' -Param3 '" + results.tot + @"' -Param4 '" + results.tot_id + @"'  """;     // results.tot
                   _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
@@ -1276,7 +1286,7 @@ namespace dotnetify_react_template.server.Controllers
                   startInfo = new ProcessStartInfo();
                   startInfo.FileName = @"powershell.exe";
                   // @"C:\\Users\\admin\\Videos"
-                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + standardOutput_1 + @"' -Param2 '" + fileName + @"' -Param3 '" + _savePath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
+                  startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + _udpscript + @" -Param1 '" + standardOutput_1 + @"' -Param2 '" + fileName + @"' -Param3 '" + _saveVideoPath + @"' -Param4 '" + results.tot + @"'  """;     // results.tot
                   _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   startInfo.RedirectStandardOutput = true;
                   startInfo.RedirectStandardError = true;
@@ -1360,12 +1370,12 @@ namespace dotnetify_react_template.server.Controllers
                   */
                   startInfo.Arguments = @"-NoLogo -ExecutionPolicy Bypass -Command """ + 
                     _zipscript + 
-                    @" -Param1 '" + _savePath + @"\\" + name + "'"  + 
+                    @" -Param1 '" + _saveSentencePath + @"\\" + name + "'"  + 
                     @" -Param2 '" + ita + "'"  +
-                    @" -Param3 '" + _savePath + @"\\" + "'"  + 
+                    @" -Param3 '" + _saveZipPath + @"\\" + "'"  + 
                     @" -Param4 '" + name + "'"  +
-                    @" -Param5 '" + _savePath + @"\\" + name + "'"  + 
-                    @" -Param6 '" + _savePath + @"\\" + name + @"'  """;     // results.tot
+                    @" -Param5 '" + _saveSentencePath + @"\\" + name + "'"  + 
+                    @" -Param6 '" + _saveVideoPath + @"\\" + name + @"'  """;     // results.tot
                   
                   _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " + startInfo.Arguments);
                   // _logger.LogWarning("ValuesController.cs - POST preview startInfo.Arguments: " +  String.Join(" ", startInfo.ArgumentList));

@@ -27,7 +27,7 @@ namespace dotnetify_react_template
       WebHost
         .CreateDefaultBuilder(args)
         .UseStartup<Startup>()
-        .UseUrls("http://0.0.0.0:5000") // Url raggiungibile anche dall'esterno
+        // .UseUrls("http://0.0.0.0:5000") // Url raggiungibile anche dall'esterno
         .Build();
       
       /*

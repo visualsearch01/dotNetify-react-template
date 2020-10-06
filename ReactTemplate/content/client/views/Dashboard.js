@@ -197,7 +197,12 @@ class Dashboard extends React.Component {
           // this.setState(
           // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()-1))}); //  , // new Date(this.state.pickDate.getDate() - 1)}, 
           // console.log(this.state.pickDate)
-          var ieri = new Date(new Date().setDate(this.state.pickDate.getDate() - 1));
+          
+          // var ieri = new Date(new Date().setDate(this.state.pickDate.getDate() - 1));
+          // var ieri = new Date().setDate(this.state.pickDate.getDate() - 1);
+
+          var ieri = new Date(this.state.pickDate.setDate(this.state.pickDate.getDate() - 1));
+
           console.log('Dashboard - handleBodyKeyDown - ieri: ', ieri);
           this.handleOpenDialogChangePicker(ieri);
           // );
@@ -207,7 +212,8 @@ class Dashboard extends React.Component {
           // this.setState(
           // {pickDate: new Date(new Date().setDate(this.state.pickDate.getDate()+1))}); // , // new Date(this.state.pickDate.getDate() - 1)}, 
           // console.log(this.state.pickDate)
-          var domani = new Date(new Date().setDate(this.state.pickDate.getDate() + 1));
+          // var domani = new Date(new Date().setDate(this.state.pickDate.getDate() + 1));
+          var domani = new Date(this.state.pickDate.setDate(this.state.pickDate.getDate() + 1));
           console.log('Dashboard - handleBodyKeyDown - domani: ', domani);
           this.handleChangePicker_dashboard(domani);
             // );

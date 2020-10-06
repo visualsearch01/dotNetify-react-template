@@ -206,18 +206,18 @@ namespace dotnetify_react_template
       });
       */
       app.UseStaticFiles();
-      
+      /*
       var videoPath = Path.Combine(
         Directory.GetCurrentDirectory(), 
         _configuration.GetValue<string>("Paths:video_rel"), 
         _configuration.GetValue<string>("Paths:video_dir"));
       _logger.LogInformation("Startup.cs - Configure, video relative path: " + videoPath);
       _logger.LogInformation("Startup.cs - Configure, video absolute path: " + Path.GetFullPath((new Uri(videoPath)).LocalPath)); 
-      
+      */
       app.UseStaticFiles(new StaticFileOptions()
       {
-        FileProvider = new PhysicalFileProvider(videoPath),
-        RequestPath = new PathString( _configuration.GetValue<string>("Urls:video_url")) // "/video_gen/mp4")
+        FileProvider = new PhysicalFileProvider( _configuration.GetValue<string>("Paths:save_video")), // videoPath),
+        RequestPath = new PathString(            _configuration.GetValue<string>("Urls:video_url")) // "/video_gen/mp4")
       });
       
       
